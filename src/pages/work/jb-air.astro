@@ -1,0 +1,425 @@
+---
+// JB Air case study.
+// Source: Figma "JB Air, Case Study (Rachel structure)" — node 334:4453.
+// Spacing mirrors the Figma spacer layers; comments name the frame.
+import CaseStudy from '../../layouts/CaseStudy.astro';
+import Figure from '../../components/case-study/Figure.astro';
+import SectionHead from '../../components/case-study/SectionHead.astro';
+import VideoSlot from '../../components/case-study/VideoSlot.astro';
+import ProcessTree from '../../components/case-study/jb/ProcessTree.astro';
+
+import hero from '../../assets/jb/hero.png';
+import overview from '../../assets/jb/overview.png';
+import problem from '../../assets/jb/problem.png';
+import persona from '../../assets/jb/persona.png';
+import journey from '../../assets/jb/journey.png';
+import device1 from '../../assets/jb/device-1.png';
+import device2 from '../../assets/jb/device-2.png';
+import device3 from '../../assets/jb/device-3.png';
+import dsType from '../../assets/jb/ds-type.png';
+import dsColour from '../../assets/jb/ds-colour.png';
+import webStoryline from '../../assets/jb/web-storyline.png';
+import webFlow from '../../assets/jb/web-flow.png';
+import webInvisible1 from '../../assets/jb/web-invisible-1.png';
+import webInvisible2 from '../../assets/jb/web-invisible-2.png';
+import webComparison from '../../assets/jb/web-comparison.png';
+import webProduct from '../../assets/jb/web-product.png';
+import webCheckout from '../../assets/jb/web-checkout.png';
+import webOrder from '../../assets/jb/web-order.png';
+import webCorporate from '../../assets/jb/web-corporate.png';
+import trustLabs from '../../assets/jb/trust-labs.png';
+import trustHealth from '../../assets/jb/trust-health.png';
+import responsive from '../../assets/jb/responsive.png';
+import movingFast from '../../assets/jb/moving-fast.png';
+import flow1 from '../../assets/jb/flow-1.png';
+import flow2 from '../../assets/jb/flow-2.png';
+import flow3 from '../../assets/jb/flow-3.png';
+import outcomeTweets from '../../assets/jb/outcome-tweets.png';
+
+// Sidebar follows the order of the page (the Figma sidebar listed a different order).
+const sections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'process', label: 'The process' },
+  { id: 'problem', label: 'Problem' },
+  { id: 'who', label: 'Who it’s for' },
+  { id: 'device', label: 'The device' },
+  { id: 'design-system', label: 'Design system' },
+  { id: 'website', label: 'The website' },
+  { id: 'trust', label: 'Earning trust' },
+  { id: 'responsive', label: 'Responsive' },
+  { id: 'moving-fast', label: 'Moving fast' },
+  { id: 'app', label: 'The app' },
+  { id: 'outcome', label: 'Outcome' },
+  { id: 'reflection', label: 'Reflection' },
+];
+
+const meta = [
+  { label: 'Role', value: ['Design Lead', 'Device HMI + launch site'] },
+  { label: 'Scope', value: ['Device screen', 'Website App, Responsive'] },
+  { label: 'Team', value: ['Lead + 2 designers', 'Brand, 3D and motion teams'] },
+  { label: 'Outcome', value: ['Shipped', 'Early batches sold out'], nowrap: true },
+];
+
+// TODO(Kavita): real URLs — Figma only has "add URL" placeholders for these.
+const LIVE_SITE_URL = '#';
+const HMI_WORK_URL = 'https://www.figma.com/design/WhhhwdsOHqD7R4UtbHYveC/JB-HMI-WORK?node-id=0-1&t=uFZe4V7hNQMKpcFj-1';
+
+// Laptop / phone screens the videos are clipped to (Figma px inside each 704-wide slot).
+const laptopBezel = { x: 52.0673, y: 52.3034, w: 598.876, h: 389.27, r: [18.427, 18.427, 3.455, 3.455] as [number, number, number, number] };
+const browserScreen = { x: 0, y: 8.672, w: 704, h: 442.112, r: [8.448, 8.448, 0, 0] as [number, number, number, number] };
+
+const pairs = [
+  {
+    title: 'From characters to a canvas',
+    body: 'The first screen could only show preset characters. Moving to a graphic OLED made custom type, icons and motion possible.',
+    img: device1, h: 330, alt: 'Character display showing 270 AQI in preset blocky characters',
+  },
+  {
+    title: 'AQI is the hero',
+    body: 'Testing on real hardware showed the AQI number got lost from across a room, so I rebuilt the layout around it.',
+    img: device2, h: 330, alt: 'Graphic OLED with a large 270 AQI reading, fan icons and AUTO R1',
+  },
+  {
+    title: 'Adding some more plaful screen t make it feel human',
+    body: 'Testing on real hardware showed the AQI number got lost from across a room, so I rebuilt the layout around it.',
+    img: device3, h: 552, alt: 'OLED screens: Feels like Tokyo, 120 air quality is improving, Keep your windows closed', tight: true,
+  },
+];
+
+const features = [
+  { label: 'Set up · 1 min', body: 'Scan the QR on the box. A guided walkthrough pairs it over Bluetooth.' },
+  { label: 'Live AQI', body: 'The room’s air on your phone, with an alert when it turns.' },
+  { label: 'Filter life', body: 'Days left, shown early, and a reorder before it runs out.' },
+];
+
+const flows = [
+  { poster: flow1, src: '/videos/jb/flow-setup.mp4', title: 'Customisation & Setup', body: 'The opening animation plays while the app finds the purifier.' },
+  { poster: flow2, src: '/videos/jb/flow-rooms.mp4', title: 'Every room, one app', body: 'Add each purifier to its room and switch them on from one place.' },
+  { poster: flow3, src: '/videos/jb/flow-closer.mp4', title: 'A closer look at the air', body: 'The overview shows each room’s AQI in detail, with a graph over time.' },
+];
+---
+<CaseStudy
+  title="JB Air — Kavita Tewari"
+  description="Making clean air something you can see. JB Air case study by Kavita Tewari, Design Lead."
+  sections={sections}
+>
+  <!-- Header (334:4478) -->
+  <header class="header">
+    <p class="t-label">JB Air • Shipped</p>
+    <h1 class="t-display header-title" data-split>Making clean air something you can see</h1>
+    <Figure class="mt-40" src={hero} alt="A delivery rider in a white suit on a blue JB scooter, carrying a JB Air purifier labelled Clean Air Delivered" width={704} height={403} eager />
+  </header>
+
+  <!-- Meta (334:4486) -->
+  <dl class="meta" data-stagger>
+    {meta.map((m) => (
+      <div class:list={['meta-col', { nowrap: m.nowrap }]}>
+        <dt>{m.label}</dt>
+        <dd>{m.value.map((v) => <span>{v}</span>)}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <!-- Overview (334:4499) -->
+  <section id="overview" class="sec">
+    <SectionHead
+      label="Overview"
+      title="JB Air is a connected air purifier from a brand nobody had heard of yet."
+      lead="I led design on two surfaces: the small screen on the device, and the website that had to sell it to strangers. The screen comes first, but this is mostly the story of the website."
+    />
+    <VideoSlot
+      class="mt-24"
+      poster={overview}
+      alt="The JB Air website home page: Breathe Easy, with the purifier"
+      src="/videos/jb/overview.mp4"
+      width={704}
+      height={457}
+      rect={{ x: 0, y: 0.5, w: 704, h: 456 }}
+    />
+    <a class="ext-link" href={LIVE_SITE_URL} target="_blank" rel="noopener"><span class="u">Live Website</span><span class="arr" aria-hidden="true">↗</span></a>
+  </section>
+
+  <!-- The process (351:798) -->
+  <section id="process" class="sec">
+    <SectionHead
+      label="The process"
+      title="Structure & Direction"
+      lead="Creative direction was the single source of truth. It kept UX, UI, 3D, motion, development and the device screen on one vision, so every touchpoint felt intentional."
+    />
+    <ProcessTree class="mt-24" />
+  </section>
+
+  <!-- Problem (334:4509) -->
+  <section id="problem" class="sec">
+    <SectionHead
+      label="Problem"
+      title="You can’t see bad air, so it never feels dirty."
+      lead="Nobody would drink cloudy water. But people breathe dirty air all day, because it looks fine. That makes a purifier hard to sell: the problem it solves is invisible."
+    />
+    <h3 class="t-sub mt-48">People don’t buy air purifiers for air.</h3>
+    <p class="t-body mt-8">They buy them for the worry of not knowing whether the air is clean. That one idea shaped both the device and the site.</p>
+    <Figure class="mt-24" src={problem} alt="Website section: If it's not in the filter, it's in your lungs — ~7M lives cut short, 99% breathe air dirtier than WHO limits" width={704} height={396} zoom />
+  </section>
+
+  <!-- Who it's for (334:4540) -->
+  <section id="who" class="sec sec-who">
+    <SectionHead
+      label="Who it’s for"
+      title="Protective families, not gadget fans."
+      lead="Research came from the team hired by the client, so we started from their data: urban Indian families, 25 to 45, buying for the bedroom where their kids or elderly parents sleep."
+    />
+    <Figure class="mt-24" src={persona} alt="Persona map: the protective family buyer at the centre, surrounded by parents with young kids, adults with elderly parents, allergy and asthma-prone people, WFH professionals and premium wellness buyers. Positioning: cleaner air for the room your family actually lives in." width={704} height={498} zoom />
+    <Figure class="mt-24" src={journey} alt="Customer journey for Ravi, Delhi: discovery, purchase, setup, living with it and advocacy, with thoughts, feelings, pain points and how we answered each" width={704} height={594} zoom />
+  </section>
+
+  <!-- The device (334:4636) -->
+  <section id="device" class="sec">
+    <SectionHead
+      label="The device"
+      title="First, a screen you can read from across the room."
+      lead="I owned the device HMI end to end: a tiny 256×64, 1-bit OLED, driven by three buttons."
+    />
+    <div class="pairs mt-24">
+      {pairs.map((p, i) => (
+        <div class:list={['pair', { 'pair-gap': i === 1 }]}>
+          <div class="pair-text">
+            <h3 class="pair-title">{p.title}</h3>
+            <p class="t-body">{p.body}</p>
+          </div>
+          <Figure class="pair-media" src={p.img} alt={p.alt} width={420} height={p.h} />
+        </div>
+      ))}
+    </div>
+    <a class="ext-link mt-28" href={HMI_WORK_URL} target="_blank" rel="noopener"><span class="u">See the full HMI work, with flows and layouts</span><span class="arr" aria-hidden="true">&nbsp;↗</span></a>
+  </section>
+
+  <!-- Design system (343:2338) — no mono label in Figma -->
+  <section id="design-system" class="sec sec-ds">
+    <h2 class="t-title" data-split>Design system</h2>
+    <p class="t-body mt-16">One type family and a tight colour set, shared by the website, the app and the device screen. It kept a small team consistent, and let each surface do what it does best.</p>
+    <Figure class="mt-48" src={dsType} alt="Type scale in Neue Haas Grotesk Display Pro: Display Large 110px down to Caption 2 16px" width={704} height={448} zoom />
+    <Figure class="mt-24" src={dsColour} alt="Colour: primary bright blue #1994FC and deep blue #134A87; content blacks and greys; blue gradients; white, off-white and light-blue backgrounds" width={704} height={511} zoom />
+  </section>
+
+  <!-- The website (334:4667) -->
+  <section id="website" class="sec">
+    <SectionHead
+      label="The website"
+      title="Then, a site that makes the problem impossible to ignore."
+      lead="I led the website with a designer-developer and a junior designer I was training. Brand, 3D and the hero film came from dedicated teams. I designed most of the home page, the JB Labs and JB Health pages, and worked on the product page and checkout."
+    />
+
+    <h3 class="t-sub mt-48">A story before a spec sheet.</h3>
+    <p class="t-body mt-8">We planned the home page as a storyline: build the feeling, show the problem, introduce the fix, then prove it.</p>
+    <Figure class="mt-24" src={webStoryline} alt="Home page story outline: building the vibe, about the product, emotional information, social proof, summary and reason to purchase" width={704} height={396} zoom />
+    <Figure class="mt-48" src={webFlow} alt="Website user flow for phase 1 and phase 2" width={704} height={396} zoom />
+
+    <h3 class="t-sub mt-96">Keep the invisible in view.</h3>
+    <p class="t-body mt-16">The page opens with the product. But air you can’t see is easy to forget, so every few scrolls we made it visible again: particles smaller than a virus, indoor air up to five times worse than the street, and what it takes to clean it. Each reminder turns the purifier from a purchase into a relief.</p>
+    <VideoSlot class="mt-16" poster={webInvisible1} alt="Home page: a living room with the AQI dropping from 250+ to 15" src="/videos/jb/invisible-1.mp4" width={704} height={396} rect={{ x: -11, y: -7, w: 726, h: 406 }} />
+    <VideoSlot class="mt-16" poster={webInvisible2} alt="Home page: If it's not in the filter, it's in your lungs, with live city AQI" src="/videos/jb/invisible-2.mp4" width={704} height={396} rect={{ x: -0.5, y: -5, w: 705, h: 402 }} />
+
+    <h3 class="t-sub mt-64">The basics, fixed.</h3>
+    <p class="t-body mt-8">Specs explained in plain words, a head-to-head comparison on the page, the price up front, and room-size answers in the FAQ.</p>
+    <Figure class="mt-24" src={webComparison} alt="Comparison table: JB AIR 400 against Philips, Eureka Forbes and Qubo on price, filter cost, coverage, CADR and filter life" width={704} height={460} zoom />
+
+    <h3 class="t-sub mt-64">Product page</h3>
+    <p class="t-body mt-8">Price, discount, delivery by pincode and after-sales support sit right beside the product, so the decision happens on one screen.</p>
+    <Figure class="mt-24" src={webProduct} alt="JB Air 400 product page with price, discount, pincode delivery check and after-sales support" width={704} height={460} zoom />
+
+    <h3 class="t-sub mt-64">Checkout Page</h3>
+    <p class="t-body mt-8">We added real photos than 3d renders on the checkout to help people visualise how it’ll actually look in a real setting</p>
+    <VideoSlot class="mt-24" poster={webCheckout} alt="Checkout: Place your order, next to a real photo of the purifier in an office" src="/videos/jb/checkout.mp4" width={704} height={460} rect={{ x: 35.0, y: 52.0, w: 617, h: 387 }} clip={laptopBezel} />
+
+    <h3 class="t-sub mt-64">Order placed</h3>
+    <p class="t-body mt-8">A calm confirmation with the order ID, expected delivery and a full summary, so a first-time buyer knows exactly what happens next.</p>
+    <Figure class="mt-24" src={webOrder} alt="Order placed: You're all set for clean air, with a refer-a-friend offer and a gift-wrapped filter" width={704} height={460} zoom />
+
+    <h3 class="t-sub mt-64">Corporate orders</h3>
+    <p class="t-body mt-8">A page for offices buying in bulk: the cost of bad air at work, then an order builder that shows the discount as you add units.</p>
+    <VideoSlot class="mt-24" poster={webCorporate} alt="Corporate page: Clean air, handled, with B2B pricing" src="/videos/jb/corporate.mp4" width={704} height={460} rect={{ x: 55.0, y: 61.0, w: 596, h: 372 }} clip={laptopBezel} />
+  </section>
+
+  <!-- Earning trust (334:4725) -->
+  <section id="trust" class="sec">
+    <SectionHead
+      label="Earning trust"
+      title="For a brand nobody knows, trust is the whole conversion problem."
+      lead="So I proposed two pages beyond the shop, built to show what JB actually does instead of telling people to believe it."
+    />
+    <div class="trust-text mt-24">
+      <h3 class="pair-title">JB Labs</h3>
+      <p class="t-body" style="max-width:634px">How the purifier was engineered: the motor, the filter, the exhaust that went from circles to slats. It replaced a generic About page.</p>
+    </div>
+    <VideoSlot poster={trustLabs} alt="JB Labs page: The science behind cleaner air" src="/videos/jb/labs.mp4" width={704} height={460} rect={{ x: -4.853, y: 8.672, w: 713.709, h: 442.112 }} clip={browserScreen} />
+    <div class="trust-text mt-24">
+      <h3 class="pair-title">JB Health</h3>
+      <p class="t-body" style="max-width:534px">What polluted air does to the body, in plain language, so the reason to buy comes before the product.</p>
+    </div>
+    <VideoSlot poster={trustHealth} alt="JB Health page: It's already in you, comparing a human hair, a red blood cell and PM2.5" src="/videos/jb/health.mp4" width={704} height={451} rect={{ x: -4.853, y: 8.672, w: 713.709, h: 442.112 }} clip={browserScreen} />
+  </section>
+
+  <!-- Responsive (334:4750) -->
+  <section id="responsive" class="sec">
+    <SectionHead
+      label="Responsive"
+      title="Every section, rebuilt for the phone."
+      lead="I designed the responsive versions and coached the junior designer on layout and breakpoints."
+    />
+    <VideoSlot class="mt-24" poster={responsive} alt="The JB Air home page on a phone" src="/videos/jb/responsive.mp4" width={704} height={520} rect={{ x: 247.433, y: 42.5, w: 210.567, h: 441 }} clip={{ x: 246, y: 38, w: 212, h: 444, r: 31 }} mobileRatio="4/5" />
+  </section>
+
+  <!-- Moving fast (334:4760) + its slot (340:5093) -->
+  <section id="moving-fast" class="sec">
+    <SectionHead
+      label="Moving fast"
+      title="AI for the pages that only needed to exist."
+      lead="With a fixed launch date, we used Claude Design+ MCP to prototype supporting pages quickly. They are not our best work, but they went live in time for SEO and the basics, and freed the team for the pages that sell."
+    />
+    <VideoSlot class="mt-24" poster={movingFast} alt="A supporting page being generated" src="/videos/jb/moving-fast.mp4" width={704} height={460} rect={{ x: -4.853, y: 8.672, w: 713.709, h: 442.112 }} clip={browserScreen} />
+  </section>
+
+  <!-- The app (334:4774) -->
+  <section id="app" class="sec">
+    <SectionHead label="The app" title="Next, an app that watches the air for you." />
+    <div class="features mt-64" data-stagger>
+      {features.map((f) => (
+        <div class="feature">
+          <p class="mini-label">{f.label}</p>
+          <p class="feature-body">{f.body}</p>
+        </div>
+      ))}
+    </div>
+    <p class="mini-label mt-64">Core flows</p>
+    <div class="app-flows mt-20">
+      {flows.map((f) => (
+        <div class="app-flow">
+          <VideoSlot class="app-flow-media" poster={f.poster} alt="" src={f.src} width={424} height={424} rect={{ x: 133, y: 50.81, w: 158, h: 322 }} mobileRatio="3/4" />
+          <div class="app-flow-text">
+            <h3 class="app-flow-title">{f.title}</h3>
+            <p class="t-body">{f.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Outcome (334:4815) -->
+  <section id="outcome" class="sec">
+    <SectionHead label="Outcome" title="It shipped, and the early batches sold out." />
+    <div class="stats mt-28" data-stagger>
+      <div class="stat">
+        <p class="stat-value">Sold out</p>
+        <p class="stat-note">Early batches cleared at launch</p>
+      </div>
+      <div class="stat">
+        <p class="stat-value">4.97/5</p>
+        <p class="stat-note">Rating from 150 customers on the live site</p>
+      </div>
+    </div>
+    <Figure src={outcomeTweets} alt="Posts from customers praising JB Air's product, R&D and branding" width={704} height={133} zoom />
+  </section>
+
+  <!-- Reflection (334:4830) -->
+  <section id="reflection" class="sec sec-reflection">
+    <SectionHead label="Reflection" title="If I ever ran it again" />
+    <div class="reflections" data-stagger>
+      <div>
+        <h3 class="t-sub">Get the hardware before the pixels.</h3>
+        <p class="t-body mt-8">We had no device for months, so the HMI was built in Figma from the specs and our best guesses. The first test on real hardware surfaced issues that set us back. Next time I’d push for a unit on day one.</p>
+      </div>
+      <div>
+        <h3 class="t-sub">Test two directions, not one.</h3>
+        <p class="t-body mt-8">We built out one website direction, then reshuffled it many times once target users saw it. Putting two very different directions in front of them early, as an A/B test, would have settled it up front.</p>
+      </div>
+    </div>
+  </section>
+</CaseStudy>
+
+<style>
+  .sec {
+    --pt: 120px;
+    padding-top: var(--pt);
+    scroll-margin-top: calc(56px - var(--pt));
+  }
+  .sec-ds { --pt: 132px; }
+  .sec-who { padding-bottom: 72px; }
+  .sec-reflection { padding-bottom: 56px; }
+
+  .header-title { margin-top: 8px; max-width: 515px; }
+
+  /* Meta: four columns, values wrap like Figma (except Outcome) */
+  .meta { display: flex; gap: 24px; margin: 0; padding-top: 32px; color: var(--muted); }
+  .meta-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .meta-col.nowrap dd { white-space: nowrap; }
+  .meta dt { font-family: var(--font-mono); font-size: 15px; line-height: 23px; text-transform: uppercase; }
+  .meta dd { margin: 0; display: flex; flex-direction: column; font-size: 15px; line-height: 23px; }
+
+  .ext-link {
+    display: inline-block;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.32px;
+    color: var(--ink);
+  }
+  .ext-link .u { text-decoration: underline; text-decoration-thickness: 1px; text-decoration-skip-ink: none; }
+  .ext-link .arr { display: inline-block; transition: transform 0.35s var(--ease-out); }
+  .ext-link:hover .arr { transform: translate(2px, -2px); }
+
+  /* Device pairs */
+  .pair { display: flex; gap: 40px; align-items: center; }
+  .pair + .pair { margin-top: 24px; }
+  .pair + .pair + .pair { margin-top: 0; }
+  .pair-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .pair-text > * { max-width: 244px; }
+  .pair :global(.pair-media) { flex: 0 0 420px; }
+  .pair-title { font-family: var(--font-serif); font-weight: 400; font-size: 21px; line-height: 28px; letter-spacing: -0.42px; color: var(--ink); }
+
+  .trust-text { display: flex; flex-direction: column; gap: 6px; }
+
+  /* App */
+  .features { display: flex; gap: 24px; }
+  .feature { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .mini-label { font-family: var(--font-mono); font-size: 11px; line-height: 14px; letter-spacing: 0.44px; text-transform: uppercase; color: var(--muted); }
+  .feature-body { font-size: 15px; line-height: 23px; color: var(--ink); }
+  .app-flows { display: flex; flex-direction: column; gap: 24px; padding-bottom: 24px; }
+  .app-flow { display: flex; gap: 40px; align-items: center; }
+  .app-flow :global(.app-flow-media) { flex: 0 0 424px; }
+  .app-flow-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .app-flow-title { font-family: var(--font-serif); font-weight: 400; font-size: 21px; line-height: 28px; color: var(--ink); }
+
+  /* Outcome */
+  .stats { display: flex; gap: 20px; }
+  .stat { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding-top: 14px; }
+  .stat > * { max-width: 210px; }
+  .stat-value { font-family: var(--font-serif); font-size: 36px; line-height: 40px; letter-spacing: -0.72px; color: var(--ink); }
+  .stat-note { font-size: 13px; line-height: 18px; color: var(--muted); }
+
+  .reflections { display: flex; flex-direction: column; gap: 48px; margin-top: 32px; }
+
+  /* ---------- Smaller screens: same design, re-flowed ---------- */
+  @media (max-width: 759px) {
+    :global(.t-display) { font-size: 34px; line-height: 38px; letter-spacing: -0.68px; }
+    :global(.t-title) { font-size: 27px; line-height: 33px; letter-spacing: -0.54px; }
+    .sec { --pt: 88px; }
+    .sec-ds { --pt: 88px; }
+    .sec-who { padding-bottom: 0; }
+    :global(.mt-96) { margin-top: 64px; }
+
+    .meta { flex-wrap: wrap; row-gap: 24px; }
+    .meta-col { flex: 1 1 calc(50% - 12px); }
+    .meta-col.nowrap dd { white-space: normal; }
+
+    .pair, .app-flow { flex-direction: column; align-items: stretch; gap: 20px; }
+    .pair + .pair + .pair { margin-top: 24px; }
+    .pair-text > * { max-width: none; }
+    .pair :global(.pair-media) { flex-basis: auto; width: 100%; }
+    .app-flow :global(.app-flow-media) { flex-basis: auto; width: 100%; }
+    .app-flow-text { order: -1; }
+    .app-flows { gap: 48px; }
+
+    .features { flex-direction: column; gap: 20px; }
+    .stats { flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .stat > * { max-width: none; }
+  }
+</style>

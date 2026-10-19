@@ -1,0 +1,140 @@
+---
+// Figma "Diagram: Process" (351:805): creative direction feeding seven disciplines.
+// Desktop reproduces the Figma coordinates; phones get a vertical list.
+const nodes = [
+  { label: 'UX', desc: 'The skeleton and core of the experience', lead: true },
+  { label: 'UI', desc: 'Tone, vibe and brand across every screen', lead: true },
+  { label: '3D design', desc: 'Animation and renders for the immersive mode' },
+  { label: 'Motion', desc: 'Advanced prototyping and transitions' },
+  { label: 'Frontend', desc: 'The design kept consistent in development' },
+  { label: 'Backend', desc: 'A working site, integrations and the CMS' },
+  { label: 'HMI', desc: 'Screen graphics for the 3D renders, and the asset map', lead: true },
+];
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<figure class:list={['tree', className]} aria-label="Creative direction feeding UX, UI, 3D design, motion, frontend, backend and HMI">
+  <div class="root">
+    <span class="root-dot" aria-hidden="true"></span>
+    <span class="root-label">Creative direction</span>
+  </div>
+  <span class="line root-line" aria-hidden="true"></span>
+  <span class="line bus" aria-hidden="true"></span>
+  <ol class="nodes" data-stagger>
+    {nodes.map((n, i) => (
+      <li class:list={['node', { lead: n.lead }]} style={`--i:${i}`}>
+        <span class="line drop" aria-hidden="true"></span>
+        <span class="dot"><span>{n.label}</span></span>
+        <span class="line stem" aria-hidden="true"></span>
+        <span class="desc">{n.desc}</span>
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .tree {
+    --line: #c7ccd4;
+    --blue: #004aac;
+    position: relative;
+    width: 704px;
+    max-width: 100%;
+    height: 244px;
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+  .line { position: absolute; background: var(--line); }
+
+  /* ---------- Desktop: Figma coordinates ---------- */
+  .root { position: absolute; left: 34px; top: 0; display: flex; align-items: center; gap: 10px; }
+  .root-dot { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #b8e0ff 0%, var(--blue) 100%); }
+  .root-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: 0.44px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .root-line { left: 49.5px; top: 32px; width: 1px; height: 32px; }
+  .bus { left: 50px; top: 64px; width: 600px; height: 1px; }
+
+  .nodes { position: absolute; inset: 0; }
+  .node {
+    position: absolute;
+    top: 64px;
+    left: calc(var(--i) * 100px);
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .drop { position: static; width: 1px; height: 24px; }
+  .dot {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #eff1f3;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 12px;
+    letter-spacing: 0.19px;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: transform 0.5s var(--ease-out, ease);
+  }
+  .node.lead .dot { background: var(--blue); color: #fff; }
+  .stem { position: static; width: 1px; height: 16px; }
+  .desc {
+    width: 90px;
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .node.lead .desc { color: var(--ink); }
+  @media (hover: hover) { .node:hover .dot { transform: scale(1.06); } }
+
+  /* ---------- Phones: vertical list ---------- */
+  @media (max-width: 759px) {
+    .tree { height: auto; }
+    .root { position: relative; left: 0; }
+    .root-line, .bus, .drop, .stem { display: none; }
+    .nodes {
+      position: relative;
+      inset: auto;
+      margin: 12px 0 0 15.5px;
+      padding-left: 0;
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-block: 12px 4px;
+    }
+    .node {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      padding-left: 18px;
+    }
+    .node::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 18px;
+      height: 1px;
+      background: var(--line);
+    }
+    .dot { flex: 0 0 56px; width: 56px; height: 56px; font-size: 9px; line-height: 11px; text-align: center; }
+    .dot span { max-width: 44px; }
+    .desc { width: auto; margin-top: 0; font-size: 14px; line-height: 20px; text-align: left; }
+  }
+</style>
