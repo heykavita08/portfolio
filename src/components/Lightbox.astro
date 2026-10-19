@@ -1,0 +1,165 @@
+---
+// Phones only: tap a dense image (img[data-zoom]) to view it full screen.
+// Tap the image to zoom in at that spot, drag to pan, tap again to zoom out.
+---
+<dialog class="lightbox" aria-label="Image viewer">
+  <div class="lb-bar">
+    <span class="lb-hint">Tap to zoom</span>
+    <button type="button" class="lb-close">Close</button>
+  </div>
+  <div class="lb-scroll">
+    <img class="lb-img" alt="" />
+  </div>
+</dialog>
+
+<style is:global>
+  .zoom-wrap { position: relative; display: block; }
+  .zoom-btn {
+    display: none;
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(250, 252, 253, 0.92);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .zoom-btn:hover { transform: scale(1.06); }
+  .zoom-btn:active { transform: scale(0.92); }
+  @media (max-width: 759px) {
+    .zoom-btn { display: grid; }
+    img[data-zoom] { cursor: zoom-in; }
+  }
+
+  .lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .lightbox::backdrop { background: var(--bg); }
+  .lightbox[open] { display: flex; flex-direction: column; animation: lb-in 0.25s ease both; }
+  @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+
+  .lb-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+  }
+  .lb-hint { color: var(--muted); }
+  .lb-close {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-transform: inherit;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .lb-scroll {
+    flex: 1 1 auto;
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+  .lb-scroll.is-zoomed { display: block; }
+  .lb-img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    cursor: zoom-in;
+  }
+  .lb-scroll.is-zoomed .lb-img { cursor: zoom-out; }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('.lightbox');
+  const scroller = dialog?.querySelector<HTMLElement>('.lb-scroll');
+  const big = dialog?.querySelector<HTMLImageElement>('.lb-img');
+  const hint = dialog?.querySelector<HTMLElement>('.lb-hint');
+  const phone = window.matchMedia('(max-width: 759px)');
+
+  const icon =
+    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M8.5 1.5h4v4M5.5 12.5h-4v-4M12.5 1.5 8 6M1.5 12.5 6 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Highest-resolution candidate from the srcset (Astro emits 1x/2x).
+  const largest = (img: HTMLImageElement) => {
+    const last = img.srcset.split(',').map((s) => s.trim().split(/\s+/)[0]).filter(Boolean).pop();
+    return last || img.currentSrc || img.src;
+  };
+
+  let zoomed = false;
+  const setZoom = (on: boolean, rx = 0.5, ry = 0.5) => {
+    if (!scroller || !big) return;
+    zoomed = on;
+    scroller.classList.toggle('is-zoomed', on);
+    big.style.width = on ? `${Math.max(Math.min(big.naturalWidth, window.innerWidth * 3), window.innerWidth * 1.5)}px` : '';
+    if (hint) hint.textContent = on ? 'Drag to explore · tap to fit' : 'Tap to zoom';
+    if (on) {
+      requestAnimationFrame(() => {
+        scroller.scrollLeft = rx * big.offsetWidth - scroller.clientWidth / 2 + 16;
+        scroller.scrollTop = ry * big.offsetHeight - scroller.clientHeight / 2 + 16;
+      });
+    }
+  };
+
+  const open = (img: HTMLImageElement) => {
+    if (!dialog || !big) return;
+    big.src = largest(img);
+    big.alt = img.alt;
+    setZoom(false);
+    document.documentElement.style.overflow = 'hidden';
+    dialog.showModal();
+  };
+
+  big?.addEventListener('click', (e) => {
+    const r = big.getBoundingClientRect();
+    setZoom(!zoomed, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  });
+  dialog?.querySelector('.lb-close')?.addEventListener('click', () => dialog.close());
+  dialog?.addEventListener('close', () => {
+    document.documentElement.style.overflow = '';
+    if (big) big.removeAttribute('src');
+  });
+
+  for (const img of document.querySelectorAll<HTMLImageElement>('img[data-zoom]')) {
+    const wrap = document.createElement('span');
+    wrap.className = 'zoom-wrap';
+    img.replaceWith(wrap);
+    wrap.append(img);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'zoom-btn';
+    btn.setAttribute('aria-label', `Enlarge image: ${img.alt}`);
+    btn.innerHTML = icon;
+    btn.addEventListener('click', () => open(img));
+    wrap.append(btn);
+
+    img.addEventListener('click', () => { if (phone.matches) open(img); });
+  }
+</script>

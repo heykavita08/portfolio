@@ -1,0 +1,22 @@
+---
+// TEMPORARY home: the real home page isn't designed yet.
+// Only here so the site has a root and the case study is reachable.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+---
+<Base title="Kavita Tewari — Product Designer">
+  <Nav />
+  <main class="wrap" id="work">
+    <p class="t-label">Work</p>
+    <ul class="list">
+      <li><a href="/work/peakpause"><span class="t-sub">PeakPause</span><span class="t-body">A calm home for a family’s health records</span></a></li>
+    </ul>
+  </main>
+</Base>
+
+<style>
+  .wrap { max-width: 704px; margin: 0 auto; padding: 120px 24px; }
+  .list { margin-top: 16px; border-top: 1px solid var(--line); }
+  .list a { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .list a:hover .t-sub { text-decoration: underline; text-underline-offset: 4px; }
+</style>

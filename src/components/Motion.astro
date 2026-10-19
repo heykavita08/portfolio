@@ -1,0 +1,117 @@
+---
+// Site-wide motion: scroll reveals, word-by-word headline reveals, staggered groups.
+// Opt-in markup:
+//   data-split    → headline animates in word by word
+//   data-stagger  → its children reveal one after another
+//   data-reveal   → reveal this element (case-study sections get this automatically)
+// Nothing is hidden unless JS runs and the visitor hasn't asked for reduced motion.
+---
+<script is:inline>
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('motion');
+  }
+</script>
+
+<style is:global>
+  :root {
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --reveal-dur: 0.9s;
+  }
+
+  /* Fade + rise */
+  .motion [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity var(--reveal-dur) var(--ease-out) var(--d, 0ms),
+      transform var(--reveal-dur) var(--ease-out) var(--d, 0ms);
+  }
+  .motion [data-reveal].is-in { opacity: 1; transform: none; }
+
+  /* Images settle from a slight zoom inside their own frame */
+  .motion figure[data-reveal] { overflow: clip; }
+  .motion figure[data-reveal]:not(.vslot) img {
+    transform: scale(1.035);
+    transition: transform 1.4s var(--ease-out) var(--d, 0ms);
+  }
+  .motion figure[data-reveal].is-in:not(.vslot) img { transform: none; }
+
+  /* Word-by-word headline reveal. vertical-align + padding/negative margin keep line boxes identical. */
+  .split-w {
+    display: inline-block;
+    overflow: clip;
+    vertical-align: top;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+  .split-i { display: inline-block; }
+  .motion [data-split] .split-i {
+    transform: translate3d(0, 105%, 0);
+    transition: transform 1s var(--ease-out) calc(var(--d, 0ms) + var(--wi) * 32ms);
+  }
+  .motion [data-split].is-in .split-i { transform: none; }
+</style>
+
+<script>
+  const root = document.documentElement;
+
+  if (root.classList.contains('motion')) {
+    // 1. Split headlines into masked words.
+    for (const el of document.querySelectorAll<HTMLElement>('[data-split]')) {
+      const text = el.textContent?.trim() ?? '';
+      el.setAttribute('aria-label', text);
+      el.textContent = '';
+      text.split(/\s+/).forEach((word, i, all) => {
+        const w = document.createElement('span');
+        w.className = 'split-w';
+        w.setAttribute('aria-hidden', 'true');
+        const inner = document.createElement('span');
+        inner.className = 'split-i';
+        inner.style.setProperty('--wi', String(i));
+        inner.textContent = word;
+        w.append(inner);
+        el.append(w);
+        if (i < all.length - 1) el.append(' ');
+      });
+    }
+
+    // 2. Case-study content reveals automatically, block by block.
+    const content = document.querySelector('.content');
+    if (content) {
+      const blocks = content.querySelectorAll<HTMLElement>(':scope > header > *, :scope > dl, :scope > section > *');
+      for (const el of blocks) {
+        // Headlines split themselves; groups reveal their children instead.
+        if (el.hasAttribute('data-split') || el.matches('[data-stagger]') || el.querySelector('[data-stagger]')) continue;
+        el.setAttribute('data-reveal', '');
+      }
+    }
+    for (const group of document.querySelectorAll<HTMLElement>('[data-stagger]')) {
+      for (const child of group.children) child.setAttribute('data-reveal', '');
+    }
+
+    // 3. Reveal on scroll. Items entering together are staggered in reading order.
+    const targets = document.querySelectorAll<HTMLElement>('[data-reveal], [data-split]');
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entering = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left);
+        entering.forEach((entry, i) => {
+          const el = entry.target as HTMLElement;
+          el.style.setProperty('--d', `${Math.min(i, 8) * 80}ms`);
+          el.classList.add('is-in');
+          io.unobserve(el);
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.12 }
+    );
+    targets.forEach((el) => io.observe(el));
+
+    // Anything already scrolled past (e.g. reload mid-page) shows immediately.
+    requestAnimationFrame(() => {
+      for (const el of targets) {
+        if (el.getBoundingClientRect().bottom < 0) { el.classList.add('is-in'); io.unobserve(el); }
+      }
+    });
+  }
+</script>

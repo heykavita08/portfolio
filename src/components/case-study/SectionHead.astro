@@ -1,0 +1,18 @@
+---
+// Mono label → 12px → serif title (32px) → 16px → grey lead.
+// Figma pattern used by Overview, Problem, Research, Defining the product, etc.
+interface Props {
+  label: string;
+  title?: string;
+  lead?: string;
+}
+const { label, title, lead } = Astro.props;
+---
+<p class="t-label">{label}</p>
+{title && <h2 class="t-title head-title" data-split>{title}</h2>}
+{lead && <p class="t-body head-lead">{lead}</p>}
+
+<style>
+  .head-title { margin-top: 12px; }
+  .head-lead { margin-top: 16px; }
+</style>

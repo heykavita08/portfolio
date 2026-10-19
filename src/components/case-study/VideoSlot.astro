@@ -1,0 +1,221 @@
+---
+// A Figma "Embed · …" video slot: the exported slot image is the poster, and the
+// video sits on top at the exact rectangle it occupies in Figma.
+//   mode="loop"  → muted, looping, plays only while on screen (UI recordings)
+//   mode="click" → poster until clicked, then plays with sound and controls (launch video)
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Rect { x: number; y: number; w: number; h: number; r?: number }
+interface Props {
+  poster: ImageMetadata;
+  alt: string;
+  src: string;
+  /** Slot size in Figma px. */
+  width: number;
+  height: number;
+  /** Where the video sits inside the slot, in Figma px. */
+  rect: Rect;
+  mode?: 'loop' | 'click';
+  caption?: string;
+  /** Phones only: crop the slot to this ratio, e.g. "1/1" (the video stays aligned). */
+  mobileRatio?: string;
+  class?: string;
+}
+
+const { poster, alt, src, width, height, rect, mode = 'loop', caption, mobileRatio, class: className } = Astro.props;
+
+// Bump when re-encoding videos so browsers and CDNs fetch the new files.
+const VIDEO_VERSION = 3;
+const videoSrc = `${src}?v=${VIDEO_VERSION}`;
+
+// Length of one Figma px, as a share of the slot's rendered width.
+const unit = `calc(100cqw / ${width})`;
+let mobileUnit = unit;
+if (mobileRatio) {
+  const [a, b] = mobileRatio.split('/').map(Number);
+  const croppedWidth = height * (a / b); // design px visible across the cropped frame
+  mobileUnit = croppedWidth < width ? `calc(100cqw / ${croppedWidth})` : unit;
+}
+const vars = [
+  `--w:${width}px`,
+  `--ratio:${width}/${height}`,
+  mobileRatio ? `--mratio:${mobileRatio}` : '',
+  `--u:${unit}`,
+  `--mu:${mobileUnit}`,
+  `--dx:${rect.x - width / 2}`,
+  `--dy:${rect.y - height / 2}`,
+  `--vw:${rect.w}`,
+  `--vh:${rect.h}`,
+  `--vr:${rect.r ?? 0}`,
+].filter(Boolean).join(';');
+---
+<figure class:list={['vslot', className]} style={vars} data-mratio={mobileRatio ? '' : undefined}>
+  <div class="vmedia">
+    <Image
+      class="vposter"
+      src={poster}
+      alt={alt}
+      width={width}
+      height={height}
+      densities={[1, 2]}
+      format="webp"
+      quality={90}
+      loading="lazy"
+    />
+    <video
+      class="vvideo"
+      data-src={videoSrc}
+      data-mode={mode}
+      muted={mode === 'loop'}
+      playsinline
+      preload="none"
+      aria-hidden={mode === 'loop' ? 'true' : undefined}
+      tabindex={mode === 'loop' ? '-1' : undefined}
+    ></video>
+    {mode === 'click' && (
+      <button type="button" class="vplay" aria-label={`Play: ${alt}`}>
+        <svg width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M17 8.27a2 2 0 0 1 0 3.46L3 19.8A2 2 0 0 1 0 18.07V1.93A2 2 0 0 1 3 .2l14 8.07Z" fill="currentColor"/></svg>
+      </button>
+    )}
+  </div>
+  {caption && <figcaption class="t-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .vslot {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(var(--w), 100%);
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+  .vmedia {
+    --k: var(--u);
+    position: relative;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .vposter {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .vvideo {
+    position: absolute;
+    left: calc(50% + var(--dx) * var(--k));
+    top: calc(50% + var(--dy) * var(--k));
+    width: calc(var(--vw) * var(--k));
+    height: calc(var(--vh) * var(--k));
+    max-width: none;
+    border-radius: calc(var(--vr) * var(--k));
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .vvideo.is-playing { opacity: 1; }
+  /* Loop seam: fade to the poster (which is frame 0), restart underneath, show again. */
+  .vvideo.is-playing.is-fading { opacity: 0; transition-duration: 0.5s; }
+  .vvideo.no-trans { transition: none; }
+
+  .vplay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 64px;
+    height: 64px;
+    margin: -32px 0 0 -32px;
+    display: grid;
+    place-items: center;
+    padding: 0 0 0 4px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.45s var(--ease-out, ease), background 0.3s ease, opacity 0.3s ease;
+  }
+  .vplay:hover { transform: scale(1.08); background: rgba(255, 255, 255, 0.22); }
+  .vplay:active { transform: scale(0.96); }
+  .vslot.is-started .vplay { opacity: 0; pointer-events: none; }
+
+  @media (max-width: 759px) {
+    .vslot[data-mratio] .vmedia { aspect-ratio: var(--mratio); --k: var(--mu); }
+  }
+</style>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const load = (v: HTMLVideoElement) => {
+    if (!v.src && v.dataset.src) v.src = v.dataset.src;
+  };
+  // Fade the video in over its poster once real frames are moving.
+  const reveal = (v: HTMLVideoElement) => {
+    const show = () => v.classList.add('is-playing');
+    v.addEventListener('playing', show, { once: true });
+    v.addEventListener('timeupdate', show, { once: true });
+  };
+
+  // Seamless loop: instead of the native hard cut, cross-fade back to frame 0.
+  const SEAM_MS = 500;
+  for (const v of document.querySelectorAll<HTMLVideoElement>('.vvideo[data-mode="loop"]')) {
+    v.addEventListener('ended', () => {
+      v.classList.add('is-fading');
+      window.setTimeout(() => {
+        v.currentTime = 0;
+        if (v.dataset.inview === '0') { v.classList.remove('is-fading'); return; }
+        v.play()
+          .then(() => {
+            v.classList.add('no-trans');
+            v.classList.remove('is-fading');
+            requestAnimationFrame(() => requestAnimationFrame(() => v.classList.remove('no-trans')));
+          })
+          .catch(() => v.classList.remove('is-fading'));
+      }, SEAM_MS);
+    });
+  }
+
+  // Looping UI recordings: play while on screen, pause when not.
+  const loops = [...document.querySelectorAll<HTMLVideoElement>('.vvideo[data-mode="loop"]')];
+  if (!reduced && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const { target, isIntersecting } of entries) {
+          const v = target as HTMLVideoElement;
+          v.dataset.inview = isIntersecting ? '1' : '0';
+          if (isIntersecting) {
+            load(v);
+            reveal(v);
+            v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        }
+      },
+      { rootMargin: '200px 0px', threshold: 0.2 }
+    );
+    loops.forEach((v) => io.observe(v));
+  }
+
+  // Click-to-play (launch video): poster until clicked, then sound + controls.
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.vplay')) {
+    btn.addEventListener('click', () => {
+      const slot = btn.closest('.vslot')!;
+      const v = slot.querySelector<HTMLVideoElement>('.vvideo')!;
+      load(v);
+      reveal(v);
+      v.muted = false;
+      v.controls = true;
+      v.removeAttribute('aria-hidden');
+      slot.classList.add('is-started');
+      v.play().catch(() => {});
+      v.focus();
+    });
+  }
+</script>

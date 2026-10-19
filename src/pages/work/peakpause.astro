@@ -1,0 +1,760 @@
+---
+// PeakPause case study.
+// Source: Figma "PeakPause, Case Study (Rachel structure)" — node 196:313.
+// Spacing below mirrors the Figma spacer layers exactly; comments name the frame.
+import { Image } from 'astro:assets';
+import CaseStudy from '../../layouts/CaseStudy.astro';
+import Figure from '../../components/case-study/Figure.astro';
+import SectionHead from '../../components/case-study/SectionHead.astro';
+import CdscoLadder from '../../components/case-study/CdscoLadder.astro';
+import VideoSlot from '../../components/case-study/VideoSlot.astro';
+
+import heroPoster from '../../assets/peakpause/hero-poster.png';
+import overview from '../../assets/peakpause/overview.png';
+import problem from '../../assets/peakpause/problem.png';
+import systemMap from '../../assets/peakpause/system-map.png';
+import researchUsers from '../../assets/peakpause/research-users.png';
+import researchExperts from '../../assets/peakpause/research-experts.png';
+import researchReviews from '../../assets/peakpause/research-reviews.png';
+import decision from '../../assets/peakpause/decision.png';
+import competitive from '../../assets/peakpause/competitive.png';
+import regulatoryMap from '../../assets/peakpause/regulatory-map.png';
+import persona1 from '../../assets/peakpause/persona-1.png';
+import persona2 from '../../assets/peakpause/persona-2.png';
+import persona3 from '../../assets/peakpause/persona-3.png';
+import legendDot from '../../assets/peakpause/legend-dot.svg';
+import ia from '../../assets/peakpause/ia.png';
+import test01 from '../../assets/peakpause/test-01-timeline.png';
+import test02a from '../../assets/peakpause/test-02-a.png';
+import test02b from '../../assets/peakpause/test-02-b.png';
+import test03a from '../../assets/peakpause/test-03-a.png';
+import test03b from '../../assets/peakpause/test-03-b.png';
+import brandSystem from '../../assets/peakpause/brand-system.png';
+import components from '../../assets/peakpause/components.png';
+import timelineIterations from '../../assets/peakpause/timeline-iterations.png';
+import chosenTimeline from '../../assets/peakpause/chosen-timeline.png';
+import edgeCases from '../../assets/peakpause/edge-cases.png';
+import flowOnboarding from '../../assets/peakpause/flow-onboarding.png';
+import flowUpload from '../../assets/peakpause/flow-upload.png';
+import flowTracking from '../../assets/peakpause/flow-tracking.png';
+import flowManaging from '../../assets/peakpause/flow-managing.png';
+import flowSharing from '../../assets/peakpause/flow-sharing.png';
+
+const sections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'problem', label: 'Problem' },
+  { id: 'process', label: 'The process' },
+  { id: 'research', label: 'Research' },
+  { id: 'defining', label: 'Defining the product' },
+  { id: 'timeline', label: 'The timeline' },
+  { id: 'flows', label: 'Final flows' },
+  { id: 'launch', label: 'Launch' },
+  { id: 'reflection', label: 'Reflection' },
+];
+
+const meta = [
+  { label: 'Role', value: ['Lead Designer'] },
+  { label: 'Timeline', value: ['Mar – Dec 2025'] },
+  { label: 'Team', value: ['3 Designers'] },
+  { label: 'Skills', value: ['User Research', 'UX Architecture', 'UI Design', 'Prototyping'] },
+];
+
+// Figma "Process table" (198:1036). Row heights are fixed in Figma (uneven on purpose or not); kept as-is.
+const process = [
+  { n: '01', phase: 'Frame', did: 'Turned an open brief into research questions', decided: 'Learn the space before drawing anything', h: 83 },
+  { n: '02', phase: 'Desk', did: 'PHR vs EHR, ABDM, regulation, competitors, user reviews', decided: 'Move to personal health records', h: 103 },
+  { n: '03', phase: 'Regulate', did: 'Mapped where an app becomes a medical device', decided: 'Show records, never interpret them', h: 83 },
+  { n: '04', phase: 'Users', did: 'Ecosystem map, stakeholder map, three personas', decided: 'Design for the family health manager', h: 90 },
+  { n: '05', phase: 'Structure', did: 'User flow, information architecture, V1 split into phases', decided: 'What ships first', h: 83 },
+  { n: '06', phase: 'Prototype', did: 'Quick ProtoPie tests, one feature at a time', decided: 'Keep or kill features early', h: 89 },
+  { n: '07', phase: 'Timeline', did: 'Many iterations, tested internally and with recruited users', decided: 'One timeline direction', h: 101 },
+  { n: '08', phase: 'Explore', did: 'UI directions far from existing health apps, then a brand system', decided: 'The visual language', h: 89 },
+  { n: '09', phase: 'Edge cases', did: 'Every edge case worked through before final UI', decided: 'Fewer surprises in testing', h: 101 },
+  { n: '10', phase: 'Launch', did: 'Investor video, website, sales decks', decided: 'First 12 users', h: 62 },
+  { n: '11', phase: 'Phase 2', did: 'Designing from what those users told us', decided: 'In progress', future: true, h: 62 },
+];
+
+// Figma "Personas" (229:590). Portrait crops copied from the file.
+const personas = [
+  {
+    name: 'The family health manager',
+    primary: true,
+    quote: '“I know I have this somewhere.”',
+    summary: 'Caregiver juggling several people’s records.',
+    img: persona1,
+    tint: 0.32,
+    crop: { left: 40, width: 136, radius: 56 },
+    gap: 10,
+    traits: [
+      ['Age', '35–50'],
+      ['Manages', 'Self, kids and parents'],
+      ['Records in', 'WhatsApp, email, a drawer'],
+      ['Tech', 'Everyday apps, not a power user'],
+      ['Opens app', 'Before every family visit'],
+    ],
+  },
+  {
+    name: 'The chronic-condition tracker',
+    quote: '“I should’ve been more prepared.”',
+    summary: 'Monitoring markers like glucose or thyroid over years.',
+    img: persona2,
+    tint: 0.2,
+    crop: { left: 21, width: 174, radius: 0 },
+    gap: 10,
+    traits: [
+      ['Age', '40–55'],
+      ['Manages', 'Their own condition'],
+      ['Records in', 'Lab portals, paper files'],
+      ['Tech', 'Comfortable, careful with data'],
+      ['Opens app', 'After every test'],
+    ],
+  },
+  {
+    name: 'The occasional user',
+    quote: '“I just wait for the doctor to tell me.”',
+    summary: 'Annual check-ups.',
+    img: persona3,
+    tint: 0.2,
+    crop: { left: 30, width: 156, radius: 0 },
+    gap: 14,
+    traits: [
+      ['Age', '28–40'],
+      ['Manages', 'Just themselves'],
+      ['Records in', 'Email inbox'],
+      ['Tech', 'High'],
+      ['Opens app', 'Once or twice a year'],
+    ],
+  },
+];
+
+const flows = [
+  {
+    img: flowOnboarding,
+    video: '/videos/peakpause/flow-onboarding.mp4',
+    title: 'Set up in minutes, with consent up front',
+    body: 'Account, consent under the DPDP Act and family profiles, then eight quick tips that show where everything lives.',
+  },
+  {
+    img: flowUpload,
+    video: '/videos/peakpause/upload.mp4',
+    title: 'Upload once, filed under the right person',
+    body: 'Pick a file or snap a photo. If a report looks like it belongs to someone else, the app asks before filing it.',
+  },
+  {
+    img: flowTracking,
+    video: '/videos/peakpause/flow-tracking.mp4',
+    title: 'Track every report over time',
+    body: 'Each report lands on one timeline, and every biomarker sits against your own past values.',
+  },
+  {
+    img: flowManaging,
+    video: '/videos/peakpause/flow-managing.mp4',
+    title: 'Keep each family member’s records apart',
+    body: 'A profile for everyone, with reports, prescriptions and insurance sorted in one place.',
+  },
+  {
+    img: flowSharing,
+    video: '/videos/peakpause/flow-sharing.mp4',
+    title: 'Share the right records, fast',
+    body: 'Bundle reports by folder or by date into one file, ready to send to the doctor.',
+  },
+];
+
+const LOOM_ID = 'f5633e5bebca4ceb8dbef5992e973c92';
+const SITE_URL = 'https://peakpause.com/';
+---
+<CaseStudy
+  title="PeakPause — Kavita Tewari"
+  description="A calm home for a family’s health records. PeakPause case study by Kavita Tewari, Lead Designer."
+  sections={sections}
+>
+  <!-- Header (196:335) -->
+  <header class="header">
+    <p class="t-label">PeakPause • Launched 2025</p>
+    <h1 class="t-display header-title" data-split>A calm home for a family’s health records</h1>
+    <VideoSlot
+      class="mt-40"
+      poster={heroPoster}
+      alt="PeakPause launch video"
+      src="/videos/peakpause/hero.mp4"
+      mode="click"
+      width={704}
+      height={403}
+      rect={{ x: 142, y: 0, w: 420, h: 403 }}
+      caption="Launch video for PeakPause"
+      mobileRatio="4/3"
+    />
+  </header>
+
+  <!-- Meta (196:342) -->
+  <dl class="meta" data-stagger>
+    {meta.map((m) => (
+      <div class="meta-col">
+        <dt>{m.label}</dt>
+        <dd>{m.value.map((v) => <span>{v}</span>)}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <!-- Overview (196:355) -->
+  <section id="overview" class="sec">
+    <SectionHead
+      label="Overview"
+      title="PeakPause is a health records app for the person who manages everyone’s health."
+      lead="It was Non Zero’s first medtech product. No client, no feature list, just a question: could a design studio build something meaningful in healthcare?"
+    />
+    <VideoSlot
+      class="mt-24"
+      poster={overview}
+      alt="PeakPause home screen on a phone, over an orange gradient"
+      src="/videos/peakpause/upload.mp4"
+      width={704}
+      height={396}
+      rect={{ x: 278, y: 43, w: 148, h: 310, r: 28 }}
+      caption="PeakPause V1, the core experience"
+      mobileRatio="1/1"
+    />
+  </section>
+
+  <!-- Problem (202:313) -->
+  <section id="problem" class="sec">
+    <SectionHead
+      label="Problem"
+      title="Health records exist. They just can’t be found when they matter."
+      lead="The person managing a family’s health has no single place for everyone’s records. Reports sit in WhatsApp, drawers and email, so at a doctor’s visit or a parent’s emergency they can’t find what they need, and walk in unprepared."
+    />
+    <Figure
+      class="mt-24"
+      src={problem}
+      alt="A person dwarfed by a giant lab report"
+      width={704}
+      height={396}
+    mobileRatio="4/3"
+    />
+    <p class="t-title hmw mt-64" data-split>How might we help them find any record in seconds, without the app ever playing doctor?</p>
+  </section>
+
+  <!-- The process (200:313) -->
+  <section id="process" class="sec">
+    <p class="t-label">The process</p>
+    <table class="process mt-12">
+      <thead data-reveal>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Phase</th>
+          <th scope="col">What we did</th>
+          <th scope="col">What it decided</th>
+        </tr>
+      </thead>
+      <tbody data-stagger>
+        {process.map((r) => (
+          <tr class:list={{ future: r.future }} style={r.h ? `--h:${r.h}px` : undefined}>
+            <td class="p-n">{r.n}</td>
+            <th scope="row" class="p-phase">{r.phase}</th>
+            <td class="p-did">{r.did}</td>
+            <td class="p-decided">{r.decided}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Research (198:1141) -->
+  <section id="research" class="sec sec-research">
+    <p class="t-label">Research</p>
+    <h2 class="t-title research-title mt-12" data-split>We spent months in research before drawing a single screen.</h2>
+
+    <h3 class="t-sub">We mapped the whole system.</h3>
+    <p class="t-body mt-13">Who creates health data, who owns it, who regulates it, and how ABDM connects them.</p>
+    <Figure
+      class="mt-13"
+      src={systemMap}
+      alt="Diagram: who touches a health record across care, payment and rules, and where PeakPause sits"
+      width={704}
+      height={1369}
+    zoom
+    />
+
+    <h3 class="t-sub mt-64">Talked to target users</h3>
+    <p class="t-body mt-13">Who creates health data, who owns it, who regulates it, and how ABDM connects them.</p>
+    <Figure class="mt-13" src={researchUsers} alt="Video calls with target users" width={704} height={396} zoom />
+
+    <h3 class="t-sub">Talked to doctors and professionals and lab guys who interact with each other on daily basis</h3>
+    <p class="t-body mt-13">Who creates health data, who owns it, who regulates it, and how ABDM connects them.</p>
+    <Figure class="mt-13" src={researchExperts} alt="Video calls with doctors, professionals and lab staff" width={704} height={396} zoom />
+
+    <h3 class="t-sub mt-64">And read what people already complain about.</h3>
+    <p class="t-body mt-8">User reviews, forum threads, and every competitor we could find.</p>
+    <Figure class="mt-24" src={researchReviews} alt="Collage of user reviews and forum threads about health records" width={704} height={396} zoom />
+
+    <p class="t-body mt-64">If an app interprets results or suggests treatment, CDSCO treats it as Software as a Medical Device (SaMD), using the global IMDRF definition India follows. The more it interprets, the higher the risk class and the longer the licence takes.</p>
+    <CdscoLadder class="mt-24" />
+    <div class="decision mt-20">
+      <Image
+        src={decision}
+        alt="So for MVP we set one rule early: PeakPause shows what the lab said, in plain words, against your own history. It never diagnoses."
+        width={696}
+        height={113}
+        densities={[1, 2]}
+        format="webp"
+        quality={95}
+        loading="lazy"
+        class="decision-img"
+      />
+      <p class="decision-text" data-split>So for MVP we set one rule early: PeakPause shows what the lab said, in plain words, against your own history. It never diagnoses.</p>
+    </div>
+    <Figure
+      class="mt-64"
+      src={competitive}
+      alt="Competitive landscape: direct competitors, partial overlaps and related ecosystems around PeakPause"
+      width={704}
+      height={832}
+    zoom
+    />
+    <VideoSlot
+      poster={regulatoryMap}
+      alt="Regulatory map and India checklist for the app"
+      src="/videos/peakpause/regulatory-map.mp4"
+      width={704}
+      height={396}
+      rect={{ x: -9, y: -18.5, w: 722, h: 433 }}
+    />
+  </section>
+
+  <!-- Defining the product (196:444) -->
+  <section id="defining" class="sec">
+    <SectionHead
+      label="Defining the product"
+      title="Who it’s for, and the one thing V1 had to do well."
+      lead="Adults in their 30s to 50s, often handling records for parents and children too. Not patients in crisis."
+    />
+
+    <div class="personas mt-24" data-stagger>
+      {personas.map((p) => (
+        <article class="persona" style={`--gap:${p.gap}px`}>
+          <div class="portrait" style={`--tint:${p.tint}`}>
+            <Image
+              src={p.img}
+              alt=""
+              width={p.crop.width}
+              densities={[1, 2]}
+              format="webp"
+              quality={90}
+              loading="lazy"
+              style={`left:${p.crop.left}px;width:${p.crop.width}px;border-radius:${p.crop.radius}px`}
+            />
+          </div>
+          <div class="persona-tag">
+            {p.primary && <span class="tag tag-md">Primary user</span>}
+          </div>
+          <h3 class="persona-name">{p.name}</h3>
+          <p class="persona-quote">{p.quote}</p>
+          <p class="t-body">{p.summary}</p>
+          <dl class="traits">
+            {p.traits.map(([k, v]) => (
+              <div class="trait">
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </article>
+      ))}
+    </div>
+
+    <div class="ia-head mt-64">
+      <h3 class="t-sub">Information architecture</h3>
+      <div class="legend" aria-hidden="true">
+        <span class="legend-item"><img src={legendDot.src} width="6" height="6" alt="" />Key screen</span>
+        <span class="legend-item"><i class="legend-swatch"></i>Flow</span>
+      </div>
+    </div>
+    <Figure
+      src={ia}
+      alt="Information architecture: onboarding and login lead to the home dashboard, which branches into upload, files, timeline, family & settings, and your data"
+      width={704}
+      height={573}
+    zoom
+    />
+
+    <h3 class="t-sub mt-64">Small tests, one feature at a time.</h3>
+    <p class="t-body mt-8">Instead of testing once at the end, we put quick ProtoPie prototypes of single features in front of people early. Weak ideas died in days, not sprints.</p>
+
+    <!-- Test 01 (239:590) -->
+    <div class="test-pair mt-24">
+      <div class="test-text">
+        <p class="t-label-sm">Test 01 · Timeline</p>
+        <h4 class="test-title mt-8">Find February’s reports from the timeline</h4>
+        <p class="t-small mt-8">Timeline → tap a card → files page → filter to February → sort by week</p>
+        <p class="result mt-16"><strong>What changed:</strong> Cards and the timeline got real tap targets, plus a “View all”.</p>
+      </div>
+      <Figure src={test01} alt="Timeline test screens" width={420} height={451} zoom />
+    </div>
+
+    <!-- Test 02 (239:602) -->
+    <div class="mt-56">
+      <p class="t-label-sm">Test 02 · Search</p>
+      <h4 class="test-title mt-8">Search for a file, two ways</h4>
+      <p class="t-small mt-8">Search → files page with history and filters → pick a suggestion → the file, under Reports</p>
+      <div class="routes mt-16">
+        <figure class="route">
+          <Image src={test02a} alt="Route A: search bar at the top" width={342} height={366} densities={[1, 2]} format="webp" quality={90} loading="lazy" style="aspect-ratio:342/366;object-fit:cover" data-zoom />
+          <figcaption class="route-cap">
+            <span class="cap-text" style="width:282px">A · Search bar at the top</span>
+            <span class="tag tag-sm">Kept</span>
+          </figcaption>
+        </figure>
+        <figure class="route">
+          <Image src={test02b} alt="Route B: search in the bottom nav" width={342} height={366} densities={[1, 2]} format="webp" quality={90} loading="lazy" style="aspect-ratio:342/366;object-fit:cover" data-zoom />
+          <figcaption class="route-cap">
+            <span class="cap-text">B · Search in the bottom nav</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="result mt-16"><strong>Result:</strong> People looked for search at the top first. Moving it there cut the task from 2:38 to 1:20.</p>
+    </div>
+
+    <!-- Test 03 (239:623) -->
+    <div class="mt-56">
+      <p class="t-label-sm">Test 03 · Upload</p>
+      <h4 class="test-title mt-8">Upload a report from a busy home screen</h4>
+      <p class="t-small mt-8">Upload → choose a file → uploading → confirm → different profile detected → switch profile → filed under the right person. Side path: edit the name or date, then back to confirm.</p>
+      <figure class="mt-16">
+        <Image src={test03a} alt="Route A: upload button at the top" width={704} height={286} densities={[1, 2]} format="webp" quality={90} loading="lazy" style="aspect-ratio:704/286;object-fit:cover" data-zoom />
+        <figcaption class="route-cap mt-8"><span class="cap-text">A · Upload button at the top</span></figcaption>
+      </figure>
+      <figure class="mt-20">
+        <Image src={test03b} alt="Route B: upload in the bottom nav" width={704} height={303} densities={[1, 2]} format="webp" quality={90} loading="lazy" style="aspect-ratio:704/303;object-fit:cover" data-zoom />
+        <figcaption class="route-cap mt-8">
+          <span class="cap-text" style="width:644px">B · Upload in the bottom nav</span>
+          <span class="tag tag-sm">Kept</span>
+        </figcaption>
+      </figure>
+      <p class="result mt-16"><strong>Result:</strong> Upload became a permanent button in the bottom nav, and the different-profile step became the three message tiers.</p>
+    </div>
+  </section>
+
+  <!-- Visual direction — first part of Figma frame "The timeline" (196:485) -->
+  <section class="sec sec-tail">
+    <h3 class="t-sub">We explored far from existing health apps.</h3>
+    <p class="t-body">Several UI directions before settling. The one we chose became the brand system.</p>
+    <Figure src={brandSystem} alt="Brand system: Source Serif 4 and DM Sans, with neutral, primary and secondary colour ramps" width={704} height={480} zoom />
+    <Figure class="mt-20" src={components} alt="Components: buttons, inputs, OTP and upload states, timeline and health graph cards, tabs, search and file lists" width={704} height={840} zoom />
+  </section>
+
+  <!-- The timeline (196:486 onward) -->
+  <section id="timeline" class="sec" style="--pt:94px">
+    <SectionHead
+      label="The timeline"
+      title="The timeline is the product, so it got the most iterations."
+      lead="We explored many versions, tested them internally, then with users we recruited, and only then picked one to take forward."
+    />
+    <VideoSlot
+      class="mt-24"
+      poster={timelineIterations}
+      alt="Timeline iterations"
+      src="/videos/peakpause/timeline-iterations.mp4"
+      width={704}
+      height={460}
+      rect={{ x: 257, y: 36, w: 191, h: 397, r: 29 }}
+      mobileRatio="1/1"
+    />
+    <Figure
+      class="mt-24"
+      src={chosenTimeline}
+      alt="The chosen timeline direction on a phone"
+      width={704}
+      height={396}
+      caption="The timeline direction we chose"
+    mobileRatio="1/1"
+    />
+
+    <h3 class="t-sub mt-136">Every edge case, before the final UI.</h3>
+    <p class="t-body mt-8">Whose report is this? What if it has two names on it? When the app guesses, it asks. It never decides for you.</p>
+    <Figure
+      class="mt-24"
+      src={edgeCases}
+      alt="Profile detection: when an upload seems to belong to a different family member, three message types nudge you to verify, without blocking you"
+      width={704}
+      height={341.5}
+    zoom
+    />
+  </section>
+
+  <!-- Final flows (269:755) -->
+  <section id="flows" class="sec">
+    <SectionHead label="Final flows" title="From first open to everyday use." />
+    <div class="flows" data-stagger>
+      {flows.map((f) => (
+        <div class="flow">
+          <VideoSlot class="flow-media" poster={f.img} alt="" src={f.video} width={300} height={611} rect={{ x: 0, y: 0, w: 300, h: 611 }} />
+          <div class="flow-text">
+            <h3 class="flow-title">{f.title}</h3>
+            <p class="t-body">{f.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Launch (196:533) -->
+  <section id="launch" class="sec">
+    <SectionHead
+      label="Launch"
+      title="Then we made it real."
+      lead="A short video for investors, a website I designed and built, and sales decks. Then our first 12 users. Phase 2 is being designed with them now, and is under wraps."
+    />
+    <div class="pair mt-24">
+      <div class="pair-text">
+        <h3 class="t-sub">Investor video</h3>
+        <p class="t-body">A short walkthrough for the first investor conversations.</p>
+      </div>
+      <div class="embed">
+        <iframe
+          src={`https://www.loom.com/embed/${LOOM_ID}?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true`}
+          title="PeakPause investor video"
+          loading="lazy"
+          allow="fullscreen"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+    <div class="pair mt-24">
+      <div class="pair-text">
+        <h3 class="t-sub">peakpause.com</h3>
+        <p class="t-body">Designed and built by me, for sign-ups and early sales on framer.</p>
+      </div>
+      <a class="embed site" href={SITE_URL} target="_blank" rel="noopener" aria-label="Open peakpause.com in a new tab">
+        <iframe src={SITE_URL} title="peakpause.com preview" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      </a>
+    </div>
+  </section>
+
+  <!-- Reflection (196:556) -->
+  <section id="reflection" class="sec">
+    <SectionHead label="Reflection" title="If I ever ran it again" />
+    <div class="reflections" data-stagger>
+      <div>
+        <h3 class="t-sub">The research decided more than any screen did.</h3>
+        <p class="t-body mt-8">The pivot and the licensing line were both research calls, made months before the UI.</p>
+      </div>
+      <div>
+        <h3 class="t-sub">Design for the return visit.</h3>
+        <p class="t-body mt-8">People add a record once and come back many times to find it. I’d design the home for that from day one.</p>
+      </div>
+      <div>
+        <h3 class="t-sub">Give onboarding real time up front.</h3>
+        <p class="t-body mt-8">We treated it as a late step, and testing showed it.</p>
+      </div>
+    </div>
+  </section>
+</CaseStudy>
+
+<script>
+  // Scale the live peakpause.com preview (rendered at 1280px) down to its box.
+  const site = document.querySelector<HTMLElement>('.embed.site');
+  if (site) {
+    const fit = () => site.style.setProperty('--scale', String(site.clientWidth / 1280));
+    new ResizeObserver(fit).observe(site);
+    fit();
+  }
+</script>
+
+<style>
+  /* Sections: 120px top padding; anchor jumps land the label level with the sidebar. */
+  .sec {
+    --pt: 120px;
+    padding-top: var(--pt);
+    scroll-margin-top: calc(56px - var(--pt));
+  }
+  .sec-tail { --pt: 144px; } /* 24px end-spacer of "Defining the product" + 120px */
+
+  /* Header */
+  .header-title { margin-top: 8px; }
+
+  /* Meta */
+  .meta {
+    display: flex;
+    gap: 24px;
+    margin: 0;
+    padding-top: 32px;
+    color: var(--muted);
+  }
+  .meta-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .meta dt { font-family: var(--font-mono); font-size: 15px; line-height: 23px; text-transform: uppercase; }
+  .meta dd { margin: 0; display: flex; flex-direction: column; font-size: 15px; line-height: 23px; }
+
+  /* Problem */
+  .hmw { line-height: 35px; }
+
+  /* Process table */
+  /* Real table semantics, flex layout so row heights match Figma exactly. */
+  .process, .process thead, .process tbody { display: block; width: 100%; }
+  .process tr { display: flex; align-items: baseline; gap: 20px; }
+  .process th, .process td { padding: 0; text-align: left; vertical-align: baseline; font-weight: 400; }
+  .process thead th {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .process tr > * { flex: 0 0 auto; display: block; }
+  .process tr > :nth-child(1) { width: 40px; }
+  .process tr > :nth-child(2) { width: 132px; }
+  .process tr > :nth-child(3) { width: 280px; }
+  .process tr > :nth-child(4) { width: 192px; }
+  .process thead tr { border-bottom: 1px solid var(--line-strong); }
+  .process thead tr { padding: 12px 0; }
+  .process tbody tr { height: var(--h); padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .p-n { font-family: var(--font-mono); font-size: 13px; line-height: 20px; color: var(--muted); }
+  .p-phase { font-family: var(--font-serif); font-size: 21px; line-height: 25px; letter-spacing: -0.42px; color: var(--ink); }
+  .p-did { font-size: 15px; line-height: 23px; color: var(--muted); }
+  .p-decided { font-size: 15px; line-height: 23px; color: var(--ink); }
+  .process tr.future { opacity: 0.55; }
+  .p-n, .p-phase { transition: color 0.3s ease, transform 0.45s var(--ease-out); }
+  @media (hover: hover) {
+    .process tbody tr:hover .p-n { color: var(--accent); }
+    .process tbody tr:hover .p-phase { transform: translateX(4px); }
+    .portrait :global(img) { transition: transform 0.9s var(--ease-out); }
+    .persona:hover .portrait :global(img) { transform: scale(1.05); }
+    .flow :global(.flow-media) { transition: transform 0.8s var(--ease-out); }
+    .flow:hover :global(.flow-media) { transform: translateY(-6px); }
+    .embed.site iframe { transition: opacity 0.3s ease; }
+    .embed.site:hover iframe { opacity: 0.88; }
+  }
+
+  /* Research */
+  .sec-research { padding-bottom: 32px; }
+  .research-title { max-width: 514px; min-height: 131px; }
+  .decision { min-height: 120px; }
+  .decision :global(img) { width: 695.5px; max-width: 100%; height: auto; }
+  .decision-text { display: none; }
+
+  /* Personas */
+  .personas { display: flex; gap: 28px; align-items: flex-start; }
+  .persona { flex: 0 0 216px; display: flex; flex-direction: column; gap: var(--gap); }
+  .portrait {
+    position: relative;
+    width: 216px;
+    height: 216px;
+    flex-shrink: 0;
+    border-radius: 108px;
+    overflow: hidden;
+    background: rgba(153, 165, 125, var(--tint));
+  }
+  .portrait :global(img) { position: absolute; top: 38px; height: 190px; object-fit: cover; }
+  /* Figma: portrait → gap → 6px spacer → gap → tag (or 19px spacer) → gap → name */
+  .persona-tag { min-height: 19px; margin-top: calc(var(--gap) + 6px); display: flex; }
+  .tag-md { padding: 3px 8px; font-size: 10px; }
+  .tag-sm { padding: 2px 7px; font-size: 9px; }
+  .persona-name { font-family: var(--font-serif); font-weight: 400; font-size: 21px; line-height: 25px; letter-spacing: -0.42px; }
+  .persona-quote { font-family: var(--font-serif); font-style: italic; font-size: 16px; line-height: 22px; }
+  .traits { margin: 0; border-top: 1px solid var(--line-soft); }
+  .trait { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line-soft); }
+  .trait dt { flex: 0 0 76px; font-family: var(--font-mono); font-size: 10.5px; line-height: 17px; text-transform: uppercase; color: var(--muted); }
+  .trait dd { margin: 0; flex: 0 1 132px; font-size: 13px; line-height: 18px; color: var(--ink); }
+
+  /* Information architecture */
+  .ia-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .legend { display: flex; gap: 18px; font-size: 10px; line-height: 13px; color: #171614; white-space: nowrap; }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-item:has(.legend-swatch) { gap: 4px; }
+  .legend-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: rgba(153, 165, 125, 0.3); }
+
+  /* Tests */
+  .test-pair { display: flex; gap: 40px; align-items: flex-start; }
+  .test-text { flex: 1 1 0; min-width: 0; }
+  .test-pair :global(.figure) { flex: 0 0 420px; }
+  .test-title { font-family: var(--font-serif); font-weight: 400; font-size: 21px; line-height: 28px; letter-spacing: -0.42px; }
+  .result { font-size: 14px; line-height: 21px; color: var(--ink); }
+  .result strong { font-weight: 500; }
+  .routes { display: flex; gap: 20px; }
+  .route { display: flex; flex-direction: column; gap: 8px; width: 342px; }
+  .route :global(img), figure :global(img) { width: 100%; height: auto; }
+  .route-cap { display: flex; align-items: center; gap: 8px; }
+  .cap-text { font-size: 13px; line-height: 18px; color: var(--muted); }
+
+  /* Final flows */
+  .flows { display: flex; flex-direction: column; gap: 56px; margin-top: 28px; }
+  .flow { display: flex; gap: 40px; align-items: center; }
+  .flow :global(.flow-media) { flex: 0 0 300px; width: 300px; height: auto; }
+  .flow-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .flow-text > * { max-width: 224px; }
+  .flow-title { font-family: var(--font-serif); font-weight: 400; font-size: 26px; line-height: 31px; letter-spacing: -0.52px; }
+
+  /* Launch */
+  .pair { display: flex; gap: 40px; align-items: flex-start; }
+  .pair-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .embed {
+    position: relative;
+    flex: 0 0 420px;
+    width: 420px;
+    height: 330px;
+    overflow: hidden;
+    background: var(--slot);
+  }
+  .embed iframe { width: 100%; height: 100%; border: 0; }
+  .embed.site iframe {
+    width: 1280px;
+    max-width: none;
+    height: calc(330px / var(--scale, 0.328125));
+    transform: scale(var(--scale, 0.328125));
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+
+  /* Reflection */
+  .reflections { display: flex; flex-direction: column; gap: 48px; margin-top: 32px; }
+
+  /* ---------- Smaller screens: same design, re-flowed to fit ---------- */
+  @media (max-width: 759px) {
+    :global(.t-display) { font-size: 34px; line-height: 38px; letter-spacing: -0.68px; }
+    :global(.t-title) { font-size: 27px; line-height: 33px; letter-spacing: -0.54px; }
+    .hmw { line-height: 31px; }
+    .sec { --pt: 88px; }
+    .sec-tail { --pt: 112px; }
+    .sec-research { padding-bottom: 32px; }
+  .research-title { min-height: 0; margin-bottom: 40px; }
+
+    .meta { flex-wrap: wrap; row-gap: 24px; }
+    .meta-col { flex: 1 1 calc(50% - 12px); }
+
+    .process thead { display: none; }
+    .process, .process tbody, .process tr, .process td, .process th { display: block; width: auto !important; }
+    .process tbody tr { height: auto; padding: 16px 0; display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; row-gap: 4px; }
+    .process tbody tr > * { padding: 0 !important; }
+    .process .p-n { grid-row: 1 / span 3; }
+    .process .p-decided::before { content: '→ '; color: var(--muted); }
+
+    .personas { flex-direction: column; gap: 48px; }
+    .persona { flex-basis: auto; width: 100%; max-width: 360px; }
+
+    .ia-head { flex-wrap: wrap; }
+
+    .test-pair, .pair, .flow { flex-direction: column; align-items: stretch; gap: 20px; }
+    .test-pair :global(.figure) { width: 100%; }
+    .routes { flex-direction: column; gap: 24px; }
+    .route { width: 100%; }
+    .cap-text { width: auto !important; flex: 1 1 auto; }
+    .flows { gap: 64px; }
+    .flow { gap: 24px; }
+    .flow-text { order: -1; gap: 8px; }
+    .flow-title { font-size: 24px; line-height: 29px; }
+    .flow :global(.flow-media) { flex-basis: auto; width: min(240px, 70%); margin: 0 auto; }
+    .flow-text > * { max-width: none; }
+
+    .decision { min-height: 0; margin-top: 48px; }
+    .decision :global(.decision-img) { display: none; }
+    .decision-text {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 26px;
+      line-height: 31px;
+      letter-spacing: -0.26px;
+      color: var(--ink);
+    }
+    .embed { flex-basis: auto; width: 100%; height: auto; aspect-ratio: 420 / 330; }
+    .embed.site iframe { height: calc(100% / var(--scale, 0.328125)); }
+  }
+</style>

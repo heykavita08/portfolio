@@ -1,0 +1,137 @@
+---
+// Shell for every case study: nav, sticky section index, 704px reading column.
+// Figma: "Body" (196:322) → "Sidebar" (196:323) + "Content" (196:334).
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+import Lightbox from '../components/Lightbox.astro';
+
+export interface Section {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  sections: Section[];
+}
+
+const { title, description, sections } = Astro.props;
+---
+<Base title={title} description={description}>
+  <Nav />
+  <div class="body">
+    <aside class="sidebar">
+      <a class="back" href="/#work"><span class="arrow" aria-hidden="true">←</span> Back</a>
+      <nav aria-label="On this page">
+        <ul class="toc">
+          {sections.map((s, i) => (
+            <li><a href={`#${s.id}`} data-toc={s.id} aria-current={i === 0 ? 'true' : undefined}>{s.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+    <main class="content">
+      <slot />
+    </main>
+  </div>
+  <Lightbox />
+</Base>
+
+<style>
+  .body {
+    display: grid;
+    grid-template-columns: var(--sidebar) var(--column);
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: 56px 0 160px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 56px;
+    align-self: start;
+    padding-left: 32px;
+  }
+  .back {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.15s ease;
+  }
+  .back:hover { color: var(--ink); }
+  .toc {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 42px;
+  }
+  .toc a {
+    display: block;
+    font-size: 15px;
+    line-height: 23px;
+    color: var(--muted);
+    transition: color 0.15s ease;
+  }
+  .toc a:hover,
+  .toc a[aria-current='true'] { color: var(--ink); }
+  .toc a { transition: color 0.25s ease, transform 0.35s var(--ease-out); }
+  .toc a:hover { transform: translateX(3px); }
+  .arrow { display: inline-block; transition: transform 0.35s var(--ease-out); }
+  .back:hover .arrow { transform: translateX(-4px); }
+  :global(.motion) .sidebar { animation: side-in 1s var(--ease-out) 0.25s both; }
+  @keyframes side-in { from { opacity: 0; transform: translateX(-8px); } }
+
+  .content { min-width: 0; }
+
+  /* Below the 920px the desktop grid needs, drop the index and let the column fill the screen. */
+  @media (max-width: 959px) {
+    .body {
+      display: block;
+      max-width: calc(var(--column) + 48px);
+      padding: 40px 24px 120px;
+    }
+    .sidebar { display: none; }
+  }
+  @media (max-width: 600px) {
+    .body { padding: 32px 16px 96px; }
+  }
+</style>
+
+<script>
+  // Highlight the section currently being read.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')];
+  const targets = links
+    .map((a) => document.getElementById(a.dataset.toc!))
+    .filter((el): el is HTMLElement => el !== null);
+
+  const setActive = (id: string) => {
+    for (const a of links) {
+      if (a.dataset.toc === id) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    }
+  };
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const line = window.innerHeight * 0.3;
+    let current = targets[0]?.id;
+    for (const el of targets) {
+      if (el.getBoundingClientRect().top <= line) current = el.id;
+    }
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    if (atBottom && targets.length) current = targets[targets.length - 1].id;
+    if (current) setActive(current);
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  window.addEventListener('load', update); // after the browser restores scroll position
+  update();
+</script>

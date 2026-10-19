@@ -1,0 +1,60 @@
+---
+// An image (Figma export, 2x) with an optional mono caption underneath.
+// Figma pattern: "Embed · …" / "Slot: …" frames — media, 10px gap, caption.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** Display size in CSS px, as drawn in Figma. */
+  width: number;
+  height: number;
+  caption?: string;
+  class?: string;
+  eager?: boolean;
+  /** Dense image: on phones, tap to open it full screen and zoom. */
+  zoom?: boolean;
+  /** Phones only: crop to this aspect ratio (e.g. "1/1") so a centred subject reads bigger. */
+  mobileRatio?: string;
+}
+
+const { src, alt, width, height, caption, class: className, eager = false, zoom = false, mobileRatio } = Astro.props;
+---
+<figure
+  class:list={['figure', className]}
+  style={`--w:${width}px;--ratio:${width}/${height}${mobileRatio ? `;--mratio:${mobileRatio}` : ''}`}
+  data-mratio={mobileRatio ? '' : undefined}
+>
+  <Image
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    densities={[1, 2]}
+    format="webp"
+    quality={90}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
+    data-zoom={zoom ? '' : undefined}
+  />
+  {caption && <figcaption class="t-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .figure {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(var(--w), 100%);
+  }
+  .figure :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--ratio);
+    object-fit: cover;
+  }
+  @media (max-width: 759px) {
+    .figure[data-mratio] :global(img) { aspect-ratio: var(--mratio); }
+  }
+</style>
