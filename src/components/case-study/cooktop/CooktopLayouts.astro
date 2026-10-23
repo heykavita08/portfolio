@@ -1,0 +1,86 @@
+---
+// Figma "Diagram: Cooktop layouts" (425:791): three hob layouts drawn at 216×150.
+// Shapes use the Figma coordinates inside each card. Red = assisted temperature.
+type Shape =
+  | { k: 'join'; x: number; y: number }
+  | { k: 'half'; x: number; y: number; act?: boolean }
+  | { k: 'zone'; x: number; y: number; d: number; act?: boolean };
+const layouts: { name: string; body: string; label: string; shapes: Shape[] }[] = [
+  {
+    name: 'One flexi zone',
+    body: 'Flexi on the left, assisted temperature on the big round zone.',
+    label: 'A flexi pair on the left, two round zones on the right and a large assisted-temperature zone in the middle',
+    shapes: [
+      { k: 'join', x: 14, y: 12 }, { k: 'half', x: 18, y: 16 }, { k: 'half', x: 18, y: 70 },
+      { k: 'zone', x: 164, y: 16, d: 36 }, { k: 'zone', x: 98, y: 40, d: 68, act: true }, { k: 'zone', x: 164, y: 82, d: 44 },
+    ],
+  },
+  {
+    name: 'Two flexi zones',
+    body: 'A flexi pair on each side, one assisted zone in the middle.',
+    label: 'Flexi pairs on both sides with an assisted-temperature zone between them',
+    shapes: [
+      { k: 'join', x: 14, y: 12 }, { k: 'half', x: 18, y: 16 }, { k: 'half', x: 18, y: 70 },
+      { k: 'join', x: 138, y: 12 }, { k: 'half', x: 142, y: 16 }, { k: 'half', x: 142, y: 70 },
+      { k: 'zone', x: 86, y: 44, d: 44, act: true },
+    ],
+  },
+  {
+    name: 'Flexi with assisted temperature',
+    body: 'Here the flexi zone itself can hold a temperature.',
+    label: 'A flexi pair that supports assisted temperature, with three round zones on the right',
+    shapes: [
+      { k: 'join', x: 14, y: 12 }, { k: 'half', x: 18, y: 16, act: true }, { k: 'half', x: 18, y: 70, act: true },
+      { k: 'zone', x: 142, y: 16, d: 52 }, { k: 'zone', x: 122, y: 82, d: 36 }, { k: 'zone', x: 174, y: 88, d: 32 },
+    ],
+  },
+];
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<div class:list={['layouts', className]} data-stagger>
+  {layouts.map((l) => (
+    <figure class="layout">
+      <div class="hob" role="img" aria-label={l.label}>
+        {l.shapes.map((s) => {
+          if (s.k === 'join') return <span class="join" style={`left:${s.x}px;top:${s.y}px`}></span>;
+          if (s.k === 'half') return <span class:list={['half', { act: s.act }]} style={`left:${s.x}px;top:${s.y}px`}></span>;
+          return <span class:list={['zone', { act: s.act }]} style={`left:${s.x}px;top:${s.y}px;width:${s.d}px;height:${s.d}px`}></span>;
+        })}
+        <span class="word" aria-hidden="true">COOKTOP</span>
+      </div>
+      <figcaption>
+        <span class="name">{l.name}</span>
+        <span class="body">{l.body}</span>
+      </figcaption>
+    </figure>
+  ))}
+</div>
+
+<style>
+  .layouts { display: flex; gap: 28px; height: 254px; }
+  .layout { flex: 0 0 216px; margin: 0; display: flex; flex-direction: column; }
+  .hob { position: relative; width: 216px; height: 150px; border-radius: 12px; background: #17171a; overflow: clip; }
+  .hob > span { position: absolute; box-sizing: border-box; }
+  .join { width: 64px; height: 118px; border: 1.5px dashed #fff; border-radius: 13px; }
+  .half { width: 56px; height: 56px; border: 1.5px solid #fff; border-radius: 9px; }
+  .half.act { border: 2px solid #c8102e; }
+  .zone { border: 1.5px solid #fff; border-radius: 50%; }
+  .zone.act { border: 2px solid #c8102e; }
+  .word { left: 92px; top: 136px; font-family: var(--font-mono); font-size: 6.5px; line-height: 9px; letter-spacing: 0.65px; color: #8c8c94; }
+  figcaption { display: flex; flex-direction: column; gap: 3px; margin-top: 14px; }
+  .name { font-size: 13px; line-height: 17px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .body { font-size: 12px; line-height: 17px; color: var(--muted); }
+
+  @media (max-width: 759px) {
+    .layouts { flex-direction: column; height: auto; gap: 28px; padding-bottom: 32px; }
+    .layout { flex: none; flex-direction: row; gap: 16px; align-items: center; }
+    .hob { flex: 0 0 auto; transform-origin: left center; }
+    figcaption { margin-top: 0; min-width: 0; }
+    .name { white-space: normal; font-size: 14px; line-height: 19px; }
+    .body { font-size: 13px; line-height: 18px; }
+  }
+  @media (max-width: 479px) {
+    .layout { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+</style>

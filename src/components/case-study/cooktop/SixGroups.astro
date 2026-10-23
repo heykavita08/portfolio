@@ -1,0 +1,76 @@
+---
+// Figma "Diagram: Six groups" (370:7152). Desktop uses the Figma coordinates;
+// phones get the core on top and the six groups as a list.
+type Align = 'center' | 'left' | 'right';
+const groups: { name: string; gives: string; needs: string; dot: [number, number]; x: number; y: number; align: Align }[] = [
+  { name: 'Food science', gives: 'Gives the cooking', needs: 'Needs which field, which screen', dot: [347, 68], x: 352, y: 4, align: 'center' },
+  { name: 'App engineering', gives: 'Gives what is buildable', needs: 'Needs conditions, not pictures', dot: [468.24, 138], x: 499.24, y: 121.5, align: 'left' },
+  { name: 'Firmware and HMI', gives: 'Gives appliance behaviour', needs: 'Needs app and panel to agree', dot: [468.24, 278], x: 499.24, y: 261.5, align: 'left' },
+  { name: 'NAR product', gives: 'Gives scope and dates', needs: 'Needs one flow set for four brands', dot: [347, 348], x: 352, y: 375, align: 'center' },
+  { name: 'EMEA team', gives: 'Gives their own designer', needs: 'Needs a spec they can re-cut', dot: [225.76, 278], x: 204.76, y: 261.5, align: 'right' },
+  { name: 'Brand and GCD', gives: 'Gives tone and visuals', needs: 'Needs one product in four skins', dot: [225.76, 138], x: 204.76, y: 121.5, align: 'right' },
+];
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<figure class:list={['groups', className]} aria-label="Six groups around me: food science, app engineering, firmware and HMI, NAR product, EMEA team, brand and GCD">
+  <div class="hub" aria-hidden="true">
+    <span class="ring"></span>
+    <span class="core"></span>
+    <span class="me">Me</span>
+    <span class="me-sub">Flows, structure<br />and the words</span>
+  </div>
+  <ul class="list" data-stagger>
+    {groups.map((g) => (
+      <li class={`g g-${g.align}`} style={`--dx:${g.dot[0]}px;--dy:${g.dot[1]}px;--x:${g.x}px;--y:${g.y}px`}>
+        <span class="dot" aria-hidden="true"></span>
+        <span class="g-text">
+          <span class="g-name">{g.name}</span>
+          <span class="g-line">{g.gives}</span>
+          <span class="g-line">{g.needs}</span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</figure>
+
+<style>
+  .groups { position: relative; width: 704px; max-width: 100%; height: 422px; margin-inline: 0; margin-bottom: 0; overflow: clip; }
+  .hub { position: absolute; inset: 0; }
+  .ring, .core { position: absolute; border-radius: 50%; }
+  .ring { left: 234px; top: 95px; width: 236px; height: 236px; background: rgba(199, 16, 46, 0.11); filter: blur(10px); }
+  .core { left: 278px; top: 139px; width: 148px; height: 148px; background: #e84660; filter: blur(6px); }
+  .me, .me-sub { position: absolute; left: 352px; transform: translateX(-50%); text-align: center; color: #fff; }
+  .me { top: 184px; width: 130px; font-family: var(--font-serif); font-size: 24px; line-height: 28px; }
+  .me-sub { top: 218px; width: 120px; font-size: 9px; line-height: 12px; color: rgba(255, 255, 255, 0.8); }
+
+  .list { position: absolute; inset: 0; }
+  .g { position: absolute; left: 0; top: 0; }
+  .dot { position: absolute; left: var(--dx); top: var(--dy); width: 10px; height: 10px; border-radius: 50%; background: #c8102e; }
+  .g-text { position: absolute; top: var(--y); width: 170px; display: flex; flex-direction: column; }
+  .g-center .g-text { left: calc(var(--x) - 85px); text-align: center; }
+  .g-left .g-text { left: var(--x); }
+  .g-right .g-text { left: calc(var(--x) - 170px); text-align: right; }
+  .g-name { font-size: 11px; line-height: 14px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .g-line { font-size: 9.5px; line-height: 13px; color: var(--muted); }
+
+  @media (max-width: 759px) {
+    .groups { height: auto; overflow: visible; }
+    .hub { position: relative; inset: auto; height: 236px; }
+    .ring { left: 50%; top: 0; margin-left: -118px; }
+    .core { left: 50%; top: 44px; margin-left: -74px; }
+    .me, .me-sub { left: 50%; }
+    .me { top: 89px; }
+    .me-sub { top: 123px; }
+    .list { position: relative; inset: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px 16px; margin-top: 16px; }
+    .g { position: relative; display: flex; gap: 10px; align-items: flex-start; }
+    .dot { position: relative; left: auto; top: 4px; flex: 0 0 10px; }
+    .g-text, .g-center .g-text, .g-left .g-text, .g-right .g-text { position: static; width: auto; text-align: left; }
+    .g-name { font-size: 14px; line-height: 18px; }
+    .g-line { font-size: 12.5px; line-height: 17px; }
+  }
+  @media (max-width: 479px) {
+    .list { grid-template-columns: 1fr; gap: 16px; }
+    .g-line { font-size: 13px; line-height: 18px; }
+  }
+</style>

@@ -1,0 +1,731 @@
+---
+// Cooktop app case study (KitchenAid · i3000 induction, NAR + EMEA).
+// Source: Figma "Cooktop App, Case Study (Rachel structure)" — node 358:756.
+// Spacing mirrors the Figma spacer layers; comments name the frame.
+import { Image } from 'astro:assets';
+import CaseStudy from '../../layouts/CaseStudy.astro';
+import Figure from '../../components/case-study/Figure.astro';
+import SectionHead from '../../components/case-study/SectionHead.astro';
+import VideoSlot from '../../components/case-study/VideoSlot.astro';
+import Shot from '../../components/case-study/cooktop/Shot.astro';
+import EcosystemChain from '../../components/case-study/cooktop/EcosystemChain.astro';
+import SixGroups from '../../components/case-study/cooktop/SixGroups.astro';
+import CooktopLayouts from '../../components/case-study/cooktop/CooktopLayouts.astro';
+import Spine from '../../components/case-study/cooktop/Spine.astro';
+
+import heroPoster from '../../assets/cooktop/posters/hero.png';
+import overviewPoster from '../../assets/cooktop/posters/overview.png';
+import recipesBoard from '../../assets/cooktop/posters/recipes-board.png';
+import statusEditPoster from '../../assets/cooktop/posters/status-edit.png';
+import flowManual from '../../assets/cooktop/posters/flow-manual.png';
+import flowEveryday from '../../assets/cooktop/posters/flow-everyday.png';
+import flowBooster from '../../assets/cooktop/posters/flow-booster.png';
+import problemPanel from '../../assets/cooktop/problem-panel.png';
+import teamWhiteboard from '../../assets/cooktop/team-whiteboard.png';
+import wordsGlossary from '../../assets/cooktop/words-glossary.png';
+import guidedStructure from '../../assets/cooktop/guided-structure.png';
+import logoKitchenAid from '../../assets/cooktop/brands/kitchenaid-logo.png';
+import logoWhirlpool from '../../assets/cooktop/brands/whirlpool-logo.png';
+import logoMaytag from '../../assets/cooktop/brands/maytag-logo.png';
+import logoJennAir from '../../assets/cooktop/brands/jennair-logo.png';
+
+import kGo from '../../assets/cooktop/screens/k-go.png';
+import kSendLocked from '../../assets/cooktop/screens/k-send-locked.png';
+import kStillWaiting from '../../assets/cooktop/screens/k-still-waiting.png';
+import kZ1 from '../../assets/cooktop/screens/k-z1.png';
+import kFlexi from '../../assets/cooktop/screens/k-flexi.png';
+import kRun12 from '../../assets/cooktop/screens/k-run12.png';
+import kTipsprog from '../../assets/cooktop/screens/k-tipsprog.png';
+import kQuick from '../../assets/cooktop/screens/k-quick.png';
+import kTipsrun from '../../assets/cooktop/screens/k-tipsrun.png';
+import liveDashboard from '../../assets/cooktop/screens/live-dashboard.png';
+import liveProgramming from '../../assets/cooktop/screens/live-programming.png';
+import liveRunning from '../../assets/cooktop/screens/live-running.png';
+import busyTechniques from '../../assets/cooktop/screens/busy-techniques.png';
+import busyNoZone from '../../assets/cooktop/screens/busy-no-zone.png';
+import busyAssisted from '../../assets/cooktop/screens/busy-assisted.png';
+import statusPreheating from '../../assets/cooktop/screens/status-preheating.png';
+import statusAddFood from '../../assets/cooktop/screens/status-add-food.png';
+import statusTimer from '../../assets/cooktop/screens/status-timer.png';
+import powerNearLimit from '../../assets/cooktop/screens/power-near-limit.png';
+import powerOnlyFits from '../../assets/cooktop/screens/power-only-fits.png';
+import otaPush from '../../assets/cooktop/screens/ota-push.png';
+import otaUpdating from '../../assets/cooktop/screens/ota-updating.png';
+import otaAfterOpen from '../../assets/cooktop/screens/ota-after-open.png';
+import otaAfterClosed from '../../assets/cooktop/screens/ota-after-closed.png';
+import emeaHome from '../../assets/cooktop/screens/emea-home.png';
+import emeaMenu from '../../assets/cooktop/screens/emea-menu.png';
+import emeaSummary0 from '../../assets/cooktop/screens/emea-summary-0.png';
+import emeaSummary1 from '../../assets/cooktop/screens/emea-summary-1.png';
+import g1 from '../../assets/cooktop/screens/g1.png';
+import g5 from '../../assets/cooktop/screens/g5.png';
+import g6 from '../../assets/cooktop/screens/g6.png';
+import g7 from '../../assets/cooktop/screens/g7.png';
+import nar1688 from '../../assets/cooktop/screens/nar-1688.png';
+import emeaAct from '../../assets/cooktop/screens/emea-act.png';
+import wp560 from '../../assets/cooktop/screens/wp56-0.png';
+import emeaHome4 from '../../assets/cooktop/screens/emea-home4.png';
+import brandJennAir from '../../assets/cooktop/screens/brand-jennair.png';
+import brandWhirlpool from '../../assets/cooktop/screens/brand-whirlpool.png';
+import brandMaytag from '../../assets/cooktop/screens/brand-maytag.png';
+
+// Sidebar follows the page. "Words" reads "Communication" here, like the section label;
+// "Oven or cooktop" is an empty frame in Figma, so it isn't listed.
+const sections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'problem', label: 'The problem' },
+  { id: 'constraint', label: 'The constraint' },
+  { id: 'team', label: 'The team' },
+  { id: 'zone-map', label: 'Zone map' },
+  { id: 'recipes', label: 'Recipes' },
+  { id: 'communication', label: 'Communication' },
+  { id: 'live-state', label: 'Live state' },
+  { id: 'core-flows', label: 'Core flows' },
+  { id: 'status', label: 'Status screen' },
+  { id: 'edge-cases', label: 'Edge cases' },
+  { id: 'updates', label: 'Updates' },
+  { id: 'guided-recipe', label: 'Guided recipe' },
+  { id: 'emea', label: 'EMEA' },
+  { id: 'four-brands', label: 'Four brands' },
+  { id: 'outcome', label: 'Outcome' },
+];
+
+const meta = [
+  { label: 'Role', value: ['Lead designer, NAR', 'Consulting lead, EMEA'] },
+  { label: 'Scope', value: ['Mobile app', '4 brands, NAR + EMEA'] },
+  { label: 'Team', value: ['UX manager', 'Junior designer', 'Food science, Eng'] },
+  { label: 'Outcome', value: ['Shipped 2025', '13 months'], nowrap: true },
+];
+
+const shapes = [
+  { name: '01 Power technique', eg: 'Melt, keep warm', sets: 'Power level', preheat: 'No', ends: 'You do' },
+  { name: '02 Temperature, one step', eg: 'Melt on the ACT zone', sets: 'Temperature', preheat: 'No', ends: 'You do' },
+  { name: '03 Temperature, two step', eg: 'Pan fry, stir fry, pancakes', sets: 'Temperature', preheat: 'Yes, with a notification', ends: 'You do' },
+  { name: '04 Assisted boil', eg: 'Pasta', sets: 'Water to a boil, then holds it', preheat: 'Until boil', ends: 'You do' },
+  { name: '05 Slow cook', eg: 'Stew, pot roast', sets: 'Low, medium, high', preheat: 'No', ends: 'The timer' },
+  { name: '06 Steam', eg: 'Vegetables, fish', sets: 'A heating stage, then steam', preheat: 'Heating stage', ends: 'The timer' },
+  { name: '07 Guided recipe', eg: 'Crepes Suzette', sets: 'The recipe, step by step', preheat: 'Inside the recipe', ends: 'The recipe' },
+];
+
+const messages = [
+  ['User notification', 'While a cycle runs', 'No, dismissable', 'Food science'],
+  ['User instruction', 'During a guided recipe', 'Yes, act at the cooktop', 'Food science'],
+  ['Cooking tips', 'While you program, before you start', 'No', 'Food science'],
+  ['In-step tips', 'While the cycle runs', 'No, dismissable', 'Food science, placed by me'],
+];
+
+const flows = [
+  { poster: flowManual, src: '/videos/cooktop/flow-manual.mp4', title: 'Manual mode', body: 'Pick a zone, pick a power level, done. Flexi zones join two burners into one, and the app shows that.', alt: 'Picking cooking zone 4, setting power level 9 and sending it to the cooktop' },
+  { poster: flowManual, src: '/videos/cooktop/flow-techniques.mp4', title: 'Techniques', body: 'Melt, sear, simmer. The list changes depending on whether that zone can hold a temperature.', alt: 'Choosing Melt from the common techniques and sending it to cooking zone 1' },
+  { poster: flowEveryday, src: '/videos/cooktop/flow-everyday.mp4', title: 'Everyday foods', body: 'Made for first-time users. Pick a food, see exactly what the hob will do, and send it.', alt: 'Picking a food from the Everyday foods grid' },
+  { poster: flowBooster, src: '/videos/cooktop/flow-booster.mp4', title: 'Power booster', body: 'A short burst of full power, and what that does to the zone next to it.', alt: 'Turning on the power booster for cooking zone 4' },
+];
+
+const brandApps = [
+  ['KitchenAid', '10,000+', '3,577', '4.6'],
+  ['Whirlpool', '500,000+', '27,654', '4.7'],
+  ['Maytag', '100,000+', '45,445', '4.7'],
+  ['JennAir', '10,000+', '2,300', '4.2'],
+];
+
+const stats = [
+  { value: '620,000+', note: 'Android installs across the four North American brand apps' },
+  { value: '100,000+', note: 'more installs of 6th Sense Live, where the EMEA build shipped' },
+  { value: '7', note: 'flow shapes that absorbed every recipe food science wrote' },
+];
+
+const metrics = [
+  { name: 'Blocked-choice rate', body: 'How often someone picks a technique and hits “no cooking zone available”. Checks the live state call.', target: 'TARGET DOWN' },
+  { name: 'Send-to-cycle success', body: 'How many sends become a real cycle at the hob. Checks whether the knob step feels like a step, not a failure.', target: 'TARGET UP' },
+  { name: 'Recipes absorbed without new design', body: 'How many new dishes fit an existing shape. Checks the seven shapes.', target: 'TARGET UP' },
+  { name: 'Guided recipe completion', body: 'How many guided recipes reach the last step, and where people drop off. Checks the five step types.', target: 'TARGET UP' },
+];
+
+---
+<CaseStudy
+  title="Connected app for cooktop — Kavita Tewari"
+  description="Designing the KitchenAid app for the i3000 induction cooktop, across four brands in North America and Europe. Case study by Kavita Tewari."
+  sections={sections}
+>
+  <!-- Header (358:783) -->
+  <header class="header">
+    <p class="t-label nowrap">KitchenAid • Connected cooktop app</p>
+    <h1 class="t-display header-title" data-split>Connected app for cooktop</h1>
+    <VideoSlot
+      class="mt-40"
+      poster={heroPoster}
+      alt="The KitchenAid app: the cooktop dashboard, a technique and a running zone"
+      src="/videos/cooktop/hero.mp4"
+      width={704}
+      height={550}
+      rect={{ x: -87, y: 0, w: 878, h: 550 }}
+    />
+  </header>
+
+  <!-- Meta (358:791) -->
+  <dl class="meta" data-stagger>
+    {meta.map((m) => (
+      <div class:list={['meta-col', { nowrap: m.nowrap }]}>
+        <dt>{m.label}</dt>
+        <dd>{m.value.map((v) => <span>{v}</span>)}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <!-- Overview (360:756) -->
+  <section id="overview" class="sec">
+    <SectionHead
+      label="Overview"
+      title="A cooking app for an induction cooktop, across four brands."
+      lead="I led the UX for North America with my manager and a junior designer, and later consulted on the European version. I owned the flows, how recipes were structured, the words in the app, and the spec engineers built from."
+    />
+    <!-- Slot 360:764: "Remote Old Flow 1" sits at (29, -3), 646×425, clipped by the black slot. -->
+    <VideoSlot
+      class="mt-48"
+      poster={overviewPoster}
+      alt="An earlier Whirlpool cooktop flow: cooking zone 5, stir fry at 350°F, ready to send to the cooktop"
+      src="/videos/cooktop/overview.mp4"
+      width={704}
+      height={396}
+      rect={{ x: 29, y: -3, w: 646, h: 425 }}
+    />
+  </section>
+
+  <!-- The problem (360:767) -->
+  <section id="problem" class="sec sec-problem">
+    <p class="t-label">The problem</p>
+    <h3 class="h3 mt-28">Imagine cooking on a hob that only shows four digits.</h3>
+    <p class="t-body mt-8">That was the i3000. Almost no screen. So which zone is on, what is cooking and how long is left all had to live in the app.</p>
+    <Figure class="mt-20" src={problemPanel} alt="The i3000 control panel: four zones, each with a tiny four-digit readout and power buttons" width={704} height={145} zoom />
+    <h3 class="h3 mt-64">Would you trust it from another room?</h3>
+    <p class="t-body mt-8">Cooking from the sofa only works if you believe what the app tells you. It had to be clear about what the hob is doing, what it can do, and what it won’t let you do.</p>
+  </section>
+
+  <!-- The constraint (360:786) -->
+  <section id="constraint" class="sec">
+    <SectionHead
+      label="The constraint"
+      title="If the app can’t start the cooktop, what is it actually for?"
+      lead="For safety, the app can only prepare a cycle. You still walk to the cooktop and turn the knob. So the app could never be a remote control. It had to become the place where all the cooking knowledge lives."
+    />
+    <EcosystemChain class="mt-52" />
+    <h3 class="h3 mt-64">So what if they never turn the knob?</h3>
+    <p class="t-body mt-8">The app waits. Send stays locked until the hob confirms, and tapping it again explains what is still pending. Nothing runs on a guess.</p>
+    <div class="gallery g32 mt-20" data-stagger>
+      <Shot variant="above" size={213} src={kGo} alt="Go to your cooktop: three steps drawn on the real control panel" label="01 · WALK TO THE HOB" text="Three steps, drawn on the real control panel." />
+      <Shot variant="above" size={213} src={kSendLocked} alt="The Send to cooktop button locked while the hob confirms" label="02 · SEND STAYS LOCKED" text="Until the hob says yes, nothing else can be sent." />
+      <Shot variant="above" size={213} src={kStillWaiting} alt="Tapping Send again lists what is still to do at the cooktop" label="03 · STILL WAITING" text="Tapping it again shows what is still to do." />
+    </div>
+  </section>
+
+  <!-- The team (361:756) -->
+  <section id="team" class="sec">
+    <SectionHead
+      label="The team"
+      title="Who had to agree before a single screen existed?"
+      lead="Six groups across two regions, and at the start none of us used the same words. Honestly, most of my week went into getting everyone to want the same thing."
+    />
+    <SixGroups class="mt-28" />
+    <Figure class="mt-24" src={teamWhiteboard} alt="A whiteboard sketch from a video call explaining cooktop logic" width={704} height={374} zoom />
+    <p class="cap mt-12">My manager was in the US, so a lot of the appliance logic was explained to me over video calls, on whiteboards like this one.</p>
+  </section>
+
+  <!-- Zone map (425:756) -->
+  <section id="zone-map" class="sec">
+    <SectionHead
+      label="Zone map"
+      title="One app, many cooktops. How does someone pick the right zone?"
+      lead="The same cooktop launched across four brands, but not with one layout. Zones sat in different places. Some models had one flexi zone, some had two. Only some zones could hold a temperature, and some flexi zones could too. A generic list of “Zone 1, Zone 2” would have meant guessing."
+    />
+    <CooktopLayouts class="mt-28" />
+    <h3 class="h3">So the app draws your exact cooktop.</h3>
+    <p class="t-body mt-8">Everywhere you pick a zone, you see a map of your own hob: the real layout, which zones are flexi, and which ones support assisted temperature. You tap the zone you’re looking at, not a number.</p>
+    <h3 class="h3 mt-48">And when two zones become one?</h3>
+    <p class="t-body mt-8">On cooktops with a flexi zone, one toggle joins two zones. The map redraws them as a single shape, so what you see is exactly what will heat.</p>
+    <div class="gallery g32 mt-20" data-stagger>
+      <Shot variant="above" size={213} src={kZ1} alt="The cooktop map with zone 1 highlighted" label="01 · PICK A ZONE" text="Zone 1 lights up on your own hob." />
+      <Shot variant="above" size={213} src={kFlexi} alt="Flexi zone switched on, zones 1 and 2 drawn as one shape" label="02 · TURN ON FLEXI" text="Zones 1 and 2 merge into one shape." />
+      <Shot variant="above" size={213} src={kRun12} alt="The running screen showing the merged flexi zone" label="03 · COOKING AS ONE" text="The running screen keeps the same shape." />
+    </div>
+    <p class="cap mt-12">A clickable prototype of this flow sits on the canvas, next to the case study.</p>
+  </section>
+
+  <!-- Recipes / Seven shapes (361:801) -->
+  <section id="recipes" class="sec">
+    <p class="t-label">Recipes</p>
+    <h2 class="t-title mt-12 w-676" data-split>How do you design for recipes that keep arriving?</h2>
+    <p class="t-body mt-16">Food science kept sending recipes, and each one looked like its own flow. Pancakes, stir fry, pasta, stew. If we designed them one by one, we would never finish.</p>
+    <table class="tbl tbl-shapes mt-48">
+      <thead>
+        <tr><th>FLOW SHAPE</th><th>SETS</th><th>PREHEAT</th><th>ENDS WHEN</th></tr>
+      </thead>
+      <tbody>
+        {shapes.map((r) => (
+          <tr>
+            <td class="first" data-k="Flow shape"><span class="strong">{r.name}</span><span class="eg">{r.eg}</span></td>
+            <td data-k="Sets">{r.sets}</td>
+            <td data-k="Preheat">{r.preheat}</td>
+            <td data-k="Ends when">{r.ends}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="lead24 mt-48"><span class="soft">I looked at what the cooktop actually does for each dish. Does it set a power level or a temperature? Does it preheat first? Does it stop on its own? Sorted that way, every recipe fell into one of seven shapes</span>. For future I had to create templates in which a new recipe will fit the category without creating a new flow all together.</p>
+    <!-- Slot 406:9200 — the board recording (1.30.06) isn't in the project yet, so its Figma frame shows. -->
+    <Figure class="mt-32" src={recipesBoard} alt="My categorisation board, every recipe sorted into one of seven shapes" width={704} height={396} zoom />
+    <p class="cap mt-12">My categorisation board, with every recipe sorted into a shape.</p>
+  </section>
+
+  <!-- The words (362:756) -->
+  <section id="communication" class="sec">
+    <SectionHead
+      label="Communication"
+      title="How do we get food science and engineering to mean the same thing?"
+      lead="In one meeting, engineering said “cooking tips” and meant the hint you see while food cooks. Food science said “cooking tips” and meant the advice you read before you start. Everyone nodded. Everyone left with a different feature in their head."
+    />
+    <table class="tbl tbl-words mt-48">
+      <thead>
+        <tr><th>NAME</th><th>WHEN IT APPEARS</th><th>BLOCKING</th><th>WHO WRITES IT</th></tr>
+      </thead>
+      <tbody>
+        {messages.map(([name, when, blocking, who]) => (
+          <tr>
+            <td class="first" data-k="Name">{name}</td>
+            <td data-k="When it appears">{when}</td>
+            <td data-k="Blocking">{blocking}</td>
+            <td data-k="Who writes it">{who}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="lead24 mt-48">So I paused the design for a while, talked to both teams.</p>
+    <p class="t-body mt-8">And wrote down every type of message: when it shows up, whether it stops you, and who writes it. Four types, one name each. It felt slow at the time. It was far cheaper than a release built on a misunderstanding.</p>
+    <Figure class="mt-24" src={wordsGlossary} alt="A flow marked up with the four message types, next to the glossary page from the spec" width={704} height={362} zoom />
+    <p class="cap mt-12">A flow marked up with the four message types, next to the glossary page from the spec.</p>
+    <h3 class="h3 mt-48">Each name has one place in the app.</h3>
+    <div class="gallery g32 mt-20" data-stagger>
+      <Shot variant="above" size={213} src={kTipsprog} alt="Cooking tips shown while programming a cycle" label="COOKING TIPS" text="While you program, before you start." />
+      <Shot variant="above" size={213} src={kQuick} alt="Quick tips inside the technique list, by power level" label="QUICK TIPS" text="Inside the technique list, by power level." screen={{ h: 422 }} crop={{ w: 102.69, h: 102.17, l: -0.03, t: 0 }} />
+      <Shot variant="above" size={213} src={kTipsrun} alt="An in-step tip shown while the zone cooks" label="IN-STEP TIPS" text="While it cooks, dismissable." />
+    </div>
+  </section>
+
+  <!-- Live state (362:841) -->
+  <section id="live-state" class="sec">
+    <p class="t-label">Live state</p>
+    <h2 class="t-title mt-12 w-549" data-split>How do you show what the cooktop is doing, at every stage?</h2>
+    <p class="t-body mt-32">The answer was a digital map of your live cooktop, on every screen. You point at the zone you want instead of decoding a number, and you always know what the rest of the hob is doing.</p>
+    <div class="gallery g37 mt-24" data-stagger>
+      <Shot variant="live" size={210} src={liveDashboard} alt="The dashboard: a live map of the cooktop with free and busy zones" label="01 · DASHBOARD" text="Your cooktop, live. See which zones are free first." />
+      <Shot variant="live" size={210} src={liveProgramming} alt="Programming a cycle with the chosen zone highlighted" label="02 · PROGRAMMING" text="The zone you picked stays highlighted while you set the cycle." />
+      <Shot variant="live" size={210} src={liveRunning} alt="Running: what is cooking on which zone and how far along it is" label="03 · RUNNING" text="What’s cooking, on which zone, and how far along it is." />
+    </div>
+    <h3 class="h3 mt-64">And if the zone you need is busy, the map says so first.</h3>
+    <div class="gallery g16 mt-20" data-stagger>
+      <Shot variant="below" size={164} src={busyTechniques} alt="Technique list for the chosen zone" text="Technique list for the chosen zone" />
+      <Shot variant="below" size={164} src={busyNoZone} alt="No cooking zone available" text="No cooking zone available" />
+      <Shot variant="below" size={164} src={busyAssisted} alt="Assisted temperature, explained" text="Assisted temperature, explained" />
+    </div>
+  </section>
+
+  <!-- Core flows (363:756). The empty "Oven or cooktop" frame (362:902) sits above it: 140px. -->
+  <section id="core-flows" class="sec sec-core">
+    <SectionHead
+      label="Core flows"
+      title="How do seven kinds of flow still feel like one app?"
+      lead="I gave them one spine. Every flow runs the same steps: pick a zone, pick what you’re cooking, set it up, read the tips, send it, then walk to the hob and turn the knob. Only a few steps change from shape to shape."
+    />
+    <Spine class="mt-24" />
+    <p class="mini-label mt-64">THE FLOWS</p>
+    <div class="flows mt-20">
+      {flows.map((f) => (
+        <div class="flow">
+          <VideoSlot
+            class="flow-media"
+            poster={f.poster}
+            alt={f.alt}
+            src={f.src}
+            width={424}
+            height={424}
+            rect={{ x: 117, y: 20, w: 190, h: 384, r: 29 }}
+            mobileRatio="4/5"
+          />
+          <div class="flow-text">
+            <h3 class="h3">{f.title}</h3>
+            <p class="t-body">{f.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Status screen (363:828) -->
+  <section id="status" class="sec">
+    <SectionHead
+      label="Status screen"
+      title="Something’s cooking. What does the phone need to tell you?"
+      lead="Is it preheating? Is it time to add the food? How long is left? Is it keeping warm? I mapped every state a zone can be in, and what you can do from each one."
+    />
+    <div class="gallery g16 mt-48 centered" data-stagger>
+      <Shot variant="below" center size={164} src={statusPreheating} alt="Status: preheating" text="Preheating" />
+      <Shot variant="below" center size={164} src={statusAddFood} alt="Status: time to add the food" text="Add food" />
+      <Shot variant="below" center size={164} src={statusTimer} alt="Status: timer running" text="Timer running" />
+    </div>
+    <h3 class="h3 mt-64">Can you change it without stopping it?</h3>
+    <p class="t-body mt-8">Yes. You can adjust the temperature or the time while the zone keeps cooking. The app only offers changes that zone can actually make.</p>
+    <VideoSlot
+      class="mt-20"
+      poster={statusEditPoster}
+      alt="Editing a running cycle: fine-tuning the temperature and changing the time"
+      src="/videos/cooktop/status-edit.mp4"
+      width={704}
+      height={396}
+      rect={{ x: 264, y: 21, w: 175, h: 354 }}
+      mobileRatio="1/1"
+    />
+  </section>
+
+  <!-- Edge cases (363:857) -->
+  <section id="edge-cases" class="sec">
+    <p class="t-label">Edge cases</p>
+    <h2 class="t-title mt-12" data-split>And what happens when things go wrong?</h2>
+    <div class="cards mt-16" data-stagger>
+      <div class="card"><h3 class="card-title">Not enough power</h3><p>Zones share one power budget. Instead of an error later, the app only offers settings that fit, and says why once.</p></div>
+      <div class="card"><h3 class="card-title">The app is closed</h3><p>If a zone stops while the app is open, it just goes back to idle. If the app is closed, you get a notification naming the zone.</p></div>
+      <div class="card"><h3 class="card-title">Someone else touches the hob</h3><p>If a cycle starts at the cooktop while you’re setting up that zone, the app steps aside and shows what’s running.</p></div>
+      <div class="card"><h3 class="card-title">The cooktop doesn’t answer</h3><p>If the hob doesn’t confirm a command, the app says so plainly. It never pretends it worked.</p></div>
+    </div>
+    <h3 class="h3 mt-48">My rule: never show an error the user can’t fix.</h3>
+    <p class="t-body mt-8">If something isn’t possible, don’t offer it. And the one limit that never changes, that you can’t switch the cooktop off from your phone, gets said before you walk away.</p>
+    <div class="gallery g32 mt-24 centered" data-stagger>
+      <Shot variant="power" size={260} src={powerNearLimit} alt="Near the power limit: each zone shows its load, with one notice" label="01 · NEAR THE POWER LIMIT" text="Each zone shows its load, and one notice says some settings may be limited." />
+      <Shot variant="power" size={260} src={powerOnlyFits} alt="Foods that need more power than is left are greyed out" label="02 · ONLY WHAT FITS" text="Foods that need more power than is left are greyed out. Everything else stays ready." />
+    </div>
+  </section>
+
+  <!-- Updates (515:4610) -->
+  <section id="updates" class="sec">
+    <SectionHead
+      label="Updates"
+      title="What happens when the cooktop updates itself overnight?"
+      lead="Updates arrive over the air, and nobody can delay them. For 20 to 25 minutes the cooktop stops responding. So the app had three jobs: warn before, explain during, and confirm after."
+    />
+    <div class="gallery g16 mt-24" data-stagger>
+      <Shot variant="label" size={164} src={otaPush} alt="Before: a notification that an update is coming" label="01 · BEFORE" />
+      <Shot variant="label" size={164} src={otaUpdating} alt="During: the cooktop is updating" label="02 · DURING" screen={{ y: 6.97, h: 322 }} crop={{ w: 100, h: 105.58, l: 0, t: -2.63 }} />
+      <Shot variant="label" size={164} src={otaAfterOpen} alt="After, with the app open: the update is done" label="03 · AFTER, APP OPEN" />
+      <Shot variant="label" size={164} src={otaAfterClosed} alt="After, with the app closed: a notification that the update is done" label="03 · AFTER, APP CLOSED" />
+    </div>
+    <h3 class="h3 mt-48">And if the update fails?</h3>
+    <p class="t-body mt-8">The app says plainly that the cooktop can’t be used right now and gives the support number. It shows the same message every time the app opens, until the cooktop is back.</p>
+  </section>
+
+  <!-- Guided recipe (364:756) -->
+  <section id="guided-recipe" class="sec">
+    <SectionHead
+      label="Guided recipe"
+      title="How do you write a recipe that controls the cooktop?"
+      lead="Guided recipes walk you through a dish while the cooktop follows. Crepes Suzette alone had thirteen steps, and every field in every step belonged to someone different: the words to food science, the zone commands to engineering, the structure to me."
+    />
+    <figure class="structure">
+      <Image class="structure-img" src={guidedStructure} alt="The guided recipe structure: every step of Crepes Suzette with its type and fields" width={435} height={336} densities={[1, 2]} format="webp" quality={90} loading="lazy" data-zoom />
+    </figure>
+    <h3 class="h3 mt-48">So I gave every step a type.</h3>
+    <p class="t-body mt-8">Prepare, select zone, preheat, cook, end. A new dish became filling in a form, not designing a new flow.</p>
+    <div class="gallery g16 mt-20" data-stagger>
+      <Shot variant="label" size={164} src={emeaHome} alt="Home in 6th Sense Live" label="HOME" />
+      <Shot variant="label" size={164} src={emeaMenu} alt="Picking a recipe" label="PICK A RECIPE" />
+      <Shot variant="label" size={164} src={emeaSummary0} alt="The recipe’s ingredients" label="INGREDIENTS" />
+      <Shot variant="label" size={164} src={emeaSummary1} alt="The recipe overview" label="OVERVIEW" />
+    </div>
+    <div class="gallery g16 mt-24" data-stagger>
+      <Shot variant="label" size={164} src={g1} alt="Step 1: prepare" label="STEP 1 · PREPARE" />
+      <Shot variant="label" size={164} src={g5} alt="Step 5: select a zone" label="STEP 5 · ZONE" />
+      <Shot variant="label" size={164} src={g6} alt="Step 6: preheat" label="STEP 6 · PREHEAT" />
+      <Shot variant="label" size={164} src={g7} alt="Step 7: cook" label="STEP 7 · COOK" />
+    </div>
+    <p class="cap mt-12">Guided recipes shipped first in the European app, so these screens are from 6th Sense Live.</p>
+  </section>
+
+  <!-- EMEA (364:825). Figma has no top spacer here; the page's usual 120px is added. -->
+  <section id="emea" class="sec">
+    <SectionHead
+      label="EMEA"
+      title="How do you hand a spec to a team you’ll never sit with?"
+      lead="North America shipped first, with me leading. By the time Europe started, the business had moved to a different company, with its own lead designer. They built from my flows. I was there to explain the why."
+    />
+    <div class="region mt-48">
+      <p class="mini-label">ROLE FOR EMEA</p>
+      <p class="region-title">Consulting lead, from the Whirlpool side</p>
+    </div>
+    <h3 class="h3 mt-64">What changed in EMEA</h3>
+    <p class="t-body mt-8">The structure held. The units, recipes and words moved.</p>
+    <p class="item-title mt-32">01  Units and words</p>
+    <p class="body14 mt-4">Celsius, metric, and the way European cooks actually talk. Not a single flow had to change.</p>
+    <div class="gallery g32 mt-16" data-stagger>
+      <Shot variant="label" size={200} src={nar1688} alt="North America: temperatures in °F" label="NAR · °F" screen={{ x: 5.75, y: 6.75, w: 186, h: 399, r: 26 }} crop={{ w: 100, h: 105.69, l: -0.16, t: -0.91 }} />
+      <Shot variant="label" size={200} src={emeaAct} alt="Europe: temperatures in °C" label="EMEA · °C" />
+    </div>
+    <p class="item-title mt-84">02  A different app</p>
+    <p class="body14 mt-4">The European version lives inside 6th Sense Live. The hob is drawn as a simple grid of zones, and my flows sit inside it.</p>
+    <div class="gallery g32 mt-16" data-stagger>
+      <Shot variant="label" size={200} src={wp560} alt="North America: the hob drawn as it really looks" label="NAR · THE DRAWN HOB" />
+      <Shot variant="label" size={200} src={emeaHome4} alt="Europe: the hob as a grid of zones" label="EMEA · A GRID OF ZONES" />
+    </div>
+    <p class="closing mt-32">As a consultant, more than deciding I had to start explaining. Every rule has to make sense to someone who wasn’t in the room.</p>
+  </section>
+
+  <!-- Four brands (364:888) -->
+  <section id="four-brands" class="sec">
+    <SectionHead
+      label="Four brands"
+      title="How do you ship one set of flows across four brands?"
+      lead="We led with KitchenAid. The same flows shipped inside the Whirlpool, Maytag and JennAir apps. Each brand got its own skin, and the structure underneath stayed the same."
+    />
+    <div class="logos mt-48" data-stagger>
+      <Image class="logo" style="left:11px;top:27.16px;width:132px;height:44px" src={logoWhirlpool} alt="Whirlpool" width={132} height={44} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+      <Image class="logo" style="left:203px;top:21px;width:97.5px;height:55px" src={logoMaytag} alt="Maytag" width={98} height={55} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+      <Image class="logo" style="left:383px;top:18.82px;width:107px;height:60.359px" src={logoKitchenAid} alt="KitchenAid" width={107} height={60} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+      <Image class="logo" style="left:580px;top:22px;width:85.944px;height:53.261px" src={logoJennAir} alt="JennAir" width={86} height={53} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+    </div>
+    <div class="gallery g32 mt-24" data-stagger>
+      <Shot variant="label" size={213} src={brandJennAir} alt="The same screen in the JennAir app" label="JENNAIR" crop={{ w: 100, h: 122.46, l: -0.07, t: 0.08 }} />
+      <Shot variant="label" size={213} src={brandWhirlpool} alt="The same screen in the Whirlpool app" label="WHIRLPOOL" crop={{ w: 100, h: 128.21, l: 0.24, t: -0.08 }} />
+      <Shot variant="label" size={213} src={brandMaytag} alt="The same screen in the Maytag app" label="MAYTAG" island="#252424" />
+    </div>
+  </section>
+
+  <!-- Outcome (364:912) -->
+  <section id="outcome" class="sec">
+    <SectionHead
+      label="Outcome"
+      title="So, did it work?"
+      lead="It shipped inside four brand apps in North America, and inside 6th Sense Live in Europe. Here’s what I can honestly point to."
+    />
+    <div class="stats mt-52" data-stagger>
+      {stats.map((s) => (
+        <div class="stat">
+          <p class="stat-value">{s.value}</p>
+          <p class="stat-note">{s.note}</p>
+        </div>
+      ))}
+    </div>
+    <table class="tbl tbl-apps mt-32">
+      <thead>
+        <tr><th>BRAND APP</th><th>ANDROID INSTALLS</th><th>IOS RATINGS</th><th>RATING</th></tr>
+      </thead>
+      <tbody>
+        {brandApps.map(([brand, installs, ratings, rating]) => (
+          <tr>
+            <td class="first" data-k="Brand app"><span class="strong">{brand}</span></td>
+            <td data-k="Android installs">{installs}</td>
+            <td data-k="iOS ratings">{ratings}</td>
+            <td data-k="Rating">{rating}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="cap mt-12">Google Play installs and App Store rating counts, read September 2026. These are whole-app figures: the cooktop is one surface inside each app, and its own usage is not public.</p>
+    <h3 class="h3 mt-48">What I can’t claim</h3>
+    <p class="t-body mt-8">Task times, adoption, or a cook telling me dinner got easier. The work landed as a spec and a set of flows. The honest measure is that two teams built from it, one of them without me in the room.</p>
+    <h3 class="h3 mt-48">What I’d measure next time</h3>
+    <p class="t-body mt-8">Nothing here was tracked. These are the four numbers I’d push for, each one tied to a call I made above.</p>
+    <ul class="metrics mt-20" data-stagger>
+      {metrics.map((m) => (
+        <li class="metric">
+          <div class="metric-text">
+            <p class="metric-name">{m.name}</p>
+            <p class="body14">{m.body}</p>
+          </div>
+          <p class="target">{m.target}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+</CaseStudy>
+
+<style>
+  .sec {
+    --pt: 120px;
+    padding-top: var(--pt);
+    scroll-margin-top: calc(56px - var(--pt));
+  }
+  .sec-problem { padding-bottom: 20px; }
+  .sec-core { --pt: 140px; padding-bottom: 24px; }
+
+  .nowrap { white-space: nowrap; }
+  .header-title { margin-top: 8px; max-width: 515px; }
+  .w-676 { max-width: 676px; }
+  .w-549 { max-width: 549px; }
+  /* Browser Geist sets this paragraph ~3px tighter than Figma; narrow it so lines break where Figma breaks them. */
+  #constraint :global(.head-lead) { max-width: 699px; }
+
+  /* Type used only here */
+  .h3 { font-family: var(--font-serif); font-weight: 400; font-size: 21px; line-height: 28px; color: var(--ink); }
+  .lead24 { font-family: var(--font-serif); font-size: 24px; line-height: 32px; letter-spacing: -0.48px; color: var(--ink); }
+  .lead24 .soft { color: #6d757d; }
+  .cap { font-size: 13px; line-height: 20px; color: var(--muted); }
+  .body14 { font-size: 14px; line-height: 21px; color: var(--muted); }
+  .mini-label { font-family: var(--font-mono); font-size: 11px; line-height: 14px; letter-spacing: 0.44px; color: var(--muted); }
+
+  /* Meta: four columns, values wrap like Figma (except Outcome) */
+  .meta { display: flex; gap: 24px; margin: 0; padding-top: 32px; color: var(--muted); }
+  .meta-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .meta-col.nowrap dd { white-space: nowrap; }
+  .meta dt { font-family: var(--font-mono); font-size: 15px; line-height: 23px; text-transform: uppercase; }
+  .meta dd { margin: 0; display: flex; flex-direction: column; font-size: 15px; line-height: 23px; }
+
+  /* Phone galleries */
+  .gallery { display: flex; align-items: flex-start; }
+  .g16 { gap: 16px; }
+  .g32 { gap: 32px; }
+  .g37 { gap: 37px; }
+  .gallery.centered { align-self: center; justify-content: center; }
+
+  /* Tables */
+  .tbl { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+  .tbl th, .tbl td { padding: 0 16px 0 0; text-align: left; vertical-align: top; }
+  .tbl th:last-child, .tbl td:last-child { padding-right: 0; }
+  .tbl th {
+    padding-bottom: 12px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 10.5px;
+    line-height: 14px;
+    letter-spacing: 0.42px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .tbl th, .tbl td { border-bottom: 1px solid #e3e5e9; }
+  .tbl td { padding-top: 12px; padding-bottom: 12px; font-size: 14px; line-height: 20px; color: var(--ink); }
+  .tbl .strong { display: block; font-weight: 500; }
+  .tbl .eg { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--muted); }
+  .tbl-shapes th:nth-child(1) { width: 244px; } .tbl-shapes th:nth-child(2) { width: 188px; } .tbl-shapes th:nth-child(3) { width: 152px; } .tbl-shapes th:nth-child(4) { width: 120px; }
+  .tbl-words th:nth-child(1) { width: 192px; } .tbl-words th:nth-child(2) { width: 216px; } .tbl-words th:nth-child(3) { width: 172px; } .tbl-words th:nth-child(4) { width: 124px; }
+  .tbl-apps th:nth-child(1) { width: 260px; } .tbl-apps th:nth-child(2) { width: 166px; } .tbl-apps th:nth-child(3) { width: 166px; } .tbl-apps th:nth-child(4) { width: 112px; }
+
+  /* Edge cases */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { display: flex; flex-direction: column; gap: 6px; padding: 20px 22px 22px; border-radius: 12px; background: #fff; transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out); }
+  .card-title { font-family: var(--font-serif); font-weight: 400; font-size: 19px; line-height: 26px; color: var(--ink); }
+  .card p { font-size: 14px; line-height: 21px; color: var(--muted); }
+  @media (hover: hover) {
+    .card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(26, 36, 51, 0.06); }
+  }
+
+  /* Core flows */
+  .flows { display: flex; flex-direction: column; gap: 24px; }
+  .flow { display: flex; gap: 40px; align-items: center; }
+  .flow :global(.flow-media) { flex: 0 0 424px; }
+  .flow-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+  /* Guided recipe structure slot (521:5176) */
+  .structure {
+    position: relative;
+    width: 704px;
+    max-width: 100%;
+    aspect-ratio: 704 / 373;
+    overflow: clip;
+    background: linear-gradient(to bottom, #fafcfd 8.445%, rgba(200, 16, 46, 0.48));
+  }
+  /* Image box 435×336 at (135, 18). On phones the lightbox wraps the image, so position whichever is the child. */
+  .structure > :global(*) {
+    position: absolute;
+    left: 19.1761%;
+    top: 4.8257%;
+    width: 61.7898%;
+    height: 90.0804%;
+  }
+  .structure :global(img) { object-fit: cover; }
+  .structure :global(.zoom-wrap img) { width: 100%; height: 100%; }
+
+  /* EMEA */
+  .region { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px 24px; border-radius: 12px; background: #eff1f3; }
+  .region-title { font-family: var(--font-serif); font-size: 19px; line-height: 26px; color: var(--ink); }
+  .item-title { font-size: 15px; line-height: 20px; font-weight: 500; color: var(--ink); white-space: pre-wrap; }
+  .closing { font-family: var(--font-serif); font-size: 21px; line-height: 29px; color: var(--ink); }
+
+  /* Four brands */
+  .logos { position: relative; height: 100px; border: 1px solid #e3e5e9; border-radius: 12px; background: #fff; overflow: clip; }
+  .logos :global(.logo) { position: absolute; max-width: none; object-fit: cover; }
+
+  /* Outcome */
+  .stats { display: flex; gap: 24px; }
+  .stat { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .stat-value { font-family: var(--font-serif); font-size: 40px; line-height: 44px; color: var(--ink); white-space: nowrap; }
+  .stat-note { font-size: 13px; line-height: 20px; color: var(--muted); }
+  .metric { display: flex; gap: 16px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #e3e5e9; }
+  .metric-text { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .metric-name { font-size: 15px; line-height: 20px; font-weight: 500; color: var(--ink); }
+  .target { font-family: var(--font-mono); font-size: 10.5px; line-height: 14px; letter-spacing: 0.42px; color: #c8102e; white-space: nowrap; }
+
+
+  /* ---------- Smaller screens: same design, re-flowed ---------- */
+  @media (max-width: 759px) {
+    :global(.t-display) { font-size: 34px; line-height: 38px; letter-spacing: -0.68px; }
+    :global(.t-title) { font-size: 27px; line-height: 33px; letter-spacing: -0.54px; }
+    .sec { --pt: 88px; }
+    .sec-core { --pt: 88px; }
+    .header .nowrap { white-space: normal; }
+    .lead24 { font-size: 21px; line-height: 29px; letter-spacing: -0.42px; }
+    :global(.mt-84) { margin-top: 56px; }
+
+    .meta { flex-wrap: wrap; row-gap: 24px; }
+    .meta-col { flex: 1 1 calc(50% - 12px); }
+    .meta-col.nowrap dd { white-space: normal; }
+
+    /* Galleries become swipeable rows that bleed to the screen edge. */
+    .gallery {
+      --gut: 24px;
+      margin-inline: calc(-1 * var(--gut));
+      padding: 4px var(--gut) 28px;
+      margin-bottom: -24px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gut);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .gallery::-webkit-scrollbar { display: none; }
+    .gallery > :global(*) { scroll-snap-align: start; }
+    .gallery.centered { justify-content: flex-start; align-self: stretch; }
+    .g37 { gap: 24px; }
+    .g32 { gap: 24px; }
+
+    .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: auto; }
+    .tbl thead { display: none; }
+    .tbl tbody tr { padding: 14px 0; border-bottom: 1px solid #e3e5e9; }
+    .tbl tbody tr:first-child { border-top: 1px solid #e3e5e9; }
+    .tbl td { display: flex; gap: 12px; padding: 2px 0; border-bottom: 0; }
+    .tbl td::before {
+      content: attr(data-k);
+      flex: 0 0 112px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      line-height: 20px;
+      letter-spacing: 0.42px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .tbl td.first { display: block; padding-bottom: 6px; }
+    .tbl td.first::before { content: none; }
+    .tbl-words td.first { font-weight: 500; }
+
+    .cards { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; align-items: stretch; gap: 20px; }
+    .flow :global(.flow-media) { flex-basis: auto; width: 100%; }
+    .flow-text { order: -1; }
+    .flows { gap: 48px; }
+
+    .logos { height: auto; display: grid; grid-template-columns: 1fr 1fr; align-items: center; justify-items: center; gap: 20px 12px; padding: 20px 16px; }
+    .logos :global(.logo) { position: static; }
+
+    .stats { flex-direction: column; gap: 20px; }
+    .metric { flex-direction: column; gap: 8px; }
+    .metric .target { order: -1; }
+  }
+  @media (max-width: 600px) {
+    .gallery { --gut: 16px; }
+  }
+</style>

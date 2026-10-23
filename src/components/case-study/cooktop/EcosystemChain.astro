@@ -1,0 +1,87 @@
+---
+// Figma "Diagram: Ecosystem chain" (360:794). Desktop uses the Figma coordinates;
+// phones get a vertical chain.
+const nodes = [
+  { cx: 58, name: 'Hestia', cap: 'Food science writes the thermal recipe' },
+  { cx: 175.6, name: 'Recipe content', cap: 'Clusters and instructions, per region' },
+  { cx: 293.2, name: 'The app', cap: 'Where a cycle is read and programmed', core: true },
+  { cx: 410.8, name: 'Cloud', cap: 'Carries the cycle and the live state' },
+  { cx: 528.4, name: 'Cooktop HMI', cap: 'The only place a cycle can start' },
+  { cx: 646, name: 'Zones and pan', cap: 'Live state flows back to the app' },
+];
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<figure class:list={['chain', className]} aria-label="How a cooking cycle travels: Hestia, recipe content, the app, the cloud, the cooktop HMI, then the zones and pan">
+  <span class="line" aria-hidden="true"></span>
+  <ol class="nodes" data-stagger>
+    {nodes.map((n, i) => (
+      <li class:list={['node', { core: n.core }]} style={`--cx:${n.cx}px`}>
+        <span class="dot" aria-hidden="true"><span class="num">{String(i + 1).padStart(2, '0')}</span></span>
+        <span class="text">
+          <span class="name">{n.name}</span>
+          <span class="cap">{n.cap}</span>
+        </span>
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .chain {
+    position: relative;
+    width: 704px;
+    max-width: 100%;
+    height: 169px;
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+  .line { position: absolute; left: 58px; top: 48px; width: 588px; height: 1px; background: #ccd1d9; }
+  .nodes { position: absolute; inset: 0; }
+  .node { position: absolute; left: calc(var(--cx) - 54px); top: 20px; width: 108px; }
+  .dot {
+    position: absolute;
+    left: 26px;
+    top: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #eff1f3;
+  }
+  .num {
+    position: absolute;
+    left: 22px;
+    top: 21.5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 13px;
+    color: var(--ink);
+  }
+  /* The app: a soft red core, 62px, blurred like the Figma layer */
+  .core .dot { left: 22.8px; top: -2px; width: 62px; height: 62px; background: none; }
+  .core .dot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #e84660;
+    filter: blur(6px);
+  }
+  .core .num { left: 25.2px; top: 23.5px; font-weight: 500; color: #fff; }
+  .text { position: absolute; left: 0; top: 72px; width: 108px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .name { font-size: 13px; line-height: 17px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .cap { width: 104px; margin-top: 5px; font-size: 11.5px; line-height: 17px; color: var(--muted); }
+
+  @media (max-width: 759px) {
+    .chain { height: auto; }
+    .line { left: 27.5px; top: 28px; bottom: 28px; width: 1px; height: auto; }
+    .nodes { position: relative; inset: auto; display: flex; flex-direction: column; gap: 18px; }
+    .node { position: relative; left: auto; top: auto; width: auto; display: flex; align-items: center; gap: 16px; min-height: 56px; }
+    .dot { position: relative; left: auto; top: auto; flex: 0 0 56px; }
+    .core .dot { left: auto; top: auto; flex-basis: 56px; width: 56px; height: 56px; }
+    .core .num { left: 23px; top: 21.5px; }
+    .text { position: static; width: auto; align-items: flex-start; text-align: left; }
+    .name { font-size: 15px; line-height: 20px; }
+    .cap { width: auto; margin-top: 2px; font-size: 14px; line-height: 20px; }
+  }
+</style>

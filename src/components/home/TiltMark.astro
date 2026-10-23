@@ -1,0 +1,286 @@
+---
+// Figma "Card / Front" (687:18631 / 633:9216): the embossed "Kavita" wordmark as an interactive card.
+// At rest it is exactly the Figma frame.
+//   Desktop: the card tilts and drifts toward the cursor, and a chrome version of the name shows
+//            through a soft spotlight that follows the cursor and fades slowly behind it.
+//   Phones:  the card follows the phone's tilt (iPhone asks once, on the first tap) and the chrome
+//            spotlight moves with it; dragging a finger paints the chrome too.
+// The emboss shadows shift with the tilt so the light feels fixed while the card moves.
+//
+// Chrome layer: Kavita's chrome lettering (kavita-chrome.webp, 2000×679, transparent). Fitted onto the
+// white lettering by maximising overlap with the rendered glyphs: it sits at (44.81, 173.19) and is
+// 677.47 × 232.93 in the 764 × 436.57 card. Its bevel rim is ~1px wider than the white letters all round.
+import { Image } from 'astro:assets';
+import chrome from '../../assets/home/kavita-chrome.webp';
+
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<h1 class:list={['mark', className]} aria-label="Kavita">
+  <span class="mark-tilt" aria-hidden="true">
+    <span class="mark-in"><span class="mk mark-ka">Ka</span><span class="mk mark-vita">vita</span></span>
+    <span class="mark-chrome">
+      <Image class="mark-chrome-img" src={chrome} alt="" width={678} densities={[1, 2]} format="webp" quality={92} loading="eager" />
+    </span>
+  </span>
+</h1>
+
+<style>
+  .mark {
+    position: relative;
+    width: min(764px, 100%);
+    aspect-ratio: 764 / 436.5714;
+    margin: 56px auto 0;
+    container-type: inline-size;
+    font-weight: 400;
+    perspective: 1100px;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* The card itself: same fill as the page, so only the letters read. */
+  .mark-tilt {
+    --rx: 0deg;
+    --ry: 0deg;
+    --tx: 0px;
+    --ty: 0px;
+    --dx: 0;
+    --dy: 0;
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    transform: translate3d(var(--tx), var(--ty), 0) rotateX(var(--rx)) rotateY(var(--ry));
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  /* Type is sized in units of the 764px card. font-size resolves cqw from the parent's container,
+     so it lives on the letters (their parents sit inside the .mark container). */
+  .mark-in {
+    position: absolute;
+    inset: 0;
+    font-family: 'Silver Editorial Wordmark', var(--font-serif);
+    line-height: 0.8;
+    white-space: nowrap;
+  }
+  .mark-in { color: var(--bg); }
+  .mk {
+    --k: calc(100cqw / 764);
+    position: absolute;
+    top: calc(192.0334 * var(--k));
+    font-size: calc(214.134 * var(--k));
+    letter-spacing: calc(2.1413 * var(--k));
+  }
+  .mark-in .mk {
+    /* Figma emboss; --dx/--dy (0 at rest) move the shadow against the tilt. */
+    text-shadow:
+      calc((2.519 + var(--dx)) * var(--k)) calc((3.359 + var(--dy)) * var(--k)) calc(4.199 * var(--k)) rgba(119, 114, 106, 0.45),
+      calc((-1.679 - var(--dx) * 0.4) * var(--k)) calc((-1.679 - var(--dy) * 0.4) * var(--k)) calc(1.679 * var(--k)) rgba(255, 255, 255, 0.9);
+  }
+  .mark-ka { left: calc(72.0471 * var(--k)); }
+  .mark-vita { left: calc(296.8813 * var(--k)); }
+
+  /* Chrome layer, shown through a mask. By default (no JS / reduced motion) a soft glint rests on
+     "Ka" so people can tell there's chrome underneath; the script replaces this with the drifting glint
+     and the cursor spotlight. */
+  .mark-chrome {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    --glint: radial-gradient(circle 19cqw at 22% 66%, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: var(--glint);
+    mask-image: var(--glint);
+  }
+  /* Fitted box, in % of the 764 × 436.57 card. */
+  .mark-chrome :global(.mark-chrome-img) {
+    position: absolute;
+    left: 5.8650%;
+    top: 39.6703%;
+    width: 88.6742%;
+    height: 53.3546%;
+    max-width: none;
+  }
+
+  :global(.motion) .mark-in .mk { animation: mark-in 1.6s var(--ease-out) both; }
+  :global(.motion) .mark-in .mark-vita { animation-delay: 0.12s; }
+  @keyframes mark-in {
+    from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+  }
+
+  @media (max-width: 759px) {
+    .mark { margin-top: 24px; perspective: 700px; }
+  }
+</style>
+
+<script>
+  const mark = document.querySelector<HTMLElement>('.mark');
+  const card = mark?.querySelector<HTMLElement>('.mark-tilt');
+  const chromeLayer = mark?.querySelector<HTMLElement>('.mark-chrome');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (mark && card && chromeLayer && !reduced) {
+    // ---------- Tilt ----------
+    const MAX_TILT = 9; // degrees
+    const MAX_SHIFT = 14; // px
+    const MAX_SHADOW = 2.6; // Figma px of extra shadow offset
+
+    let tx = 0, ty = 0; // target, -1..1 (x right, y down)
+    let x = 0, y = 0; // current (eased)
+    let inView = true;
+
+    const applyTilt = () => {
+      card.style.setProperty('--ry', `${(x * MAX_TILT).toFixed(3)}deg`);
+      card.style.setProperty('--rx', `${(-y * MAX_TILT).toFixed(3)}deg`);
+      card.style.setProperty('--tx', `${(x * MAX_SHIFT).toFixed(2)}px`);
+      card.style.setProperty('--ty', `${(y * MAX_SHIFT).toFixed(2)}px`);
+      card.style.setProperty('--dx', `${(-x * MAX_SHADOW).toFixed(3)}`);
+      card.style.setProperty('--dy', `${(-y * MAX_SHADOW).toFixed(3)}`);
+    };
+
+    // ---------- Chrome spotlight trail ----------
+    // A handful of soft spots: each new pointer position adds one at full strength, and every spot
+    // fades over ~1.4s, so the chrome lingers behind the cursor like the reference.
+    type Spot = { x: number; y: number; a: number };
+    let spots: Spot[] = [];
+    const FADE_MS = 1400;
+    const MAX_SPOTS = 28;
+    const radius = () => mark.clientWidth * 0.19; // ~145px on the 764px card
+
+    const addSpot = (px: number, py: number, strength = 1) => {
+      const r = radius();
+      const last = spots[spots.length - 1];
+      if (last && Math.hypot(last.x - px, last.y - py) < r * 0.22) {
+        last.x = px; last.y = py; last.a = Math.max(last.a, strength);
+      } else {
+        spots.push({ x: px, y: py, a: strength });
+        if (spots.length > MAX_SPOTS) spots.shift();
+      }
+      kick();
+    };
+    // ---------- Resting glint ----------
+    // So the chrome is never fully hidden: a soft spot drifts slowly back and forth across the name.
+    // It fades out while someone is hovering or touching (the cursor spotlight takes over) and fades
+    // back in once their trail has gone.
+    const IDLE_A = 0.72; // strength of the resting glint
+    const SWEEP_MS = 9000; // one left→right→left pass
+    const IDLE_DELAY_MS = 1100; // let the wordmark's entrance finish first
+    let idleA = 0;
+    let idleClock = 0;
+    let engaged = false; // pointer over the card, or a finger on it
+    let quietSince = 0; // when the last trail spot faded
+    const born = performance.now();
+
+    const spotLayer = (sx: number, sy: number, a: number, r: string) => {
+      const k = Math.min(1, a);
+      return `radial-gradient(circle ${r}px at ${sx.toFixed(1)}px ${sy.toFixed(1)}px, rgba(0,0,0,${k.toFixed(3)}) 0%, rgba(0,0,0,${(k * 0.55).toFixed(3)}) 45%, rgba(0,0,0,0) 100%)`;
+    };
+    const paintMask = () => {
+      const r = radius().toFixed(1);
+      const layers = spots.map(({ x: sx, y: sy, a }) => spotLayer(sx, sy, a, r));
+      if (idleA > 0.005) {
+        const w = mark.clientWidth, h = mark.clientHeight;
+        const ph = (idleClock % SWEEP_MS) / SWEEP_MS;
+        const u = 0.5 - 0.34 * Math.cos(ph * Math.PI * 2); // starts on "K", eases across to "a" and back
+        const v = 0.66 + 0.03 * Math.sin(ph * Math.PI * 4);
+        layers.push(spotLayer(w * u, h * v, idleA, r));
+      }
+      const mask = layers.length ? layers.join(',') : 'linear-gradient(transparent, transparent)';
+      chromeLayer.style.webkitMaskImage = chromeLayer.style.maskImage = mask;
+    };
+
+    // ---------- One loop for both ----------
+    let raf = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min(64, now - last) : 16;
+      last = now;
+      x += (tx - x) * 0.09;
+      y += (ty - y) * 0.09;
+      applyTilt();
+      for (const s of spots) s.a -= dt / FADE_MS;
+      const hadSpots = spots.length > 0;
+      spots = spots.filter((s) => s.a > 0.01);
+      if (hadSpots && !spots.length) quietSince = now;
+      // Resting glint: off while engaged or a trail is showing, back ~0.5s after things go quiet.
+      const idleOn = !engaged && !spots.length && now - born > IDLE_DELAY_MS && now - quietSince > 500;
+      idleA += ((idleOn ? IDLE_A : 0) - idleA) * Math.min(1, dt / (idleOn ? 900 : 250));
+      if (idleA > 0.005) idleClock += dt;
+      paintMask();
+      if (inView) raf = requestAnimationFrame(tick);
+      else { raf = 0; last = 0; }
+    };
+    function kick() { if (!raf && inView) raf = requestAnimationFrame(tick); }
+    kick(); // the resting glint runs whenever the card is on screen
+
+    const aim = (nx: number, ny: number) => {
+      tx = Math.max(-1, Math.min(1, nx));
+      ty = Math.max(-1, Math.min(1, ny));
+      kick();
+    };
+    const local = (cx: number, cy: number) => {
+      const r = mark.getBoundingClientRect();
+      return { lx: cx - r.left, ly: cy - r.top, w: r.width, h: r.height };
+    };
+    const fromPoint = (cx: number, cy: number) => {
+      const { lx, ly, w, h } = local(cx, cy);
+      aim((lx / w - 0.5) * 2, (ly / h - 0.5) * 2);
+      addSpot(lx, ly);
+    };
+
+    // Mouse / pen: follow the pointer over the card, settle back when it leaves (the chrome fades out).
+    mark.addEventListener('pointermove', (e) => { if (e.pointerType !== 'touch') { engaged = true; fromPoint(e.clientX, e.clientY); } });
+    mark.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') { engaged = false; aim(0, 0); } });
+
+    // Finger: drag across the card to tilt it and paint the chrome.
+    mark.addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) fromPoint(t.clientX, t.clientY); }, { passive: true });
+    mark.addEventListener('touchmove', (e) => { const t = e.touches[0]; if (t) fromPoint(t.clientX, t.clientY); }, { passive: true });
+    mark.addEventListener('touchend', () => { if (!sensing) aim(0, 0); }, { passive: true });
+    mark.addEventListener('touchstart', () => { engaged = true; }, { passive: true });
+    window.addEventListener('touchend', () => { engaged = false; }, { passive: true });
+
+    // ---------- Phone motion ----------
+    // Tilt relative to how the phone was held when sensing started; the chrome spotlight sits where
+    // the phone is "pointing" on the card.
+    let sensing = false;
+    let base: { b: number; g: number } | null = null;
+    const RANGE = 18; // degrees of phone tilt for a full card turn
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (e.beta == null || e.gamma == null) return;
+      sensing = true;
+      const landscape = (screen.orientation?.angle ?? 0) % 180 !== 0;
+      const b = landscape ? e.gamma : e.beta;
+      const g = landscape ? -e.beta : e.gamma;
+      if (!base) base = { b, g };
+      // Let the resting angle follow slowly, so holding the phone differently re-centres the card.
+      base.b += (b - base.b) * 0.01;
+      base.g += (g - base.g) * 0.01;
+      const nx = Math.max(-1, Math.min(1, (g - base.g) / RANGE));
+      const ny = Math.max(-1, Math.min(1, (b - base.b) / RANGE));
+      aim(nx, ny);
+      if (Math.abs(nx) + Math.abs(ny) > 0.08) {
+        const w = mark.clientWidth, h = mark.clientHeight;
+        // The name sits in the lower half of the card, so the spot travels over the letters.
+        addSpot(w * (0.5 + nx * 0.42), h * (0.66 + ny * 0.22), Math.min(1, (Math.abs(nx) + Math.abs(ny)) * 1.2));
+      }
+    };
+    const startSensors = () => window.addEventListener('deviceorientation', onOrient);
+
+    type IOSOrientation = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<'granted' | 'denied'> };
+    const DOE = window.DeviceOrientationEvent as IOSOrientation | undefined;
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    if (DOE && coarse) {
+      // Android delivers motion straight away.
+      startSensors();
+      // iOS only does after the visitor allows it, and can only ask after a tap: ask on the first one.
+      if (typeof DOE.requestPermission === 'function') {
+        const ask = () => { if (!sensing) DOE.requestPermission!().catch(() => {}); };
+        document.addEventListener('touchend', ask, { once: true, passive: true });
+      }
+    }
+
+    // Stop work while the card is off screen.
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (!inView && raf) { cancelAnimationFrame(raf); raf = 0; last = 0; }
+      else if (inView) kick();
+    }).observe(mark);
+  }
+</script>

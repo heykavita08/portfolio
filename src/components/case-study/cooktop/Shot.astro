@@ -1,0 +1,51 @@
+---
+// One phone in a Cooktop gallery, with its caption laid out the way each Figma gallery does it.
+//   above → red label + ink line above the phone (01 · Walk to the hob …)
+//   label → red label only above the phone (OTA, guided recipe, EMEA, brands)
+//   live  → red label + ink line, 14px spacer (Live map at every stage)
+//   below → small grey caption under the phone (Phone slots)
+//   power → phone first, then red label + ink line (Power limit screens)
+import type { ComponentProps } from 'astro/types';
+import Phone from './Phone.astro';
+
+type PhoneProps = ComponentProps<typeof Phone>;
+interface Props extends PhoneProps {
+  variant: 'above' | 'label' | 'live' | 'below' | 'power';
+  label?: string;
+  text?: string;
+  center?: boolean;
+}
+const { variant, label, text, center, ...phone } = Astro.props;
+const w = `${phone.size}px`;
+---
+<div class:list={['shot', `shot-${variant}`, { center }]} style={`--sw:${w}`}>
+  {variant !== 'power' && variant !== 'below' && label && <p class="lbl">{label}</p>}
+  {(variant === 'above' || variant === 'live') && text && <p class="txt">{text}</p>}
+  <Phone {...phone} class="ph" />
+  {variant === 'power' && label && <p class="lbl">{label}</p>}
+  {variant === 'power' && text && <p class="txt">{text}</p>}
+  {variant === 'below' && text && <p class="sub">{text}</p>}
+</div>
+
+<style>
+  .shot { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: none; width: var(--sw); }
+  .shot.center { align-items: center; }
+  .lbl {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 14px;
+    letter-spacing: 0.42px;
+    color: #c8102e;
+    white-space: nowrap;
+  }
+  .txt { width: 100%; font-size: 13px; line-height: 19px; color: var(--ink); }
+  .shot-above .txt { min-height: 38px; }
+  .sub { font-size: 12px; line-height: 17px; color: var(--muted); }
+  .shot-below { gap: 10px; }
+  .shot-below.center .sub { white-space: nowrap; }
+  /* Spacers from the Figma galleries (on top of the 6px gap). */
+  .shot-above :global(.ph), .shot-label :global(.ph) { margin-top: 14px; }
+  .shot-live :global(.ph) { margin-top: 20px; }
+  .shot-power .lbl { margin-top: 20px; }
+</style>

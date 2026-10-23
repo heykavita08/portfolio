@@ -1,0 +1,140 @@
+---
+// A work card from the home page grid (Figma "Link" frames under "Detailed case studies" / "More work...").
+// Media is laid out in Figma px: the poster is the exported thumbnail, a video (optional) sits at its
+// exact rectangle, and overlays (slot "overlay") are positioned with the same units.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import VideoSlot from '../case-study/VideoSlot.astro';
+
+interface Rect { x: number; y: number; w: number; h: number; r?: number }
+interface Props {
+  title: string;
+  meta: string;
+  alt: string;
+  /** Media size in Figma px (including the 1px border when the card has one). */
+  w: number;
+  h: number;
+  poster?: ImageMetadata;
+  video?: string;
+  rect?: Rect;
+  /** Inner box the video is clipped to (bordered cards keep their border visible). */
+  clip?: Rect;
+  rotate?: number;
+  /** Custom media (no poster): background colour and optional 1px border. */
+  bg?: string;
+  border?: boolean;
+  href?: string;
+  /** Opens a Figma deck in a dialog instead of leaving the site. */
+  deck?: string;
+  /** Caption still to be written: shows a visible placeholder. */
+  todo?: boolean;
+}
+
+const { title, meta, alt, w, h, poster, video, rect, clip, rotate, bg, border, href, deck, todo } = Astro.props;
+const Tag = href || deck ? 'a' : 'div';
+// A deck link still works without JS (new tab); with JS it opens in the on-page dialog.
+const tagProps = href
+  ? { href }
+  : deck
+    ? { href: deck, target: '_blank', rel: 'noopener', 'data-deck': deck, 'aria-haspopup': 'dialog' }
+    : {};
+const hasOverlay = Astro.slots.has('overlay');
+---
+<Tag class:list={['card', { 'is-link': href || deck, 'is-todo': todo }]} style={`--W:${w};--mw:${w}px;--mratio:${w}/${h}`} {...tagProps}>
+  {video && poster && rect ? (
+    <VideoSlot class="card-media" poster={poster} alt={alt} src={video} width={w} height={h} rect={rect} clip={clip} rotate={rotate}>
+      {hasOverlay && <slot name="overlay" />}
+    </VideoSlot>
+  ) : poster ? (
+    <div class="card-media cbox">
+      <Image class="cposter" src={poster} alt={alt} width={w} height={h} densities={[1, 2]} format="webp" quality={88} loading="lazy" />
+      {hasOverlay && <slot name="overlay" />}
+    </div>
+  ) : (
+    <div class:list={['card-media', 'cbox', { bordered: border }]} style={bg ? `--fill:${bg}` : undefined} role="img" aria-label={alt}>
+      <slot name="overlay" />
+    </div>
+  )}
+  <span class="cap">
+    <span class="title">{title}</span>
+    <span class="meta">{meta}</span>
+  </span>
+</Tag>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    container: card / inline-size;
+  }
+  .card.is-link { cursor: pointer; }
+  .card :global(.card-media) { width: min(var(--mw), 100%); }
+  .cbox {
+    position: relative;
+    aspect-ratio: var(--mratio);
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .cbox { background: var(--fill, transparent); }
+  /* Figma "Border": a 1px tint over the page, the fill sits inside it (positions stay in outer px). */
+  .cbox.bordered {
+    background: linear-gradient(var(--fill), var(--fill)) center / calc(100% - 2px) calc(100% - 2px) no-repeat, var(--bg);
+    box-shadow: inset 0 0 0 1px rgba(50, 64, 79, 0.1);
+  }
+  .cposter { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  .cap {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 4px;
+  }
+  .title {
+    font-family: var(--font-inter);
+    font-size: 17px;
+    line-height: 26px;
+    letter-spacing: -0.34px;
+    color: var(--ink);
+    white-space: nowrap;
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 2px) / 0 1px no-repeat;
+    transition: background-size 0.45s var(--ease-out, ease);
+  }
+  .meta {
+    margin-top: -0.75px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 22.5px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.58);
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+  .card.is-link:hover .title { background-size: 100% 1px; }
+  .card.is-link:hover .meta { color: var(--ink); }
+  .card.is-todo .title, .card.is-todo .meta { color: #c8102e; }
+
+  /* Overlay layers, in Figma px of the media box. */
+  .card :global(.ov) {
+    position: absolute;
+    left: calc(var(--x) * 100cqw / var(--W));
+    top: calc(var(--y) * 100cqw / var(--W));
+    width: calc(var(--w) * 100cqw / var(--W));
+    height: calc(var(--h) * 100cqw / var(--W));
+    pointer-events: none;
+  }
+
+  /* Narrow cards (tablet two-up, phones): title over meta. */
+  @container card (max-width: 540px) {
+    .cap { flex-direction: column; gap: 0; }
+    .title { white-space: normal; font-size: 16px; line-height: 23px; }
+    .meta { margin-top: 2px; font-size: 13px; line-height: 20px; }
+  }
+</style>

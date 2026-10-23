@@ -1,0 +1,84 @@
+---
+// Figma "Diagram: Shared spine" (363:764): nine steps on a snaking track.
+// Desktop uses the Figma coordinates; phones get the steps as a vertical track.
+import track from '../../../assets/cooktop/spine-track.svg?raw';
+
+const steps = [
+  { x: 52, y: 73, label: 'Entry' },
+  { x: 267, y: 73, label: 'Zone' },
+  { x: 479, y: 73, label: 'Technique or food' },
+  { x: 471, y: 193, label: 'Parameters', varies: true },
+  { x: 274, y: 193, label: 'Cooking tips' },
+  { x: 52, y: 193, label: 'Send to cooktop', hot: true },
+  { x: 52, y: 313, label: 'Confirm at the hob' },
+  { x: 294, y: 313, label: 'Running', varies: true },
+  { x: 518, y: 313, label: 'End', varies: true },
+];
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<figure class:list={['spine', className]} aria-label="The shared spine: entry, zone, technique or food, parameters, cooking tips, send to cooktop, confirm at the hob, running, end. Parameters, running and end vary by flow.">
+  <div class="track" aria-hidden="true" set:html={track} />
+  <ol class="steps" data-stagger>
+    {steps.map((s, i) => (
+      <li class:list={['step', { hot: s.hot }]} style={`left:${s.x}px;top:${s.y}px`}>
+        <span class="n">{String(i + 1).padStart(2, '0')}</span>
+        <span class="t">{s.label}</span>
+        {s.varies && <span class="v">VARIES</span>}
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .spine {
+    position: relative;
+    width: 704px;
+    max-width: 100%;
+    height: 459px;
+    margin-inline: 0;
+    margin-bottom: 0;
+    border-radius: 16px;
+    background: #f4ebdf;
+    overflow: clip;
+  }
+  /* Track vector: 560×240 box at (72, 96); the stroke overhangs it by 33px. */
+  .track { position: absolute; left: 39px; top: 63px; width: 626px; height: 306px; }
+  .track :global(svg) { display: block; width: 626px; height: 306px; }
+  .steps { position: absolute; inset: 0; }
+  .step {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    padding: 10px 16px 10px 14px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px #0e0e11;
+    white-space: nowrap;
+    color: #0f0f12;
+    font-weight: 500;
+  }
+  .step.hot { background: #e94b65; color: #fff; }
+  .n { font-family: var(--font-mono); font-size: 20px; line-height: 26px; }
+  .t { font-size: 13px; line-height: 17px; }
+  .v { font-family: var(--font-mono); font-weight: 400; font-size: 9px; line-height: 12px; letter-spacing: 0.54px; color: #999ea8; }
+
+  @media (max-width: 759px) {
+    .spine { height: auto; padding: 24px 20px; }
+    .track { display: none; }
+    .steps { position: relative; inset: auto; display: flex; flex-direction: column; gap: 14px; }
+    .steps::before {
+      content: '';
+      position: absolute;
+      left: 31px;
+      top: 23px;
+      bottom: 23px;
+      width: 12px;
+      border-radius: 6px;
+      background: #dccfbd;
+    }
+    .step { position: relative; left: auto !important; top: auto !important; align-self: flex-start; }
+  }
+</style>

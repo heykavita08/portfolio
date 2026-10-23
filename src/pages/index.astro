@@ -1,23 +1,466 @@
 ---
-// TEMPORARY home: the real home page isn't designed yet.
-// Only here so the site has a root and the case study is reachable.
+// Home. Source: Figma "1920w light" (633:8850), Cooktop App file.
+// Layout is the Figma 1920 frame: 60px gutters, a 1800px column split 888 / 24 / 888.
+// Card captions: the Figma file carried template text from another portfolio; these are
+// Kavita's projects, matched to each visual (see TODO captions below).
 import Base from '../layouts/Base.astro';
-import Nav from '../components/Nav.astro';
+import WorkCard from '../components/home/WorkCard.astro';
+import DeckDialog from '../components/home/DeckDialog.astro';
+import TiltMark from '../components/home/TiltMark.astro';
+import { Image } from 'astro:assets';
+
+import mascot from '../assets/home/mascot.png';
+import whirlpoolLogo from '../assets/home/cards/whirlpool-logo.png';
+import pinMask from '../assets/home/cards/pin-mask.png';
+import caseCooktop from '../assets/home/cards/case-cooktop.png';
+import caseVeyra from '../assets/home/cards/case-veyra.png';
+import casePeakpause from '../assets/home/cards/case-peakpause.png';
+import caseJb from '../assets/home/cards/case-jb.png';
+import l1 from '../assets/home/cards/more-l1.png';
+import l2 from '../assets/home/cards/more-l2.png';
+import l3 from '../assets/home/cards/more-l3.png';
+import l4 from '../assets/home/cards/more-l4.png';
+import l5 from '../assets/home/cards/more-l5.png';
+import l6 from '../assets/home/cards/more-l6.png';
+import r2 from '../assets/home/cards/more-r2.png';
+import r3 from '../assets/home/cards/more-r3.png';
+import r4 from '../assets/home/cards/more-r4.png';
+import r6 from '../assets/home/cards/more-r6.png';
+
+// TODO(Kavita): contact destination isn't in Figma — LinkedIn for now.
+const CONTACT_URL = 'https://www.linkedin.com/in/kavita-tewari/';
+const DECK_URL = 'https://www.figma.com/deck/mRsFPUIQRjeqk4KO44klcB';
+
+const timeline = [
+  ['2026', 'VEYRA', 'Pet tracker app + wearable · Design lead (ongoing)'],
+  ['2026', 'Reborn Goods', 'Platform · UX lead'],
+  ['2026', 'JB Air', 'HMI & Website Design · Spec definition'],
+  ['2026', 'Identity Labs', 'Agency website · Design lead'],
+  ['2026', 'HUM US', 'Food brand · Website + Shopify build'],
+  ['2025', 'PeakPause', 'Health records app · Research + core design'],
+  ['2025', 'i3000 NAR', 'Cooktop app · Spec definition'],
+  ['2025', 'i3000 EMEA', 'Cooktop app · Spec definition'],
+  ['2025', 'LPP OPP', 'Microwave · Spec definition'],
+  ['2025', 'Keurig i200', 'Coffee machine · Spec management'],
+  ['2024', 'ORION', 'eVTOL dashboard · Tablet system design'],
+  ['2024', 'Trimkit MHC DOE', 'Microwave · Spec definition'],
+  ['2024', 'QC+ Induction', 'Induction · App & HMI'],
+  ['2024', 'Keurig', 'Coffee machine · Spec management, team of 6'],
+  ['2024', 'Rubicon', 'Washing machine · Spec conversion'],
+  ['2023', 'Yucatan', 'Platform design'],
+  ['2023', 'A330 Q+ Phase 2 Study', 'Oven · Spec definition'],
+  ['2023', 'A330 Q+ Phase 2', 'Oven · Study prototypes'],
+  ['2023', 'Titan 4', 'Microwave · Spec definition'],
+  ['2022-23', 'QC+ Induction Study', 'Induction · Study prototypes'],
+  ['2022', 'Big 6 Prototypes', 'Ovens, all brands · Prototyping'],
+  ['2022', 'Flush / QC+ Phase 1', 'Microwave + oven · Spec definition'],
+  ['2022', 'Scribble T', 'Website · POD'],
+];
+
+const skills = [
+  ['UI/UX Design', 'Craft'],
+  ['AI fluency and workflow automation', 'Process'],
+  ['Functional prototyping', 'Craft'],
+  ['Strategic problem framing and business thinking', 'Strategy'],
+  ['Systems thinking', 'Strategy'],
+  ['No-code development', 'Craft'],
+  ['Human Machine Interface Design', 'Craft'],
+  ['Basic SEO & AEO', 'Growth'],
+];
+
+const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
 ---
-<Base title="Kavita Tewari — Product Designer">
-  <Nav />
-  <main class="wrap" id="work">
-    <p class="t-label">Work</p>
-    <ul class="list">
-      <li><a href="/work/peakpause"><span class="t-sub">PeakPause</span><span class="t-body">A calm home for a family’s health records</span></a></li>
-      <li><a href="/work/jb-air"><span class="t-sub">JB Air</span><span class="t-body">Making clean air something you can see</span></a></li>
-    </ul>
+<Base title="Kavita Tewari — Product Designer" description="Kavita Tewari, product designer: apps, websites, tablets and appliance screens.">
+  <!-- Background+HorizontalBorder (633:9202) -->
+  <header class="nav">
+    <div class="nav-in">
+      <a class="brand" href="/">kavita tewari</a>
+      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><span>contact</span></a></nav>
+    </div>
+  </header>
+
+  <main class="home" id="top">
+    <!-- Card / Front (633:9216): embossed wordmark -->
+    <TiltMark />
+
+    <!-- Intro (633:8860) -->
+    <section class="intro">
+      <p class="intro-lede" data-split>Full stack designer with 5+ years of experience worked across apps, websites, tablets and appliance screens.</p>
+      <ol class="timeline" data-stagger aria-label="Projects">
+        {timeline.map(([year, name, desc]) => (
+          <li class="row">
+            <span class="row-year">{year}</span>
+            <span class="row-name">{name}</span>
+            <span class="row-desc">{desc}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <!-- Detailed case studies (633:9050 + 633:9054) -->
+    <section class="block" id="work" aria-labelledby="h-case">
+      <h2 class="h-sec h-case" id="h-case" data-split>Detailed case studies</h2>
+      <div class="grid grid-case">
+        <div class="col col-l" data-stagger>
+          <WorkCard
+            title="Two markets, one cooktop app" meta="Whirlpool i3000 • Shipped 2025" href="/work/cooktop"
+            alt="Whirlpool logo over the cooktop app" poster={caseCooktop} w={888} h={547}
+            video="/videos/home/cooktop.mp4" rect={{ x: 114.5, y: -178.74, w: 659, h: 978.468 }} rotate={90}
+            clip={{ x: 1, y: 1, w: 886, h: 545 }}
+          >
+            <span slot="overlay" class="ov ov-logo" style="--x:208;--y:193;--w:472.843;--h:161.762">
+              <Image src={whirlpoolLogo} alt="" width={473} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+            </span>
+          </WorkCard>
+          <WorkCard
+            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026"
+            alt="VEYRA app home: Champa is home" poster={caseVeyra} w={886} h={497.5}
+            video="/videos/home/veyra.mp4" rect={{ x: 337, y: 124.32, w: 211, h: 444, r: 41 }}
+          />
+        </div>
+        <div class="col col-r" data-stagger>
+          <WorkCard
+            title="Health records people actually keep" meta="PeakPause • Shipped 2025" href="/work/peakpause"
+            alt="PeakPause app: your timeline and health summary" poster={casePeakpause} w={888} h={499.5}
+            video="/videos/home/peakpause.mp4" rect={{ x: 350.66, y: 54.24, w: 186.682, h: 391.023, r: 35.318 }}
+          />
+          <WorkCard
+            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air"
+            alt="The JB Air purifier in a living room" poster={caseJb} w={888} h={555}
+            video="/videos/home/jb.mp4" rect={{ x: -8, y: -43.6, w: 904, h: 603 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- More work (633:9100 + 633:9104) -->
+    <section class="block" aria-labelledby="h-more">
+      <h2 class="h-sec h-more" id="h-more" data-split>More work...</h2>
+      <div class="grid grid-more">
+        <div class="col col-l" data-stagger>
+          <WorkCard
+            title="Coffee machine spec management" meta="Keurig i200 • 2025"
+            alt="Keurig alta screen in an oval frame over clouds" poster={l1} w={886} h={497.5}
+            video="/videos/home/l1.mp4" rect={{ x: 310, y: 26.005, w: 266, h: 444, r: 136 }}
+          />
+          <WorkCard
+            title="eVTOL dashboard, tablet system design" meta="ORION • 2024"
+            alt="ORION eVTOL management and details screens on two iPads" poster={l2} w={888} h={555}
+          />
+          <WorkCard
+            {...TODO}
+            alt="A 3D carousel of fashion editorial pages" poster={l3} w={886} h={497.5}
+            video="/videos/home/l3.mp4" rect={{ x: -32, y: 21.73, w: 950.438, h: 453.909 }}
+          />
+          <WorkCard
+            title="eVTOL dashboard, desktop" meta="ORION • 2024"
+            alt="ORION desktop dashboard: Good morning, Jane" poster={l4} w={886} h={553}
+            video="/videos/home/l4.mp4" rect={{ x: -110, y: -54, w: 1105, h: 621 }}
+          />
+          <WorkCard
+            {...TODO}
+            alt="Design Police Dept site with a red portrait" poster={l5} w={888} h={499.5}
+            video="/videos/home/l5.mp4" rect={{ x: -13, y: -47, w: 914.59, h: 594 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
+          />
+          <WorkCard
+            title="Platform design and UX" meta="Reborn Goods • 2026"
+            alt="We find the right people to build your brand: a platform home page" poster={l6} w={888} h={555}
+            video="/videos/home/l6.mp4" rect={{ x: 0, y: -0.27, w: 896, h: 563 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
+          />
+        </div>
+        <div class="col col-r" data-stagger>
+          <WorkCard {...TODO} deck={DECK_URL} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
+            <span slot="overlay" class="ov pin-bg" style="--x:-8.86;--y:-5.53;--w:903.72;--h:564.06"></span>
+            <span slot="overlay" class="ov pin" style={`--x:324;--y:157;--w:239;--h:239;--mask:url(${pinMask.src})`}>
+              <span class="pin-flow"></span>
+            </span>
+          </WorkCard>
+          <WorkCard
+            title="Print-on-demand website" meta="Scribble T • 2022"
+            alt="A shirt product page on a laptop" poster={r2} w={888} h={621.59}
+            video="/videos/home/r2.mp4" rect={{ x: -59, y: 39.23, w: 1007, h: 544 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
+          />
+          <WorkCard
+            {...TODO}
+            alt="A microwave control panel: Enter cup, 00:02" poster={r3} w={888} h={621.59}
+            video="/videos/home/r3.mp4" rect={{ x: 221, y: 59, w: 445, h: 641, r: 48 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
+          />
+          <WorkCard
+            {...TODO}
+            alt="A hero over soft clouds: world's first content science lab" poster={r4} w={888} h={499.5}
+            video="/videos/home/r4.mp4" rect={{ x: -20.64, y: -66.95, w: 913.286, h: 634 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
+          />
+          <WorkCard title="Vetted badge" meta="Reborn Goods • 2026" alt="A bronze Reborn Goods Vetted coin turning" w={888} h={555} bg="#958073" border>
+            <img slot="overlay" class="ov ring" style="--x:251;--y:85.22;--w:385;--h:385" src="/videos/home/r5-ring.webp" alt="" loading="lazy" decoding="async" />
+          </WorkCard>
+          <WorkCard
+            title="Agency website" meta="Identity Labs • 2026"
+            alt="Identity Labs: the science of viral posts" poster={r6} w={888} h={499.5}
+            video="/videos/home/r6.mp4" rect={{ x: -24, y: -27, w: 936, h: 597 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- In the arsenal (633:9193 + 674:18567) -->
+    <section class="block" aria-labelledby="h-arsenal">
+      <h2 class="h-sec h-more" id="h-arsenal" data-split>In the arsenal...</h2>
+      <div class="arsenal">
+        <div class="ars-intro" data-reveal>
+          <Image class="mascot" src={mascot} alt="" width={176} height={176} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+          <p class="ars-text">The tools, habits and instincts I bring to every team — from first framing to shipped screen.</p>
+        </div>
+        <ol class="skills" data-stagger>
+          {skills.map(([name, tag], i) => (
+            <li class="skill">
+              <span class="skill-label">
+                <span class="skill-n">{String(i + 1).padStart(2, '0')}</span>
+                <span class="skill-name">{name}</span>
+              </span>
+              <span class="skill-tag">{tag}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
   </main>
+
+  <DeckDialog />
 </Base>
 
 <style>
-  .wrap { max-width: 704px; margin: 0 auto; padding: 120px 24px; }
-  .list { margin-top: 16px; border-top: 1px solid var(--line); }
-  .list a { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
-  .list a:hover .t-sub { text-decoration: underline; text-underline-offset: 4px; }
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 64px;
+    padding: 0 52px 0 60px;
+    background: var(--bg);
+    border-bottom: 1px solid rgba(50, 64, 79, 0.1);
+  }
+  .nav-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1808px;
+    height: 100%;
+    margin: 0 auto;
+  }
+  .brand {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 22.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .nav-link {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 22.5px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.58);
+    transition: color 0.3s ease;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s var(--ease-out);
+  }
+  .nav-link:hover { color: var(--ink); }
+  .nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  /* ---------- Page column ---------- */
+  .home {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 24px 60px 0;
+  }
+
+
+  /* ---------- Intro ---------- */
+  .intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    align-items: start;
+    height: 982.795px;
+    padding-top: 310.795px;
+  }
+  .intro-lede {
+    max-width: 559px;
+    font-family: var(--font-display);
+    font-size: 46px;
+    line-height: 51px;
+    letter-spacing: -1.84px;
+    color: var(--ink);
+  }
+  .timeline { display: flex; flex-direction: column; gap: 4px; }
+  .row {
+    display: grid;
+    grid-template-columns: 104px 224px auto;
+    column-gap: 8px;
+    height: 24px;
+    font-size: 15px;
+    line-height: 22.5px;
+    white-space: nowrap;
+  }
+  .row-year {
+    margin-top: -0.75px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.58);
+  }
+  .row-name { color: var(--ink); }
+  .row-desc { margin: -0.75px 0 0 -6px; color: rgba(50, 64, 79, 0.58); }
+
+  .block { scroll-margin-top: 40px; }
+
+  /* ---------- Section headings ---------- */
+  .h-sec {
+    max-width: 729px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 54px;
+    line-height: 59px;
+    letter-spacing: -2.16px;
+    color: var(--ink);
+  }
+  /* "Detailed case studies": 23 top, 12.81 + 32 below */
+  .h-case { padding: 23px 0 44.81px; }
+  /* "More work..." / "In the arsenal...": sits 94px into a 177px block, 24 below */
+  .h-more { padding: 94px 0 24px; }
+
+  /* ---------- Card grids ---------- */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-items: start; }
+  .col { display: flex; flex-direction: column; min-width: 0; }
+  .grid-case .col-l { gap: 24px; padding-bottom: 66.59px; }
+  .grid-case .col-r { gap: 32px; }
+  .grid-more .col { gap: 24px; }
+
+  /* Whirlpool logo over the cooktop video: Figma crop of a square image */
+  .ov-logo { overflow: hidden; }
+  .ov-logo :global(img) { position: absolute; left: 0; top: -98.37%; width: 100%; height: 292.31%; max-width: none; }
+
+  /* Map-pin logo: a rainbow conic gradient turning inside the pin shape (Figma: 18s linear) */
+  .pin-bg { background: rgba(235, 235, 235, 0.83); }
+  .pin {
+    overflow: hidden;
+    -webkit-mask: var(--mask) 0 0 / 100% 100% no-repeat;
+    mask: var(--mask) 0 0 / 100% 100% no-repeat;
+  }
+  .pin-flow {
+    position: absolute;
+    left: -50%;
+    top: -60%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 90deg, rgb(40, 196, 121) 0%, rgb(44, 198, 121) 16.667%, rgb(71, 201, 111) 18.75%, rgb(97, 205, 100) 20.833%, rgb(150, 211, 78) 25%, rgb(202, 218, 57) 29.167%, rgb(255, 224, 36) 33.333%, rgb(255, 191, 52) 37.5%, rgb(255, 157, 67) 41.667%, rgb(255, 124, 83) 45.833%, rgb(255, 91, 99) 50%, rgb(228, 98, 136) 54.167%, rgb(200, 106, 173) 58.333%, rgb(173, 114, 209) 62.5%, rgb(145, 121, 246) 66.667%, rgb(112, 132, 251) 75%, rgb(80, 143, 255) 83.333%, rgb(60, 169, 188) 91.667%, rgb(50, 183, 155) 95.833%, rgb(40, 196, 121) 100%);
+    animation: pin-turn 18s linear infinite;
+  }
+  @keyframes pin-turn { to { transform: rotate(1turn); } }
+  .ring { object-fit: contain; }
+
+  /* ---------- Arsenal ---------- */
+  .arsenal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    align-items: start;
+    padding: 40px 0 160px;
+  }
+  .ars-intro { display: flex; flex-direction: column; gap: 20px; }
+  .ars-intro :global(.mascot) { width: 176px; height: 176px; }
+  .ars-text {
+    max-width: 420px;
+    font-size: 17px;
+    line-height: 25.5px;
+    letter-spacing: -0.34px;
+    color: rgba(50, 64, 79, 0.8);
+  }
+  .skill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 0;
+    border-bottom: 1px solid rgba(50, 64, 79, 0.14);
+  }
+  .skill:first-child { border-top: 1px solid rgba(50, 64, 79, 0.14); }
+  .skill-label { display: flex; align-items: baseline; min-width: 0; height: 27px; }
+  .skill-n {
+    flex: 0 0 64px;
+    height: 23px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 22.5px;
+    color: rgba(50, 64, 79, 0.45);
+  }
+  .skill-name {
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 26.4px;
+    letter-spacing: -0.96px;
+    color: var(--ink);
+    white-space: nowrap;
+    transition: transform 0.45s var(--ease-out);
+  }
+  .skill:hover .skill-name { transform: translateX(6px); }
+  .skill-tag {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.5);
+    white-space: nowrap;
+  }
+
+  /* ---------- Motion ---------- */
+  :global(.motion) .nav { animation: nav-drop 0.9s var(--ease-out) both; }
+  @keyframes nav-drop { from { opacity: 0; transform: translateY(-8px); } }
+
+  /* ---------- Smaller screens ---------- */
+  @media (max-width: 1499px) {
+    .row { grid-template-columns: 64px minmax(120px, 0.9fr) 1.6fr; height: auto; min-height: 24px; white-space: normal; }
+    .row-desc { margin-left: 0; }
+  }
+  @media (max-width: 1199px) {
+    .intro { grid-template-columns: 1fr; height: auto; padding: 120px 0 96px; row-gap: 56px; }
+  }
+  @media (max-width: 959px) {
+    .nav { padding: 0 24px; }
+    .home { padding: 16px 24px 0; }
+    .h-sec { font-size: 44px; line-height: 48px; letter-spacing: -1.6px; }
+    .h-case { padding: 16px 0 32px; }
+    .h-more { padding: 72px 0 24px; }
+    .arsenal { grid-template-columns: 1fr; row-gap: 40px; padding-bottom: 120px; }
+  }
+  @media (max-width: 759px) {
+    .grid { grid-template-columns: 1fr; }
+    .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
+    .grid .col + .col { margin-top: 40px; }
+    .intro { padding: 56px 0 64px; row-gap: 40px; }
+    .intro-lede { font-size: 34px; line-height: 38px; letter-spacing: -1.2px; }
+    .h-sec { font-size: 36px; line-height: 40px; letter-spacing: -1.2px; }
+    .skill-name { white-space: normal; font-size: 21px; line-height: 25px; }
+    .skill-label { height: auto; }
+    .skill { align-items: flex-start; }
+    .skill-tag { padding-top: 3px; }
+  }
+  @media (max-width: 600px) {
+    .nav { padding: 0 16px; }
+    .home { padding: 8px 16px 0; }
+    .row { grid-template-columns: 56px 1fr; row-gap: 0; padding-bottom: 6px; }
+    .row-desc { grid-column: 2; font-size: 14px; line-height: 20px; }
+    .skill-n { flex-basis: 44px; }
+  }
 </style>

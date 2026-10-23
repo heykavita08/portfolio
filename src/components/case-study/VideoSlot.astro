@@ -24,10 +24,12 @@ interface Props {
   caption?: string;
   /** Phones only: crop the slot to this ratio, e.g. "1/1" (the video stays aligned). */
   mobileRatio?: string;
+  /** Rotate the video about its centre (Figma layers rotated 90°); rect is the unrotated box. */
+  rotate?: number;
   class?: string;
 }
 
-const { poster, alt, src, width, height, rect, clip, mode = 'loop', caption, mobileRatio, class: className } = Astro.props;
+const { poster, alt, src, width, height, rect, clip, mode = 'loop', caption, mobileRatio, rotate = 0, class: className } = Astro.props;
 
 // Bump when re-encoding videos so browsers and CDNs fetch the new files.
 const VIDEO_VERSION = 3;
@@ -59,6 +61,7 @@ const vars = [
   `--vw:${rect.w}`,
   `--vh:${rect.h}`,
   `--vr:${rect.r ?? 0}`,
+  rotate ? `--vrot:${rotate}deg` : '',
 ].filter(Boolean).join(';');
 ---
 <figure class:list={['vslot', className]} style={vars} data-mratio={mobileRatio ? '' : undefined}>
@@ -86,6 +89,7 @@ const vars = [
       tabindex={mode === 'loop' ? '-1' : undefined}
     ></video>
     </div>
+    <slot />
     {mode === 'click' && (
       <button type="button" class="vplay" aria-label={`Play: ${alt}`}>
         <svg width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M17 8.27a2 2 0 0 1 0 3.46L3 19.8A2 2 0 0 1 0 18.07V1.93A2 2 0 0 1 3 .2l14 8.07Z" fill="currentColor"/></svg>
@@ -125,6 +129,7 @@ const vars = [
     width: calc(var(--cw) * var(--k));
     height: calc(var(--ch) * var(--k));
     overflow: hidden;
+    overflow: clip; /* not a scroll container, so nothing can shift the video inside it */
     border-radius: calc(var(--cr0) * var(--k)) calc(var(--cr1) * var(--k)) calc(var(--cr2) * var(--k)) calc(var(--cr3) * var(--k));
     pointer-events: none;
   }
@@ -138,6 +143,7 @@ const vars = [
     max-width: none;
     border-radius: calc(var(--vr) * var(--k));
     object-fit: cover;
+    transform: rotate(var(--vrot, 0deg));
     opacity: 0;
     transition: opacity 0.4s ease;
   }

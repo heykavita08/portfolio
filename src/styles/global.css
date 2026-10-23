@@ -2,6 +2,23 @@
 @import '@fontsource-variable/geist-mono';
 @import '@fontsource-variable/newsreader/opsz.css';
 @import '@fontsource-variable/newsreader/opsz-italic.css';
+@import '@fontsource-variable/inter';
+
+/* Home page faces (self-hosted). Licensed fonts: Benton Modern (Monotype), The Silver Editorial (wordmark subset). */
+@font-face {
+  font-family: 'Benton Modern';
+  src: url('/fonts/benton-modern-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Silver Editorial Wordmark';
+  src: url('/fonts/silver-editorial-italic-wordmark.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
 
 /* Tokens — values taken from the Figma file (Dev Mode). */
 :root {
@@ -18,6 +35,8 @@
   --font-serif: 'Newsreader Variable', Georgia, serif;
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --font-display: 'Benton Modern', 'Newsreader Variable', Georgia, serif;
+  --font-inter: 'Inter Variable', system-ui, sans-serif;
 
   --page: 1280px;
   --sidebar: 216px;
@@ -70,6 +89,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Spacing utilities — the spacer heights used in the Figma file. Global so they also reach component roots. */
+.mt-4 { margin-top: 4px; }
 .mt-8 { margin-top: 8px; }
 .mt-12 { margin-top: 12px; }
 .mt-13 { margin-top: 13px; }
@@ -77,9 +97,12 @@ a { color: inherit; text-decoration: none; }
 .mt-20 { margin-top: 20px; }
 .mt-24 { margin-top: 24px; }
 .mt-28 { margin-top: 28px; }
+.mt-32 { margin-top: 32px; }
 .mt-40 { margin-top: 40px; }
 .mt-48 { margin-top: 48px; }
+.mt-52 { margin-top: 52px; }
 .mt-56 { margin-top: 56px; }
 .mt-64 { margin-top: 64px; }
+.mt-84 { margin-top: 84px; }
 .mt-96 { margin-top: 96px; }
 .mt-136 { margin-top: 136px; }

@@ -1,0 +1,86 @@
+---
+// Figma "Phone mockup" component, at the five sizes the Cooktop file uses.
+// Positions are Figma's Dev Mode values (measured from inside the stroke).
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+type Size = 164 | 200 | 210 | 213 | 260;
+interface Box { x: number; y: number; w: number; h: number; r: number }
+/** Image placement inside the screen, in % (Figma "crop"); omit for object-fit: cover. */
+interface Crop { w: number; h: number; l: number; t: number }
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  size: Size;
+  /** Override the screen rectangle (a few Figma screens are 1px off the default). */
+  screen?: Partial<Box>;
+  crop?: Crop;
+  island?: string;
+  class?: string;
+}
+
+const SPECS: Record<Size, {
+  h: number; border: number; r: number; screen: Box;
+  island: { x: number; y: number; w: number; h: number };
+  shadow: string; btnW: number; btnL: number; sideL: number;
+  action: [number, number]; volUp: [number, number]; volDown: [number, number]; side: [number, number];
+}> = {
+  213: { h: 441, border: 1.331, r: 34, screen: { x: 7.67, y: 7.67, w: 195, h: 423, r: 25 }, island: { x: 74.17, y: 13.67, w: 62, h: 18 }, shadow: '0 13px 15px', btnW: 2.556, btnL: -3.39, sideL: 211.17, action: [82.46, 19.845], volUp: [113.33, 33.075], volDown: [153.02, 33.075], side: [126.56, 52.92] },
+  210: { h: 437, border: 1.313, r: 34, screen: { x: 6.69, y: 6.69, w: 194, h: 421, r: 26 }, island: { x: 73.19, y: 12.69, w: 61, h: 18 }, shadow: '0 13px 14.5px', btnW: 2.52, btnL: -3.33, sideL: 208.19, action: [81.72, 19.665], volUp: [112.31, 32.775], volDown: [151.64, 32.775], side: [125.42, 52.44] },
+  164: { h: 339, border: 1.025, r: 26, screen: { x: 5.97, y: 5.97, w: 150, h: 325, r: 19 }, island: { x: 56.98, y: 10.97, w: 48, h: 14 }, shadow: '0 10px 11.5px', btnW: 2, btnL: -2.52, sideL: 162.47, action: [63.39, 15.255], volUp: [87.11, 25.425], volDown: [117.63, 25.425], side: [97.28, 40.68] },
+  260: { h: 540, border: 1.625, r: 42, screen: { x: 8.38, y: 8.38, w: 240, h: 520, r: 32 }, island: { x: 90.88, y: 15.38, w: 75, h: 22 }, shadow: '0 16px 18px', btnW: 3.12, btnL: -4.24, sideL: 257.88, action: [100.97, 24.3], volUp: [138.77, 40.5], volDown: [187.38, 40.5], side: [154.98, 64.8] },
+  200: { h: 415, border: 1.25, r: 32, screen: { x: 6.75, y: 6.75, w: 184, h: 399, r: 24 }, island: { x: 69.75, y: 12.75, w: 58, h: 17 }, shadow: '0 12px 14px', btnW: 2.4, btnL: -3.15, sideL: 198.25, action: [77.6, 18.675], volUp: [106.65, 31.125], volDown: [144, 31.125], side: [119.1, 49.8] },
+};
+
+const { src, alt, size, screen: screenOverride, crop, island = '#000', class: className } = Astro.props;
+const s = SPECS[size];
+const sc = { ...s.screen, ...screenOverride };
+const px = (n: number) => `${n}px`;
+const b = s.border; // children are placed from the outer edge; the stroke is drawn on top as an inset shadow
+const btn = ([top, h]: [number, number], left: number) =>
+  `left:${px(left + b)};top:${px(top + b)};width:${px(s.btnW)};height:${px(h)}`;
+const imgStyle = crop
+  ? `position:absolute;width:${crop.w}%;height:${crop.h}%;left:${crop.l}%;top:${crop.t}%;max-width:none`
+  : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
+---
+<div
+  class:list={['phone', className]}
+  style={`width:${px(size)};height:${px(s.h)};border-radius:${px(s.r)};box-shadow:inset 0 0 0 ${px(b)} #9ea3ab, ${s.shadow} rgba(26,36,51,0.14)`}
+>
+  <span class="btn" style={btn(s.action, s.btnL)}></span>
+  <span class="btn" style={btn(s.volUp, s.btnL)}></span>
+  <span class="btn" style={btn(s.volDown, s.btnL)}></span>
+  <span class="btn" style={btn(s.side, s.sideL)}></span>
+  <div class="screen" style={`left:${px(sc.x + b)};top:${px(sc.y + b)};width:${px(sc.w)};height:${px(sc.h)};border-radius:${px(sc.r)}`}>
+    <Image
+      src={src}
+      alt={alt}
+      width={sc.w}
+      densities={[1, 2, 3]}
+      format="webp"
+      quality={88}
+      loading="lazy"
+      style={imgStyle}
+    />
+  </div>
+  <span
+    class="island"
+    style={`left:${px(s.island.x + b)};top:${px(s.island.y + b)};width:${px(s.island.w)};height:${px(s.island.h)};border-radius:${px(s.island.h / 2)};background:${island}`}
+  ></span>
+</div>
+
+<style>
+  .phone {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    background: #121214;
+    transition: transform 0.6s var(--ease-out, ease), box-shadow 0.6s var(--ease-out, ease);
+  }
+  .btn { position: absolute; background: #6b7078; border-radius: 1px; }
+  .screen { position: absolute; overflow: hidden; }
+  .island { position: absolute; }
+  @media (hover: hover) {
+    .phone:hover { transform: translateY(-4px); }
+  }
+</style>
