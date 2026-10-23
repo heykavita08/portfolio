@@ -2,7 +2,7 @@
 // Home. Source: Figma "1920w light" (633:8850), Cooktop App file.
 // Layout is the Figma 1920 frame: 60px gutters, a 1800px column split 888 / 24 / 888.
 // Card captions: the Figma file carried template text from another portfolio; these are
-// Kavita's projects, matched to each visual (see TODO captions below).
+// Kavita's projects, matched to each visual; titles from her Figma update, meta lines from her timeline.
 import Base from '../layouts/Base.astro';
 import WorkCard from '../components/home/WorkCard.astro';
 import DeckDialog from '../components/home/DeckDialog.astro';
@@ -27,7 +27,7 @@ import r3 from '../assets/home/cards/more-r3.png';
 import r4 from '../assets/home/cards/more-r4.png';
 import r6 from '../assets/home/cards/more-r6.png';
 
-// TODO(Kavita): contact destination isn't in Figma — LinkedIn for now.
+// TODO(Kavita): "About & contact" has no page yet — LinkedIn for now.
 const CONTACT_URL = 'https://www.linkedin.com/in/kavita-tewari/';
 const DECK_URL = 'https://www.figma.com/deck/mRsFPUIQRjeqk4KO44klcB';
 
@@ -68,14 +68,13 @@ const skills = [
   ['Basic SEO & AEO', 'Growth'],
 ];
 
-const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
 ---
 <Base title="Kavita Tewari — Product Designer" description="Kavita Tewari, product designer: apps, websites, tablets and appliance screens.">
   <!-- Background+HorizontalBorder (633:9202) -->
   <header class="nav">
     <div class="nav-in">
       <a class="brand" href="/">kavita tewari</a>
-      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><span>contact</span></a></nav>
+      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><span class="spark" aria-hidden="true">✦ </span><span class="nav-text">About &amp; contact</span></a></nav>
     </div>
   </header>
 
@@ -85,7 +84,20 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
 
     <!-- Intro (633:8860) -->
     <section class="intro">
-      <p class="intro-lede" data-split>Full stack designer with 5+ years of experience worked across apps, websites, tablets and appliance screens.</p>
+      <div class="intro-left">
+        <p class="intro-lede" data-split>Not every design problem comes in a Figma-sized box.</p>
+        <p class="intro-lede intro-exp" data-split>Experience: 5+ years</p>
+        <dl class="intro-details" data-stagger>
+          <div>
+            <dt>Areas I work across</dt>
+            <dd>Product strategy · UX research · Interaction design · UI design · Prototyping · No-code development</dd>
+          </div>
+          <div>
+            <dt>Products &amp; environments</dt>
+            <dd>Mobile · Web · Tablet · Connected appliances · Early-stage startups · Enterprise</dd>
+          </div>
+        </dl>
+      </div>
       <ol class="timeline" data-stagger aria-label="Projects">
         {timeline.map(([year, name, desc]) => (
           <li class="row">
@@ -103,7 +115,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
       <div class="grid grid-case">
         <div class="col col-l" data-stagger>
           <WorkCard
-            title="Two markets, one cooktop app" meta="Whirlpool i3000 • Shipped 2025" href="/work/cooktop"
+            title="Two markets, one cooktop app" meta="Whirlpool i3000 • Shipped 2025" href="/work/cooktop" fade
             alt="Whirlpool logo over the cooktop app" poster={caseCooktop} w={888} h={547}
             video="/videos/home/cooktop.mp4" rect={{ x: 114.5, y: -178.74, w: 659, h: 978.468 }} rotate={90}
             clip={{ x: 1, y: 1, w: 886, h: 545 }}
@@ -113,19 +125,19 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
             </span>
           </WorkCard>
           <WorkCard
-            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026"
+            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026" fade
             alt="VEYRA app home: Champa is home" poster={caseVeyra} w={886} h={497.5}
             video="/videos/home/veyra.mp4" rect={{ x: 337, y: 124.32, w: 211, h: 444, r: 41 }}
           />
         </div>
         <div class="col col-r" data-stagger>
           <WorkCard
-            title="Health records people actually keep" meta="PeakPause • Shipped 2025" href="/work/peakpause"
+            title="Health records people actually keep" meta="PeakPause • Shipped 2025" href="/work/peakpause" fade
             alt="PeakPause app: your timeline and health summary" poster={casePeakpause} w={888} h={499.5}
             video="/videos/home/peakpause.mp4" rect={{ x: 350.66, y: 54.24, w: 186.682, h: 391.023, r: 35.318 }}
           />
           <WorkCard
-            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air"
+            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air" fade
             alt="The JB Air purifier in a living room" poster={caseJb} w={888} h={555}
             video="/videos/home/jb.mp4" rect={{ x: -8, y: -43.6, w: 904, h: 603 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
           />
@@ -148,7 +160,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
             alt="ORION eVTOL management and details screens on two iPads" poster={l2} w={888} h={555}
           />
           <WorkCard
-            {...TODO}
+            title="Yucatan web explorations" meta="Yucatan • Concept 2023"
             alt="A 3D carousel of fashion editorial pages" poster={l3} w={886} h={497.5}
             video="/videos/home/l3.mp4" rect={{ x: -32, y: 21.73, w: 950.438, h: 453.909 }}
           />
@@ -158,7 +170,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
             video="/videos/home/l4.mp4" rect={{ x: -110, y: -54, w: 1105, h: 621 }}
           />
           <WorkCard
-            {...TODO}
+            title="Portfolio exploration" meta="Personal • Concept 2026"
             alt="Design Police Dept site with a red portrait" poster={l5} w={888} h={499.5}
             video="/videos/home/l5.mp4" rect={{ x: -13, y: -47, w: 914.59, h: 594 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
@@ -169,7 +181,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
           />
         </div>
         <div class="col col-r" data-stagger>
-          <WorkCard {...TODO} deck={DECK_URL} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
+          <WorkCard title="Google Maps study" meta="Personal • Study 2026" deck={DECK_URL} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
             <span slot="overlay" class="ov pin-bg" style="--x:-8.86;--y:-5.53;--w:903.72;--h:564.06"></span>
             <span slot="overlay" class="ov pin" style={`--x:324;--y:157;--w:239;--h:239;--mask:url(${pinMask.src})`}>
               <span class="pin-flow"></span>
@@ -181,12 +193,12 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
             video="/videos/home/r2.mp4" rect={{ x: -59, y: 39.23, w: 1007, h: 544 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
           />
           <WorkCard
-            {...TODO}
+            title="Titan 4 microwave oven, with the China team" meta="Whirlpool • 2023"
             alt="A microwave control panel: Enter cup, 00:02" poster={r3} w={888} h={621.59}
             video="/videos/home/r3.mp4" rect={{ x: 221, y: 59, w: 445, h: 641, r: 48 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
           />
           <WorkCard
-            {...TODO}
+            title="Identity Labs" meta="Agency website • 2026"
             alt="A hero over soft clouds: world's first content science lab" poster={r4} w={888} h={499.5}
             video="/videos/home/r4.mp4" rect={{ x: -20.64, y: -66.95, w: 913.286, h: 634 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
@@ -194,7 +206,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
             <img slot="overlay" class="ov ring" style="--x:251;--y:85.22;--w:385;--h:385" src="/videos/home/r5-ring.webp" alt="" loading="lazy" decoding="async" />
           </WorkCard>
           <WorkCard
-            title="Agency website" meta="Identity Labs • 2026"
+            title="Identity Labs" meta="Agency website • 2026"
             alt="Identity Labs: the science of viral posts" poster={r6} w={888} h={499.5}
             video="/videos/home/r6.mp4" rect={{ x: -24, y: -27, w: 936, h: 597 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
@@ -237,7 +249,6 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     height: 64px;
     padding: 0 52px 0 60px;
     background: var(--bg);
-    border-bottom: 1px solid rgba(50, 64, 79, 0.1);
   }
   .nav-in {
     display: flex;
@@ -261,10 +272,13 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     font-size: 15px;
     line-height: 22.5px;
     text-transform: uppercase;
-    color: rgba(50, 64, 79, 0.58);
-    transition: color 0.3s ease;
+    color: #1e2b3a;
+    white-space: pre;
   }
-  .nav-link::after {
+  .spark { display: inline-block; color: #000; transition: transform 0.6s var(--ease-out); }
+  .nav-link:hover .spark { transform: rotate(90deg) scale(1.15); }
+  .nav-text { position: relative; }
+  .nav-text::after {
     content: '';
     position: absolute;
     left: 0;
@@ -276,8 +290,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     transform-origin: right;
     transition: transform 0.45s var(--ease-out);
   }
-  .nav-link:hover { color: var(--ink); }
-  .nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
+  .nav-link:hover .nav-text::after { transform: scaleX(1); transform-origin: left; }
 
   /* ---------- Page column ---------- */
   .home {
@@ -296,13 +309,31 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     height: 982.795px;
     padding-top: 310.795px;
   }
+  .intro-left { display: flex; flex-direction: column; gap: 24px; }
   .intro-lede {
     max-width: 559px;
     font-family: var(--font-display);
-    font-size: 46px;
-    line-height: 51px;
-    letter-spacing: -1.84px;
-    color: var(--ink);
+    font-size: 40px;
+    line-height: 44px;
+    letter-spacing: -1.6px;
+    color: #1e2b3a;
+  }
+  .intro-details { display: flex; flex-direction: column; gap: 28px; margin: 0; padding-top: 20px; }
+  .intro-details div { display: flex; flex-direction: column; gap: 8px; }
+  .intro-details dt {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.5);
+  }
+  .intro-details dd {
+    max-width: 640px;
+    margin: 0;
+    font-size: 17px;
+    line-height: 25.5px;
+    letter-spacing: -0.34px;
+    color: rgba(50, 64, 79, 0.8);
   }
   .timeline { display: flex; flex-direction: column; gap: 4px; }
   .row {
@@ -330,15 +361,15 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     max-width: 729px;
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: 54px;
-    line-height: 59px;
-    letter-spacing: -2.16px;
+    font-size: 40px;
+    line-height: 44px;
+    letter-spacing: -1.6px;
     color: var(--ink);
   }
   /* "Detailed case studies": 23 top, 12.81 + 32 below */
   .h-case { padding: 23px 0 44.81px; }
-  /* "More work..." / "In the arsenal...": sits 94px into a 177px block, 24 below */
-  .h-more { padding: 94px 0 24px; }
+  /* "More work..." / "In the arsenal...": sits 109px into a 177px block, 24 below */
+  .h-more { padding: 109px 0 24px; }
 
   /* ---------- Card grids ---------- */
   .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-items: start; }
@@ -439,7 +470,7 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
   @media (max-width: 959px) {
     .nav { padding: 0 24px; }
     .home { padding: 16px 24px 0; }
-    .h-sec { font-size: 44px; line-height: 48px; letter-spacing: -1.6px; }
+    .h-sec { font-size: 36px; line-height: 40px; letter-spacing: -1.4px; }
     .h-case { padding: 16px 0 32px; }
     .h-more { padding: 72px 0 24px; }
     .arsenal { grid-template-columns: 1fr; row-gap: 40px; padding-bottom: 120px; }
@@ -449,8 +480,9 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
     .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
     .grid .col + .col { margin-top: 40px; }
     .intro { padding: 56px 0 64px; row-gap: 40px; }
-    .intro-lede { font-size: 34px; line-height: 38px; letter-spacing: -1.2px; }
-    .h-sec { font-size: 36px; line-height: 40px; letter-spacing: -1.2px; }
+    .intro-lede { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
+    .intro-details dd { font-size: 16px; line-height: 24px; }
+    .h-sec { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
     .skill-name { white-space: normal; font-size: 21px; line-height: 25px; }
     .skill-label { height: auto; }
     .skill { align-items: flex-start; }
@@ -459,7 +491,8 @@ const TODO = { title: 'Caption needed', meta: 'Project • Year', todo: true };
   @media (max-width: 600px) {
     .nav { padding: 0 16px; }
     .home { padding: 8px 16px 0; }
-    .row { grid-template-columns: 56px 1fr; row-gap: 0; padding-bottom: 6px; }
+    .row { grid-template-columns: 70px 1fr; row-gap: 0; padding-bottom: 6px; }
+    .row-year { white-space: nowrap; }
     .row-desc { grid-column: 2; font-size: 14px; line-height: 20px; }
     .skill-n { flex-basis: 44px; }
   }
