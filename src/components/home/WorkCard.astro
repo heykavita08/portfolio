@@ -28,14 +28,9 @@ interface Props {
   deck?: string;
   /** Caption still to be written: shows a visible placeholder. */
   todo?: boolean;
-  /** Figma "seamless" edge: a page-coloured bar, blurred 14px, melts the right edge into the page. */
-  fade?: boolean;
 }
 
-const { title, meta, alt, w, h, poster, video, rect, clip, rotate, bg, border, href, deck, todo, fade } = Astro.props;
-// The fade sits inside the image box, so a 1px Figma border (bordered posters / clipped videos) stays visible.
-const inset = border || (clip && clip.x === 1) ? 1 : 0;
-const fadeBox = `--x:${inset};--y:${inset};--w:${w - inset * 2};--h:${h - inset * 2};--iw:${w - inset * 2}`;
+const { title, meta, alt, w, h, poster, video, rect, clip, rotate, bg, border, href, deck, todo } = Astro.props;
 const Tag = href || deck ? 'a' : 'div';
 // A deck link still works without JS (new tab); with JS it opens in the on-page dialog.
 const tagProps = href
@@ -49,13 +44,11 @@ const hasOverlay = Astro.slots.has('overlay');
   {video && poster && rect ? (
     <VideoSlot class="card-media" poster={poster} alt={alt} src={video} width={w} height={h} rect={rect} clip={clip} rotate={rotate}>
       {hasOverlay && <slot name="overlay" />}
-      {fade && <span class="ov edge" style={fadeBox} aria-hidden="true"></span>}
     </VideoSlot>
   ) : poster ? (
     <div class="card-media cbox">
       <Image class="cposter" src={poster} alt={alt} width={w} height={h} densities={[1, 2]} format="webp" quality={88} loading="lazy" />
       {hasOverlay && <slot name="overlay" />}
-      {fade && <span class="ov edge" style={fadeBox} aria-hidden="true"></span>}
     </div>
   ) : (
     <div class:list={['card-media', 'cbox', { bordered: border }]} style={bg ? `--fill:${bg}` : undefined} role="img" aria-label={alt}>
@@ -136,19 +129,6 @@ const hasOverlay = Astro.slots.has('overlay');
     width: calc(var(--w) * 100cqw / var(--W));
     height: calc(var(--h) * 100cqw / var(--W));
     pointer-events: none;
-  }
-
-  /* Seamless right edge (Figma 689:21475): bar at x = width − 32, 3.82% down, 63 wide, 96.88% tall, blur 14. */
-  .card :global(.edge) { overflow: hidden; }
-  .card :global(.edge)::after {
-    content: '';
-    position: absolute;
-    left: calc((var(--iw) - 32) / var(--iw) * 100%);
-    top: 3.82%;
-    width: calc(63 / var(--iw) * 100%);
-    height: 96.88%;
-    background: var(--bg);
-    filter: blur(calc(14 * 100cqw / var(--W)));
   }
 
   /* Narrow cards (tablet two-up, phones): title over meta. */

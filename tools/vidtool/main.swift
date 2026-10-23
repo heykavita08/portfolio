@@ -59,8 +59,11 @@ Task {
       let out = URL(fileURLWithPath: args[3])
       let targetW = Int(args[4])!
       let kbps = Int(args[5])!
-      // Extra options: audio | cut=<mad> | fade=<frames> | end=<seconds>
+      // Extra options: audio | cut=<mad> | fade=<frames> | end=<seconds> | even=<fps>
+      //   even=<fps>: ignore the source timestamps and show every captured frame for exactly one tick at
+      //   <fps>. For screen recordings of playing video with uneven capture (freezes, dropped ticks).
       var keepAudio = false, cutThreshold = 0.0, fadeFrames = 9, endAt = Double.infinity
+      var evenFps: Double? = nil
       for opt in args.dropFirst(6) {
         let kv = opt.split(separator: "=", maxSplits: 1).map(String.init)
         switch kv[0] {
@@ -68,10 +71,11 @@ Task {
         case "cut": cutThreshold = Double(kv[1])!
         case "fade": fadeFrames = Int(kv[1])!
         case "end": endAt = Double(kv[1])!
+        case "even": evenFps = Double(kv[1])!
         default: fail("unknown option \(opt)")
         }
       }
-      let fps = 30.0
+      let fps = evenFps ?? 30.0
       let t = try await videoTrack()
       let natural = try await t.load(.naturalSize)
       let outW = targetW / 2 * 2
@@ -96,7 +100,7 @@ Task {
           AVVideoAverageBitRateKey: kbps * 1000,
           AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
           AVVideoMaxKeyFrameIntervalKey: 60,
-          AVVideoExpectedSourceFrameRateKey: 30,
+          AVVideoExpectedSourceFrameRateKey: Int(fps),
           AVVideoAllowFrameReorderingKey: false, // no B-frames → no edit list, frame 0 at t=0
         ],
       ])
@@ -154,17 +158,27 @@ Task {
         while vIn.isReadyForMoreMediaData {
           let tOut = Double(k) / fps
           let tSrc = tOut + offset
-          // Advance to the latest source frame at or before this tick.
           var changed = false
-          while let u = upcoming, CMSampleBufferGetPresentationTimeStamp(u).seconds <= tSrc + 1e-6 {
-            current = u
-            lastSourcePTS = CMSampleBufferGetPresentationTimeStamp(u).seconds
-            upcoming = nextFrame()
-            changed = true
-          }
-          // Done once the source is exhausted (or the trim point is reached).
-          if (upcoming == nil && tSrc > lastSourcePTS + 1.0 / fps) || tSrc > endAt {
-            vIn.markAsFinished(); group.leave(); return
+          if evenFps != nil {
+            // One source frame per tick, in order.
+            if k > 0 {
+              guard let u = upcoming, tOut <= endAt else { vIn.markAsFinished(); group.leave(); return }
+              current = u
+              upcoming = nextFrame()
+              changed = true
+            }
+          } else {
+            // Advance to the latest source frame at or before this tick.
+            while let u = upcoming, CMSampleBufferGetPresentationTimeStamp(u).seconds <= tSrc + 1e-6 {
+              current = u
+              lastSourcePTS = CMSampleBufferGetPresentationTimeStamp(u).seconds
+              upcoming = nextFrame()
+              changed = true
+            }
+            // Done once the source is exhausted (or the trim point is reached).
+            if (upcoming == nil && tSrc > lastSourcePTS + 1.0 / fps) || tSrc > endAt {
+              vIn.markAsFinished(); group.leave(); return
+            }
           }
           let px = CMSampleBufferGetImageBuffer(current)!
           // Hard cut? Dissolve from what was last shown into the new frame.
@@ -214,7 +228,7 @@ Task {
       await writer.finishWriting()
       if writer.status != .completed { fail("write failed: \(String(describing: writer.error))") }
       let bytes = (try FileManager.default.attributesOfItem(atPath: out.path)[.size] as? Int) ?? 0
-      print("\(out.lastPathComponent): \(outW)x\(outH) \(outFrames)f @30fps, \(cuts) cuts dissolved, \(String(format: "%.2f", Double(bytes) / 1_048_576))MB")
+      print("\(out.lastPathComponent): \(outW)x\(outH) \(outFrames)f @\(Int(fps))fps, \(cuts) cuts dissolved, \(String(format: "%.2f", Double(bytes) / 1_048_576))MB")
 
     case "luma":
       // vidtool luma <in> [step]  → mean luminance (0-255) per sampled frame

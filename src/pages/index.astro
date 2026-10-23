@@ -74,7 +74,7 @@ const skills = [
   <header class="nav">
     <div class="nav-in">
       <a class="brand" href="/">kavita tewari</a>
-      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><span class="spark" aria-hidden="true">✦ </span><span class="nav-text">About &amp; contact</span></a></nav>
+      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.2 16.8 11.1 24 12C16.8 12.9 12.9 16.8 12 24C11.1 16.8 7.2 12.9 0 12C7.2 11.1 11.1 7.2 12 0Z" fill="currentColor"/></svg><span class="nav-text">About &amp; contact</span></a></nav>
     </div>
   </header>
 
@@ -86,8 +86,11 @@ const skills = [
     <section class="intro">
       <div class="intro-left">
         <p class="intro-lede" data-split>Not every design problem comes in a Figma-sized box.</p>
-        <p class="intro-lede intro-exp" data-split>Experience: 5+ years</p>
         <dl class="intro-details" data-stagger>
+          <div>
+            <dt>Experience</dt>
+            <dd class="dd-strong">5+ years</dd>
+          </div>
           <div>
             <dt>Areas I work across</dt>
             <dd>Product strategy · UX research · Interaction design · UI design · Prototyping · No-code development</dd>
@@ -115,7 +118,7 @@ const skills = [
       <div class="grid grid-case">
         <div class="col col-l" data-stagger>
           <WorkCard
-            title="Two markets, one cooktop app" meta="Whirlpool i3000 • Shipped 2025" href="/work/cooktop" fade
+            title="Two markets, one cooktop app" meta="Whirlpool i3000 • Shipped 2025" href="/work/cooktop"
             alt="Whirlpool logo over the cooktop app" poster={caseCooktop} w={888} h={547}
             video="/videos/home/cooktop.mp4" rect={{ x: 114.5, y: -178.74, w: 659, h: 978.468 }} rotate={90}
             clip={{ x: 1, y: 1, w: 886, h: 545 }}
@@ -125,19 +128,19 @@ const skills = [
             </span>
           </WorkCard>
           <WorkCard
-            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026" fade
+            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026"
             alt="VEYRA app home: Champa is home" poster={caseVeyra} w={886} h={497.5}
             video="/videos/home/veyra.mp4" rect={{ x: 337, y: 124.32, w: 211, h: 444, r: 41 }}
           />
         </div>
         <div class="col col-r" data-stagger>
           <WorkCard
-            title="Health records people actually keep" meta="PeakPause • Shipped 2025" href="/work/peakpause" fade
+            title="Health records people actually keep" meta="PeakPause • Shipped 2025" href="/work/peakpause"
             alt="PeakPause app: your timeline and health summary" poster={casePeakpause} w={888} h={499.5}
             video="/videos/home/peakpause.mp4" rect={{ x: 350.66, y: 54.24, w: 186.682, h: 391.023, r: 35.318 }}
           />
           <WorkCard
-            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air" fade
+            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air"
             alt="The JB Air purifier in a living room" poster={caseJb} w={888} h={555}
             video="/videos/home/jb.mp4" rect={{ x: -8, y: -43.6, w: 904, h: 603 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
           />
@@ -275,7 +278,17 @@ const skills = [
     color: #1e2b3a;
     white-space: pre;
   }
-  .spark { display: inline-block; color: #000; transition: transform 0.6s var(--ease-out); }
+  /* ✦ drawn as a vector: Geist Mono has no star glyph, so the font fallback rendered it small.
+     Sized to the caps (10.9px), centred on them, one mono letter-space (9px) before the text. */
+  .spark {
+    display: inline-block;
+    width: 11.6px;
+    height: 11.6px;
+    margin-right: 9px;
+    vertical-align: -0.8px;
+    color: #000;
+    transition: transform 0.6s var(--ease-out);
+  }
   .nav-link:hover .spark { transform: rotate(90deg) scale(1.15); }
   .nav-text { position: relative; }
   .nav-text::after {
@@ -335,6 +348,7 @@ const skills = [
     letter-spacing: -0.34px;
     color: rgba(50, 64, 79, 0.8);
   }
+  .intro-details dd.dd-strong { color: #32404f; }
   .timeline { display: flex; flex-direction: column; gap: 4px; }
   .row {
     display: grid;
@@ -470,7 +484,6 @@ const skills = [
   @media (max-width: 959px) {
     .nav { padding: 0 24px; }
     .home { padding: 16px 24px 0; }
-    .h-sec { font-size: 36px; line-height: 40px; letter-spacing: -1.4px; }
     .h-case { padding: 16px 0 32px; }
     .h-more { padding: 72px 0 24px; }
     .arsenal { grid-template-columns: 1fr; row-gap: 40px; padding-bottom: 120px; }
@@ -480,9 +493,7 @@ const skills = [
     .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
     .grid .col + .col { margin-top: 40px; }
     .intro { padding: 56px 0 64px; row-gap: 40px; }
-    .intro-lede { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
     .intro-details dd { font-size: 16px; line-height: 24px; }
-    .h-sec { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
     .skill-name { white-space: normal; font-size: 21px; line-height: 25px; }
     .skill-label { height: auto; }
     .skill { align-items: flex-start; }

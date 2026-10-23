@@ -18,6 +18,8 @@ Settings used for PeakPause:
 - Rapid design click-throughs: `cut=12 fade=8`
 - Launch film: `840 1500 audio` (never dissolve a produced edit)
 
+- Recording of a playing video with freezes / uneven capture (Yucatan card): `1600 2600 even=24`, no `cut` (fast motion isn't a cut)
+
 Gotchas:
 - macOS recording filenames contain a narrow no-break space before AM/PM, so match files with `grep -F "at 4.24.47"`, not the full name.
 - Figma video layer names are often stale. Match each slot by comparing the video's frame 0 with the exported Figma poster.

@@ -32,7 +32,7 @@ interface Props {
 const { poster, alt, src, width, height, rect, clip, mode = 'loop', caption, mobileRatio, rotate = 0, class: className } = Astro.props;
 
 // Bump when re-encoding videos so browsers and CDNs fetch the new files.
-const VIDEO_VERSION = 3;
+const VIDEO_VERSION = 4;
 const videoSrc = `${src}?v=${VIDEO_VERSION}`;
 
 // Length of one Figma px, as a share of the slot's rendered width.
