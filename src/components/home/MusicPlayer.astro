@@ -1,7 +1,9 @@
 ---
 // A small music pill for the nav: an iridescent disc that spins while playing, notes that bob, and
-// a thin progress line. Click to play or pause (the volume fades in and out). The track keeps
-// going across pages: its time and state are saved on leave and picked up on the next page.
+// a thin progress line. The music starts by itself: right away where the browser allows it,
+// otherwise on the visitor's first click, tap or key press anywhere on the page (browsers block
+// sound before any interaction). Once someone pauses it, it stays paused for the rest of the visit.
+// The track keeps going across pages: its time and state are saved on leave and picked up again.
 // Track: "Washed Up" by HoliznaCC0, CC0 1.0 (public domain), from Free Music Archive:
 // https://freemusicarchive.org/music/holiznacc0/ocean-memory-lo-fi-chill/washed-up/
 const TRACK = { src: '/audio/washed-up.m4a', title: 'Washed Up', artist: 'HoliznaCC0' };
@@ -149,21 +151,45 @@ const TRACK = { src: '/audio/washed-up.m4a', title: 'Washed Up', artist: 'Holizn
       window.setTimeout(() => { if (!root.classList.contains('is-playing')) audio.pause(); }, 380);
     };
 
-    btn.addEventListener('click', () => (root.classList.contains('is-playing') ? pause() : play()));
+    let userPaused = false;
+    btn.addEventListener('click', () => {
+      if (root.classList.contains('is-playing')) { userPaused = true; pause(); }
+      else { userPaused = false; play(); }
+    });
     audio.addEventListener('timeupdate', () => {
       if (audio.duration) root.style.setProperty('--p', String(audio.currentTime / audio.duration));
     });
 
     // Carry on across pages.
-    let saved: { t: number; playing: boolean } | null = null;
+    let saved: { t: number; playing: boolean; userPaused?: boolean } | null = null;
     try { saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch { /* storage off */ }
     if (saved) {
-      audio.preload = 'auto';
       audio.addEventListener('loadedmetadata', () => { audio.currentTime = saved!.t || 0; }, { once: true });
-      if (saved.playing) play();
+      userPaused = !!saved.userPaused;
     }
+
+    // Start by itself unless the visitor paused it this visit.
+    if (!userPaused) {
+      audio.preload = 'auto';
+      play().then(() => {
+        if (root.classList.contains('is-playing')) return;
+        // Blocked until the visitor interacts: start on their first click, tap or key press
+        // (not on the player itself, whose own click handles that).
+        const kick = (e: Event) => {
+          if (root.contains(e.target as Node)) return;
+          stop();
+          if (!userPaused && !root.classList.contains('is-playing')) play();
+        };
+        const events = ['pointerdown', 'keydown', 'touchend'] as const;
+        const stop = () => events.forEach((t) => document.removeEventListener(t, kick, true));
+        events.forEach((t) => document.addEventListener(t, kick, true));
+      });
+    }
+
     window.addEventListener('pagehide', () => {
-      try { sessionStorage.setItem(KEY, JSON.stringify({ t: audio.currentTime, playing: root.classList.contains('is-playing') })); } catch { /* storage off */ }
+      try {
+        sessionStorage.setItem(KEY, JSON.stringify({ t: audio.currentTime, playing: root.classList.contains('is-playing'), userPaused }));
+      } catch { /* storage off */ }
     });
   }
 </script>

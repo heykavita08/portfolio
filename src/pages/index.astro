@@ -301,8 +301,10 @@ const skills = [
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 24px;
     align-items: start;
-    /* Tighter than the Figma frame (310px of air) so the intro starts in the first screen. */
-    padding: 64px 0 120px;
+    /* The first screen ends just below the 6th project (PeakPause): the wordmark ends 581px down
+       and the opening line → 6th project band is 202px, so the gap above takes what’s left of the
+       screen (at least 64px on short screens). Everything below shows as you scroll. */
+    padding: max(64px, calc(100vh - 785px)) 0 120px;
   }
   .intro-left { display: flex; flex-direction: column; gap: 24px; }
   .intro-lede {
@@ -345,7 +347,7 @@ const skills = [
   /* On the 1200px column the timeline has ~588px, so rows wrap rather than run on one line. */
   .row {
     display: grid;
-    grid-template-columns: 64px minmax(120px, 0.9fr) 1.6fr;
+    grid-template-columns: 68px minmax(120px, 0.9fr) 1.6fr;
     column-gap: 8px;
     min-height: 24px;
     font-size: 15px;
@@ -358,7 +360,7 @@ const skills = [
     color: rgba(50, 64, 79, 0.58);
   }
   .row-name { color: var(--ink); }
-  .row-desc { margin-top: -0.75px; color: rgba(50, 64, 79, 0.58); }
+  .row-desc { margin-top: -0.75px; color: rgba(50, 64, 79, 0.58); text-wrap: pretty; }
 
   .block { scroll-margin-top: 40px; }
 
@@ -486,7 +488,7 @@ const skills = [
   @media (max-width: 600px) {
     .intro-lede { font-size: 28px; line-height: 32px; letter-spacing: -1px; }
     .home { padding: 8px 16px 0; }
-    .row { grid-template-columns: 70px 1fr; row-gap: 0; padding-bottom: 6px; }
+    .row { grid-template-columns: 72px 1fr; row-gap: 0; padding-bottom: 6px; }
     .row-year { white-space: nowrap; }
     .row-desc { grid-column: 2; font-size: 14px; line-height: 20px; }
     .skill-n { flex-basis: 40px; }
