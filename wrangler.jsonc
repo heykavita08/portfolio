@@ -1,0 +1,8 @@
+// Cloudflare Workers config: serve the built static site (npm run build → dist/).
+{
+  "name": "portfolio",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
