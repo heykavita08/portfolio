@@ -1,0 +1,113 @@
+---
+// Site footer: a strip of bubble wrap to pop, then name + year on the left, LinkedIn / Instagram /
+// email on the right.
+// `wide` lines it up with the home and About column (1200px, 60px gutters); otherwise it matches the
+// case-study nav (32px gutters).
+import BubbleWrap from './BubbleWrap.astro';
+
+interface Props { wide?: boolean }
+const { wide = false } = Astro.props;
+
+const EMAIL = 'heykavita08@gmail.com';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/kavita-tewari/';
+const INSTAGRAM_URL = 'https://www.instagram.com/rizzemble.life/';
+
+const year = new Date().getFullYear();
+---
+<footer class:list={['footer', { wide }]}>
+  <div class="foot-in foot-game"><BubbleWrap /></div>
+  <div class="foot-in">
+    <p class="foot-name">© {year} Kavita Tewari</p>
+    <ul class="socials" aria-label="Find me elsewhere">
+      <li>
+        <a class="social" href={LINKEDIN_URL} target="_blank" rel="noopener" aria-label="LinkedIn" data-tip="LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.75" y="2.75" width="18.5" height="18.5" rx="5" /><path d="M8 10.5v6M8 7.6v.05M11.75 16.5v-6M11.75 13.2c0-1.7 1.05-2.75 2.45-2.75s2.3 1 2.3 2.75v3.3" /></svg>
+        </a>
+      </li>
+      <li>
+        <a class="social" href={INSTAGRAM_URL || undefined} target="_blank" rel="noopener" aria-label="Instagram" data-tip="Instagram" aria-disabled={INSTAGRAM_URL ? undefined : 'true'}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.75" y="2.75" width="18.5" height="18.5" rx="5.5" /><circle cx="12" cy="12" r="4.25" /><circle class="dot" cx="17.4" cy="6.6" r="0.6" /></svg>
+        </a>
+      </li>
+      <li>
+        <a class="social" href={`mailto:${EMAIL}`} aria-label={`Email ${EMAIL}`} data-tip={EMAIL}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.75" y="4.75" width="18.5" height="14.5" rx="3" /><path d="M3.5 6.75l8.5 6.25 8.5-6.25" /></svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 32px 32px 40px;
+  }
+  .footer.wide { padding: 32px 60px 40px; }
+  .foot-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .footer.wide .foot-in { max-width: 1200px; margin: 0 auto; }
+  .foot-game { display: block; }
+  .foot-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .socials { display: flex; gap: 8px; }
+  .social {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--ink);
+    transition: background 0.25s ease, transform 0.45s var(--ease-out, ease);
+  }
+  .social svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .social .dot { fill: currentColor; stroke: none; }
+  .social:hover { background: rgba(50, 64, 79, 0.06); transform: translateY(-2px); }
+  .social[aria-disabled='true'] { opacity: 0.35; pointer-events: none; }
+
+  /* Small label above the icon on hover / keyboard focus. */
+  .social::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.3s var(--ease-out, ease);
+  }
+  .social:hover::after, .social:focus-visible::after { opacity: 1; transform: none; }
+
+  @media (max-width: 959px) {
+    .footer.wide { padding: 28px 24px 36px; }
+  }
+  @media (max-width: 600px) {
+    .footer, .footer.wide { padding: 24px 16px 32px; }
+  }
+</style>

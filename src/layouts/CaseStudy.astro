@@ -2,8 +2,10 @@
 // Shell for every case study: nav, sticky section index, 704px reading column.
 // Figma: "Body" (196:322) → "Sidebar" (196:323) + "Content" (196:334).
 import Base from './Base.astro';
-import Nav from '../components/Nav.astro';
+import HomeNav from '../components/home/HomeNav.astro';
 import Lightbox from '../components/Lightbox.astro';
+import NextCase from '../components/case-study/NextCase.astro';
+import type { CaseSlug } from '../data/case-cards';
 
 export interface Section {
   id: string;
@@ -17,9 +19,11 @@ interface Props {
 }
 
 const { title, description, sections } = Astro.props;
+// /work/<slug>/ → which case study comes next.
+const current = Astro.url.pathname.split('/').filter(Boolean)[1] as CaseSlug;
 ---
 <Base title={title} description={description}>
-  <Nav />
+  <HomeNav href="/about" label="About & contact" />
   <div class="body">
     <aside class="sidebar">
       <a class="back" href="/#work"><span class="arrow" aria-hidden="true">←</span> Back</a>
@@ -33,12 +37,14 @@ const { title, description, sections } = Astro.props;
     </aside>
     <main class="content">
       <slot />
+      <NextCase current={current} />
     </main>
   </div>
   <Lightbox />
 </Base>
 
 <style>
+  :global(html) { scroll-padding-top: 88px; }
   .body {
     display: grid;
     grid-template-columns: var(--sidebar) var(--column);
@@ -49,9 +55,10 @@ const { title, description, sections } = Astro.props;
 
   .sidebar {
     position: sticky;
-    top: 56px;
+    top: calc(64px + 32px); /* below the sticky nav */
     align-self: start;
-    padding-left: 32px;
+    /* Lines up with the nav's left edge (1200px column, 60px gutters) inside the 1280px page. */
+    padding-left: clamp(40px, calc(60px - (100vw - 1280px) / 2), 60px);
   }
   .back {
     display: block;

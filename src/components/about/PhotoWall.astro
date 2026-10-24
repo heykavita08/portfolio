@@ -1,0 +1,318 @@
+---
+// About page photo wall: a masonry of every image in src/assets/about/photos/, captions from
+// src/data/about-photos.ts. Click (or Enter) opens a viewer with arrows, keyboard and swipe.
+// Masonry reads left to right: JS deals the photos, in order, into whichever column is shortest
+// (heights come from each photo's known ratio, so nothing waits for images). Without JS it falls
+// back to CSS columns.
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+import { photoCaptions, placeholderPhotos } from '../../data/about-photos';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/about/photos/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG}', { eager: true });
+const order = Object.keys(photoCaptions);
+const rank = (name: string) => (order.includes(name) ? order.indexOf(name) : order.length);
+const photos = await Promise.all(
+  Object.entries(files)
+    .map(([path, mod]) => ({ name: path.split('/').pop()!, src: mod.default }))
+    .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name))
+    .map(async (p) => ({
+      ...p,
+      caption: photoCaptions[p.name] ?? '',
+      full: (await getImage({ src: p.src, width: Math.min(p.src.width, 2000), format: 'webp', quality: 85 })).src,
+    }))
+);
+---
+<div class="wall">
+  {photos.length ? photos.map((p, i) => (
+    <figure class="ph" data-reveal data-ratio={(p.src.height / p.src.width).toFixed(4)} style={`--rr:${(((i * 37) % 7) - 3) * 0.6}deg`}>
+      <button class="ph-open" type="button" data-full={p.full} data-caption={p.caption} data-i={i} aria-label={p.caption ? `Open photo: ${p.caption}` : 'Open photo'}>
+        <Image class="ph-img" src={p.src} alt={p.caption} width={400} densities={[1, 2]} format="webp" quality={85} loading="lazy" />
+      </button>
+      {p.caption && <figcaption class="ph-cap">{p.caption}</figcaption>}
+    </figure>
+  )) : placeholderPhotos.map((p) => (
+    <figure class="ph ph-todo" data-reveal data-ratio={(() => { const [w, h] = p.ratio.split('/').map(Number); return (h / w).toFixed(4); })()}>
+      <div class="ph-slot" style={`aspect-ratio:${p.ratio}`}><span>Photo needed</span></div>
+      <figcaption class="ph-cap">{p.label}</figcaption>
+    </figure>
+  ))}
+</div>
+
+{photos.length > 0 && (
+  <dialog class="viewer" aria-label="Photo viewer">
+    <figure class="v-fig">
+      <img class="v-img" alt="" />
+      <figcaption class="v-cap"></figcaption>
+    </figure>
+    <button class="v-btn v-close" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    </button>
+    <button class="v-btn v-prev" type="button" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+    </button>
+    <button class="v-btn v-next" type="button" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <p class="v-count" aria-live="polite"></p>
+  </dialog>
+)}
+
+<style>
+  .wall {
+    --cols: 5;
+    --gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    column-count: var(--cols);
+    column-gap: var(--gap);
+  }
+  .ph { break-inside: avoid; margin: 0 0 28px; }
+  .wall.is-masonry { display: flex; align-items: flex-start; gap: var(--gap); column-count: auto; }
+  .wall.is-masonry :global(.wall-col) { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 28px; }
+  .wall.is-masonry .ph { margin: 0; }
+  .ph-open {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    overflow: hidden;
+  }
+  .ph-open :global(.ph-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.9s var(--ease-out);
+  }
+  .ph-open:hover :global(.ph-img) { transform: scale(1.04); }
+
+  /* Motion. Photos settle in from a slight tilt as they reach the screen; on hover each leans toward
+     the cursor and lifts on a soft shadow; on wide screens the columns drift at different speeds. */
+  :global(.motion) .ph[data-reveal] {
+    transition:
+      opacity 0.9s var(--ease-out) var(--d, 0ms),
+      transform 1.2s var(--ease-out) var(--d, 0ms);
+  }
+  :global(.motion) .ph[data-reveal]:not(.is-in) { transform: translate3d(0, 36px, 0) rotate(var(--rr, 0deg)) scale(0.96); }
+  .ph-open {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.6s var(--ease-out), box-shadow 0.6s var(--ease-out);
+  }
+  .ph-open:hover { box-shadow: 0 22px 40px -24px rgba(30, 43, 58, 0.45), 0 6px 14px -8px rgba(30, 43, 58, 0.14); }
+  .ph-open.is-tilting { transition: transform 0.15s linear, box-shadow 0.6s var(--ease-out); }
+  .ph-cap { transition: color 0.3s ease, transform 0.45s var(--ease-out); }
+  .ph:hover .ph-cap { transform: translateX(4px); }
+  :global(.wall-col) { will-change: transform; }
+  /* Hairline so white photos (the JLPT result) keep an edge on the page. */
+  .ph-open::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(50, 64, 79, 0.08); pointer-events: none; }
+  .ph-open:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .ph-cap {
+    padding-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.58);
+    transition: color 0.3s ease;
+  }
+  .ph:hover .ph-cap { color: var(--ink); }
+
+  /* Placeholder tiles (no photos yet): obviously unfinished. */
+  .ph-slot {
+    display: grid;
+    place-items: center;
+    background: #eef1f4;
+    box-shadow: inset 0 0 0 1px rgba(200, 16, 46, 0.35);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #c8102e;
+  }
+  .ph-todo .ph-cap { color: #c8102e; }
+
+  /* Viewer */
+  .viewer {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(18, 20, 24, 0.94);
+    color: #fff;
+  }
+  .viewer[open] { display: grid; place-items: center; animation: v-in 0.35s ease both; }
+  .viewer::backdrop { background: transparent; }
+  @keyframes v-in { from { opacity: 0; } }
+  .v-fig { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 0; }
+  .v-img {
+    display: block;
+    max-width: min(88vw, 1600px);
+    max-height: 80dvh;
+    width: auto;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: opacity 0.25s ease, transform 0.45s var(--ease-out);
+  }
+  .v-img.is-swapping { opacity: 0; transform: translateX(var(--dir, 0px)); }
+  .v-cap, .v-count {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .v-count { position: absolute; top: 24px; left: 24px; margin: 0; }
+  .v-btn {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: background 0.2s ease, transform 0.3s var(--ease-out);
+  }
+  .v-btn:hover { background: rgba(255, 255, 255, 0.2); }
+  .v-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .v-close { top: 16px; right: 16px; }
+  .v-prev { left: 24px; top: 50%; translate: 0 -50%; }
+  .v-next { right: 24px; top: 50%; translate: 0 -50%; }
+  .v-prev:hover { transform: translateX(-2px); }
+  .v-next:hover { transform: translateX(2px); }
+
+  @media (max-width: 1199px) { .wall { --cols: 4; } }
+  @media (max-width: 959px) { .wall { --cols: 3; } }
+  @media (max-width: 759px) {
+    .wall { --cols: 2; --gap: 12px; }
+    .ph { margin-bottom: 20px; }
+    .wall.is-masonry :global(.wall-col) { gap: 20px; }
+    .v-prev, .v-next { top: auto; bottom: 24px; translate: none; }
+    .v-prev { left: calc(50% - 56px); }
+    .v-next { right: calc(50% - 56px); }
+    .v-img { max-width: 100vw; max-height: 72dvh; }
+  }
+</style>
+
+<script>
+  // Masonry: deal photos left to right into the shortest column; re-deal when the column count changes.
+  const wall = document.querySelector<HTMLElement>('.wall');
+  if (wall) {
+    const figs = [...wall.querySelectorAll<HTMLElement>(':scope > .ph')];
+    let dealt = 0;
+    const deal = () => {
+      const n = parseInt(getComputedStyle(wall).getPropertyValue('--cols')) || 4;
+      if (n === dealt) return;
+      dealt = n;
+      const cols = Array.from({ length: n }, () => Object.assign(document.createElement('div'), { className: 'wall-col' }));
+      const heights = new Array(n).fill(0);
+      for (const f of figs) {
+        const k = heights.indexOf(Math.min(...heights));
+        cols[k].append(f);
+        heights[k] += Number(f.dataset.ratio || 1) + (f.querySelector('.ph-cap') ? 0.18 : 0) + 0.12; // in column widths
+      }
+      wall.querySelectorAll(':scope > .wall-col').forEach((c) => c.remove());
+      wall.append(...cols);
+      wall.classList.add('is-masonry');
+    };
+    deal();
+    window.addEventListener('resize', deal);
+  }
+
+  const moving = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hover: lean toward the cursor (max 5deg), settle back on leave. Mouse only.
+  if (moving) {
+    for (const btn of document.querySelectorAll<HTMLElement>('.ph-open')) {
+      btn.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        btn.classList.add('is-tilting');
+        btn.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`);
+        btn.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
+      });
+      btn.addEventListener('pointerleave', () => {
+        btn.classList.remove('is-tilting');
+        btn.style.setProperty('--rx', '0deg');
+        btn.style.setProperty('--ry', '0deg');
+      });
+    }
+  }
+
+  // Scroll: columns drift at different speeds while the wall is on screen (3+ columns only).
+  if (moving && wall) {
+    const SPEEDS = [0.05, -0.04, 0.08, -0.06, 0.03];
+    let ticking = false;
+    let visible = false;
+    const drift = () => {
+      ticking = false;
+      const cols = [...wall.querySelectorAll<HTMLElement>(':scope > .wall-col')];
+      const on = cols.length >= 3;
+      const r = wall.getBoundingClientRect();
+      const offset = r.top + r.height / 2 - window.innerHeight / 2;
+      cols.forEach((c, i) => {
+        const y = on ? Math.max(-56, Math.min(56, offset * SPEEDS[i % SPEEDS.length])) : 0;
+        c.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+      });
+    };
+    const request = () => { if (visible && !ticking) { ticking = true; requestAnimationFrame(drift); } };
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; request(); }).observe(wall);
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', () => { visible = true; request(); });
+  }
+
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.viewer');
+  if (dialog) {
+    // Masonry reorders the DOM by column; the viewer follows the wall's reading order.
+    const items = [...document.querySelectorAll<HTMLButtonElement>('.ph-open')].sort((a, b) => Number(a.dataset.i) - Number(b.dataset.i));
+    const img = dialog.querySelector<HTMLImageElement>('.v-img')!;
+    const cap = dialog.querySelector<HTMLElement>('.v-cap')!;
+    const count = dialog.querySelector<HTMLElement>('.v-count')!;
+    let i = 0;
+
+    const show = (n: number, dir = 0) => {
+      i = (n + items.length) % items.length;
+      const item = items[i];
+      const swap = () => {
+        img.src = item.dataset.full!;
+        img.alt = item.dataset.caption || 'Photo';
+        cap.textContent = item.dataset.caption || '';
+        count.textContent = `${i + 1} / ${items.length}`;
+        img.classList.remove('is-swapping');
+      };
+      if (!dir || !dialog.open) return swap();
+      img.style.setProperty('--dir', `${dir * 24}px`);
+      img.classList.add('is-swapping');
+      window.setTimeout(swap, 180);
+    };
+
+    items.forEach((btn, n) => btn.addEventListener('click', () => { show(n); dialog.showModal(); }));
+    dialog.querySelector('.v-close')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('.v-prev')!.addEventListener('click', () => show(i - 1, 1));
+    dialog.querySelector('.v-next')!.addEventListener('click', () => show(i + 1, -1));
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => items[i]?.focus());
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(i + 1, -1);
+      if (e.key === 'ArrowLeft') show(i - 1, 1);
+    });
+
+    // Swipe on touch screens.
+    let x0: number | null = null;
+    dialog.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
+    dialog.addEventListener('pointerup', (e) => {
+      if (x0 === null) return;
+      const dx = e.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1), dx < 0 ? -1 : 1);
+    });
+  }
+</script>

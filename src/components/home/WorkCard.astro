@@ -24,23 +24,23 @@ interface Props {
   bg?: string;
   border?: boolean;
   href?: string;
-  /** Opens a Figma deck in a dialog instead of leaving the site. */
-  deck?: string;
+  /** Opens `embed` in the on-page dialog instead of leaving the site; `href` is the no-JS fallback (new tab). */
+  popup?: { href: string; embed: string };
   /** Caption still to be written: shows a visible placeholder. */
   todo?: boolean;
 }
 
-const { title, meta, alt, w, h, poster, video, rect, clip, rotate, bg, border, href, deck, todo } = Astro.props;
-const Tag = href || deck ? 'a' : 'div';
-// A deck link still works without JS (new tab); with JS it opens in the on-page dialog.
+const { title, meta, alt, w, h, poster, video, rect, clip, rotate, bg, border, href, popup, todo } = Astro.props;
+const Tag = href || popup ? 'a' : 'div';
+// A popup link still works without JS (new tab); with JS it opens in the on-page dialog.
 const tagProps = href
   ? { href }
-  : deck
-    ? { href: deck, target: '_blank', rel: 'noopener', 'data-deck': deck, 'aria-haspopup': 'dialog' }
+  : popup
+    ? { href: popup.href, target: '_blank', rel: 'noopener', 'data-embed': popup.embed, 'data-embed-title': title, 'aria-haspopup': 'dialog' }
     : {};
 const hasOverlay = Astro.slots.has('overlay');
 ---
-<Tag class:list={['card', { 'is-link': href || deck, 'is-todo': todo }]} style={`--W:${w};--mw:${w}px;--mratio:${w}/${h}`} {...tagProps}>
+<Tag class:list={['card', { 'is-link': href || popup, 'is-todo': todo }]} style={`--W:${w};--mw:${w}px;--mratio:${w}/${h}`} {...tagProps}>
   {video && poster && rect ? (
     <VideoSlot class="card-media" poster={poster} alt={alt} src={video} width={w} height={h} rect={rect} clip={clip} rotate={rotate}>
       {hasOverlay && <slot name="overlay" />}
@@ -75,7 +75,6 @@ const hasOverlay = Astro.slots.has('overlay');
     text-align: left;
     container: card / inline-size;
   }
-  .card.is-link { cursor: pointer; }
   .card :global(.card-media) { width: min(var(--mw), 100%); }
   .cbox {
     position: relative;
@@ -104,8 +103,6 @@ const hasOverlay = Astro.slots.has('overlay');
     letter-spacing: -0.34px;
     color: var(--ink);
     white-space: nowrap;
-    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 2px) / 0 1px no-repeat;
-    transition: background-size 0.45s var(--ease-out, ease);
   }
   .meta {
     margin-top: -0.75px;
@@ -117,7 +114,19 @@ const hasOverlay = Astro.slots.has('overlay');
     white-space: nowrap;
     transition: color 0.3s ease;
   }
-  .card.is-link:hover .title { background-size: 100% 1px; }
+  /* Hover: the media lifts a little on a soft shadow (no underline). */
+  .card.is-link :global(.card-media) {
+    transition: transform 0.5s var(--ease-out, ease), box-shadow 0.5s var(--ease-out, ease);
+  }
+  .card.is-link:hover :global(.card-media),
+  .card.is-link:focus-visible :global(.card-media) {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px -20px rgba(30, 43, 58, 0.4), 0 6px 14px -8px rgba(30, 43, 58, 0.14);
+  }
+  .card.is-link:hover .cbox.bordered,
+  .card.is-link:focus-visible .cbox.bordered {
+    box-shadow: inset 0 0 0 1px rgba(50, 64, 79, 0.1), 0 18px 36px -20px rgba(30, 43, 58, 0.4), 0 6px 14px -8px rgba(30, 43, 58, 0.14);
+  }
   .card.is-link:hover .meta { color: var(--ink); }
   .card.is-todo .title, .card.is-todo .meta { color: #c8102e; }
 

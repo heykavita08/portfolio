@@ -1,15 +1,18 @@
 ---
 // Home. Source: Figma "1920w light" (633:8850), Cooktop App file.
-// Layout is the Figma 1920 frame: 60px gutters, a 1800px column split 888 / 24 / 888.
+// Layout follows the Figma 1920 frame, set on the site's shared column (as on About): centred,
+// 1200px max, at least 60px gutters, split in two with a 24px gap.
 // Card captions: the Figma file carried template text from another portfolio; these are
 // Kavita's projects, matched to each visual; titles from her Figma update, meta lines from her timeline.
 import Base from '../layouts/Base.astro';
 import WorkCard from '../components/home/WorkCard.astro';
 import DeckDialog from '../components/home/DeckDialog.astro';
 import TiltMark from '../components/home/TiltMark.astro';
+import HomeNav from '../components/home/HomeNav.astro';
+import Mascot from '../components/home/Mascot.astro';
+import Footer from '../components/Footer.astro';
 import { Image } from 'astro:assets';
 
-import mascot from '../assets/home/mascot.png';
 import whirlpoolLogo from '../assets/home/cards/whirlpool-logo.png';
 import pinMask from '../assets/home/cards/pin-mask.png';
 import caseCooktop from '../assets/home/cards/case-cooktop.png';
@@ -22,14 +25,22 @@ import l3 from '../assets/home/cards/more-l3.png';
 import l4 from '../assets/home/cards/more-l4.png';
 import l5 from '../assets/home/cards/more-l5.png';
 import l6 from '../assets/home/cards/more-l6.png';
+import l7 from '../assets/home/cards/more-l7.png';
 import r2 from '../assets/home/cards/more-r2.png';
 import r3 from '../assets/home/cards/more-r3.png';
 import r4 from '../assets/home/cards/more-r4.png';
 import r6 from '../assets/home/cards/more-r6.png';
+import r7 from '../assets/home/cards/more-r7.png';
+import r7Phone from '../assets/home/cards/more-r7-phone.png';
+import r7Grips from '../assets/home/cards/more-r7-grips.png';
 
-// TODO(Kavita): "About & contact" has no page yet — LinkedIn for now.
-const CONTACT_URL = 'https://www.linkedin.com/in/kavita-tewari/';
 const DECK_URL = 'https://www.figma.com/deck/mRsFPUIQRjeqk4KO44klcB';
+const MAPS_POPUP = { href: DECK_URL, embed: `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(DECK_URL)}` };
+// Behance blocks its normal page in frames; its official embed URL is allowed.
+const YUCATAN_POPUP = {
+  href: 'https://www.behance.net/gallery/234823285/Yucatan-UIUX-CGI-Website',
+  embed: 'https://www.behance.net/embed/project/234823285?ilo0=1',
+};
 
 const timeline = [
   ['2026', 'VEYRA', 'Pet tracker app + wearable · Design lead (ongoing)'],
@@ -65,18 +76,12 @@ const skills = [
   ['Systems thinking', 'Strategy'],
   ['No-code development', 'Craft'],
   ['Human Machine Interface Design', 'Craft'],
-  ['Basic SEO & AEO', 'Growth'],
 ];
 
 ---
 <Base title="Kavita Tewari — Product Designer" description="Kavita Tewari, product designer: apps, websites, tablets and appliance screens.">
   <!-- Background+HorizontalBorder (633:9202) -->
-  <header class="nav">
-    <div class="nav-in">
-      <a class="brand" href="/">kavita tewari</a>
-      <nav aria-label="Primary"><a class="nav-link" href={CONTACT_URL} target="_blank" rel="noopener"><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.2 16.8 11.1 24 12C16.8 12.9 12.9 16.8 12 24C11.1 16.8 7.2 12.9 0 12C7.2 11.1 11.1 7.2 12 0Z" fill="currentColor"/></svg><span class="nav-text">About &amp; contact</span></a></nav>
-    </div>
-  </header>
+  <HomeNav href="/about" label="About & contact" />
 
   <main class="home" id="top">
     <!-- Card / Front (633:9216): embossed wordmark -->
@@ -101,7 +106,7 @@ const skills = [
           </div>
         </dl>
       </div>
-      <ol class="timeline" data-stagger aria-label="Projects">
+      <ol class="timeline tl-desk" data-stagger aria-label="Projects">
         {timeline.map(([year, name, desc]) => (
           <li class="row">
             <span class="row-year">{year}</span>
@@ -128,7 +133,7 @@ const skills = [
             </span>
           </WorkCard>
           <WorkCard
-            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026"
+            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026" href="/work/veyra"
             alt="VEYRA app home: Champa is home" poster={caseVeyra} w={886} h={497.5}
             video="/videos/home/veyra.mp4" rect={{ x: 337, y: 124.32, w: 211, h: 444, r: 41 }}
           />
@@ -177,6 +182,15 @@ const skills = [
             alt="Design Police Dept site with a red portrait" poster={l5} w={888} h={499.5}
             video="/videos/home/l5.mp4" rect={{ x: -13, y: -47, w: 914.59, h: 594 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
+          <!-- Figma 755:24556 (931 x 1329), shown whole on its white ground in a 16:10 card. -->
+          <WorkCard
+            title="Prosthetic Hand Research Project" meta="Non Zero • Medtech"
+            alt="A prosthetic arm with a slim smart band on the wrist showing 55% charged" w={888} h={555} bg="#fffffd" border
+          >
+            <span slot="overlay" class="ov arm" style="--x:250.3;--y:1;--w:387.4;--h:553">
+              <Image src={l7} alt="" width={388} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+            </span>
+          </WorkCard>
           <WorkCard
             title="Platform design and UX" meta="Reborn Goods • 2026"
             alt="We find the right people to build your brand: a platform home page" poster={l6} w={888} h={555}
@@ -184,15 +198,15 @@ const skills = [
           />
         </div>
         <div class="col col-r" data-stagger>
-          <WorkCard title="Google Maps study" meta="Personal • Study 2026" deck={DECK_URL} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
+          <WorkCard title="Google Maps study" meta="Personal • Study 2026" popup={MAPS_POPUP} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
             <span slot="overlay" class="ov pin-bg" style="--x:-8.86;--y:-5.53;--w:903.72;--h:564.06"></span>
             <span slot="overlay" class="ov pin" style={`--x:324;--y:157;--w:239;--h:239;--mask:url(${pinMask.src})`}>
               <span class="pin-flow"></span>
             </span>
           </WorkCard>
           <WorkCard
-            title="Print-on-demand website" meta="Scribble T • 2022"
-            alt="A shirt product page on a laptop" poster={r2} w={888} h={621.59}
+            title="Yucatan UI/UX & CGI website" meta="Non Zero • 2023" popup={YUCATAN_POPUP}
+            alt="The Yucatan website on a laptop: a shirt and trousers to configure" poster={r2} w={888} h={621.59}
             video="/videos/home/r2.mp4" rect={{ x: -59, y: 39.23, w: 1007, h: 544 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
           />
           <WorkCard
@@ -208,6 +222,19 @@ const skills = [
           <WorkCard title="Vetted badge" meta="Reborn Goods • 2026" alt="A bronze Reborn Goods Vetted coin turning" w={888} h={555} bg="#958073" border>
             <img slot="overlay" class="ov ring" style="--x:251;--y:85.22;--w:385;--h:385" src="/videos/home/r5-ring.webp" alt="" loading="lazy" decoding="async" />
           </WorkCard>
+          <!-- Figma 755:24578: an ambient recording (Luminosity blend, baked into hand.mp4) behind two phones. -->
+          <WorkCard
+            title="Prosthetic Hand Research Project" meta="Non Zero • Medtech"
+            alt="Bio Arm Pro app: the grip gallery and the arm's home screen on two phones" poster={r7} w={903.72} h={631.99}
+            video="/videos/home/hand.mp4" rect={{ x: 97, y: -222, w: 649, h: 1077 }} rotate={90}
+          >
+            <span slot="overlay" class="ov hand-phone" style="--x:466;--y:-164;--w:458;--h:959">
+              <Image src={r7Phone} alt="" width={384} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+            </span>
+            <span slot="overlay" class="ov hand-grips" style="--x:105;--y:120;--w:347.059;--h:726">
+              <Image src={r7Grips} alt="" width={402} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+            </span>
+          </WorkCard>
           <WorkCard
             title="Identity Labs" meta="Agency website • 2026"
             alt="Identity Labs: the science of viral posts" poster={r6} w={888} h={499.5}
@@ -217,13 +244,27 @@ const skills = [
       </div>
     </section>
 
+    <!-- Phones only: the project timeline moves below the work so the case studies come first. -->
+    <section class="block tl-mobile" aria-labelledby="h-projects">
+      <h2 class="tl-label" id="h-projects">Projects</h2>
+      <ol class="timeline" data-stagger>
+        {timeline.map(([year, name, desc]) => (
+          <li class="row">
+            <span class="row-year">{year}</span>
+            <span class="row-name">{name}</span>
+            <span class="row-desc">{desc}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
     <!-- In the arsenal (633:9193 + 674:18567) -->
     <section class="block" aria-labelledby="h-arsenal">
       <h2 class="h-sec h-more" id="h-arsenal" data-split>In the arsenal...</h2>
       <div class="arsenal">
         <div class="ars-intro" data-reveal>
-          <Image class="mascot" src={mascot} alt="" width={176} height={176} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
-          <p class="ars-text">The tools, habits and instincts I bring to every team — from first framing to shipped screen.</p>
+          <Mascot />
+          <p class="ars-text">The tools, habits and instincts I bring to every team, from first framing to shipped screen.</p>
         </div>
         <ol class="skills" data-stagger>
           {skills.map(([name, tag], i) => (
@@ -240,74 +281,15 @@ const skills = [
     </section>
   </main>
 
+  <Footer wide />
+
   <DeckDialog />
 </Base>
 
 <style>
-  /* ---------- Nav ---------- */
-  .nav {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    height: 64px;
-    padding: 0 52px 0 60px;
-    background: var(--bg);
-  }
-  .nav-in {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1808px;
-    height: 100%;
-    margin: 0 auto;
-  }
-  .brand {
-    font-family: var(--font-mono);
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 22.5px;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .nav-link {
-    position: relative;
-    font-family: var(--font-mono);
-    font-size: 15px;
-    line-height: 22.5px;
-    text-transform: uppercase;
-    color: #1e2b3a;
-    white-space: pre;
-  }
-  /* ✦ drawn as a vector: Geist Mono has no star glyph, so the font fallback rendered it small.
-     Sized to the caps (10.9px), centred on them, one mono letter-space (9px) before the text. */
-  .spark {
-    display: inline-block;
-    width: 11.6px;
-    height: 11.6px;
-    margin-right: 9px;
-    vertical-align: -0.8px;
-    color: #000;
-    transition: transform 0.6s var(--ease-out);
-  }
-  .nav-link:hover .spark { transform: rotate(90deg) scale(1.15); }
-  .nav-text { position: relative; }
-  .nav-text::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.45s var(--ease-out);
-  }
-  .nav-link:hover .nav-text::after { transform: scaleX(1); transform-origin: left; }
-
   /* ---------- Page column ---------- */
   .home {
-    max-width: 1920px;
+    max-width: calc(1200px + 120px);
     margin: 0 auto;
     padding: 24px 60px 0;
   }
@@ -316,10 +298,10 @@ const skills = [
   /* ---------- Intro ---------- */
   .intro {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 24px;
     align-items: start;
-    height: 982.795px;
+    min-height: 982.795px;
     padding-top: 310.795px;
   }
   .intro-left { display: flex; flex-direction: column; gap: 24px; }
@@ -350,14 +332,24 @@ const skills = [
   }
   .intro-details dd.dd-strong { color: #32404f; }
   .timeline { display: flex; flex-direction: column; gap: 4px; }
+  .tl-mobile { display: none; }
+  .tl-label {
+    margin-bottom: 20px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.5);
+  }
+  /* On the 1200px column the timeline has ~588px, so rows wrap rather than run on one line. */
   .row {
     display: grid;
-    grid-template-columns: 104px 224px auto;
+    grid-template-columns: 64px minmax(120px, 0.9fr) 1.6fr;
     column-gap: 8px;
-    height: 24px;
+    min-height: 24px;
     font-size: 15px;
     line-height: 22.5px;
-    white-space: nowrap;
   }
   .row-year {
     margin-top: -0.75px;
@@ -366,7 +358,7 @@ const skills = [
     color: rgba(50, 64, 79, 0.58);
   }
   .row-name { color: var(--ink); }
-  .row-desc { margin: -0.75px 0 0 -6px; color: rgba(50, 64, 79, 0.58); }
+  .row-desc { margin-top: -0.75px; color: rgba(50, 64, 79, 0.58); }
 
   .block { scroll-margin-top: 40px; }
 
@@ -414,6 +406,10 @@ const skills = [
   }
   @keyframes pin-turn { to { transform: rotate(1turn); } }
   .ring { object-fit: contain; }
+  .arm :global(img) { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .hand-phone :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: calc(50.355 * 100cqw / var(--W)); }
+  .hand-grips { overflow: hidden; border-radius: calc(62.853 * 100cqw / var(--W)); }
+  .hand-grips :global(img) { position: absolute; left: -2.62%; top: 0; width: 105.51%; height: 100.88%; max-width: none; }
 
   /* ---------- Arsenal ---------- */
   .arsenal {
@@ -424,7 +420,6 @@ const skills = [
     padding: 40px 0 160px;
   }
   .ars-intro { display: flex; flex-direction: column; gap: 20px; }
-  .ars-intro :global(.mascot) { width: 176px; height: 176px; }
   .ars-text {
     max-width: 420px;
     font-size: 17px;
@@ -434,27 +429,24 @@ const skills = [
   }
   .skill {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     gap: 16px;
-    padding: 22px 0;
-    border-bottom: 1px solid rgba(50, 64, 79, 0.14);
+    padding: 13px 0;
   }
-  .skill:first-child { border-top: 1px solid rgba(50, 64, 79, 0.14); }
-  .skill-label { display: flex; align-items: baseline; min-width: 0; height: 27px; }
+  .skill-label { display: flex; align-items: baseline; min-width: 0; }
   .skill-n {
-    flex: 0 0 64px;
-    height: 23px;
+    flex: 0 0 48px;
     font-family: var(--font-mono);
-    font-size: 15px;
-    line-height: 22.5px;
+    font-size: 13px;
+    line-height: 20px;
     color: rgba(50, 64, 79, 0.45);
   }
   .skill-name {
     font-family: var(--font-display);
-    font-size: 24px;
-    line-height: 26.4px;
-    letter-spacing: -0.96px;
+    font-size: 20px;
+    line-height: 22px;
+    letter-spacing: -0.8px;
     color: var(--ink);
     white-space: nowrap;
     transition: transform 0.45s var(--ease-out);
@@ -469,42 +461,34 @@ const skills = [
     white-space: nowrap;
   }
 
-  /* ---------- Motion ---------- */
-  :global(.motion) .nav { animation: nav-drop 0.9s var(--ease-out) both; }
-  @keyframes nav-drop { from { opacity: 0; transform: translateY(-8px); } }
 
   /* ---------- Smaller screens ---------- */
-  @media (max-width: 1499px) {
-    .row { grid-template-columns: 64px minmax(120px, 0.9fr) 1.6fr; height: auto; min-height: 24px; white-space: normal; }
-    .row-desc { margin-left: 0; }
-  }
   @media (max-width: 1199px) {
-    .intro { grid-template-columns: 1fr; height: auto; padding: 120px 0 96px; row-gap: 56px; }
+    .intro { grid-template-columns: 1fr; min-height: 0; padding: 120px 0 96px; row-gap: 56px; }
   }
   @media (max-width: 959px) {
-    .nav { padding: 0 24px; }
     .home { padding: 16px 24px 0; }
     .h-case { padding: 16px 0 32px; }
     .h-more { padding: 72px 0 24px; }
     .arsenal { grid-template-columns: 1fr; row-gap: 40px; padding-bottom: 120px; }
   }
   @media (max-width: 759px) {
+    .tl-desk { display: none; }
+    .tl-mobile { display: block; padding-top: 96px; }
     .grid { grid-template-columns: 1fr; }
     .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
     .grid .col + .col { margin-top: 40px; }
     .intro { padding: 56px 0 64px; row-gap: 40px; }
     .intro-details dd { font-size: 16px; line-height: 24px; }
-    .skill-name { white-space: normal; font-size: 21px; line-height: 25px; }
-    .skill-label { height: auto; }
-    .skill { align-items: flex-start; }
-    .skill-tag { padding-top: 3px; }
+    .skill-name { white-space: normal; font-size: 19px; line-height: 23px; letter-spacing: -0.7px; }
+    .skill-tag { display: none; }
   }
   @media (max-width: 600px) {
-    .nav { padding: 0 16px; }
+    .intro-lede { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
     .home { padding: 8px 16px 0; }
     .row { grid-template-columns: 70px 1fr; row-gap: 0; padding-bottom: 6px; }
     .row-year { white-space: nowrap; }
     .row-desc { grid-column: 2; font-size: 14px; line-height: 20px; }
-    .skill-n { flex-basis: 44px; }
+    .skill-n { flex-basis: 40px; }
   }
 </style>

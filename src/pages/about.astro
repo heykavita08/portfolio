@@ -1,0 +1,222 @@
+---
+// About: Kavita's note, contact and resume, then a photo wall (field work, interests, certificates).
+// Built in the home page's system (no Figma frame): same nav, the shared 1200px column split in
+// two, mono labels.
+import Base from '../layouts/Base.astro';
+import HomeNav from '../components/home/HomeNav.astro';
+import PhotoWall from '../components/about/PhotoWall.astro';
+import Footer from '../components/Footer.astro';
+
+const EMAIL = 'heykavita08@gmail.com';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/kavita-tewari/';
+const INSTAGRAM_URL = 'https://www.instagram.com/rizzemble.life/';
+const RESUME_URL = '/resume.pdf';
+---
+<Base title="About — Kavita Tewari" description="Kavita Tewari, product designer with an engineering background: about, contact and resume.">
+  <HomeNav href="/#work" label="Work" />
+
+  <main class="about">
+    <section class="a-intro" aria-labelledby="a-title">
+      <div class="a-left">
+        <h1 class="a-label" id="a-title" data-reveal>About</h1>
+        <div class="a-body">
+          <p data-split>I design products, cook, lift weights, and collect interests I don’t have enough time for.</p>
+          <p data-split>I like making things that work well, feel right, and occasionally taste good.</p>
+        </div>
+      </div>
+
+      <aside class="a-contact" aria-label="Contact">
+        <dl class="a-details" data-stagger>
+          <div>
+            <dt>Email</dt>
+            <dd class="email-row">
+              <a class="a-link" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+              <button class="copy" type="button" data-copy={EMAIL} aria-label="Copy email address">
+                <svg class="i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5" /><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" /></svg>
+                <svg class="i-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12.5l4 4 9-9" /></svg>
+                <span class="copy-tip" aria-live="polite"></span>
+              </button>
+            </dd>
+          </div>
+          <div>
+            <dt>Elsewhere</dt>
+            <dd class="links-row">
+              <a class="a-link" href={LINKEDIN_URL} target="_blank" rel="noopener">LinkedIn <span class="ext" aria-hidden="true">↗</span></a>
+              <a class="a-link" href={INSTAGRAM_URL} target="_blank" rel="noopener">Instagram <span class="ext" aria-hidden="true">↗</span></a>
+            </dd>
+          </div>
+        </dl>
+        <a class="resume" href={RESUME_URL} target="_blank" rel="noopener" data-reveal>
+          Resume
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
+        </a>
+      </aside>
+    </section>
+
+    <section class="a-photos" aria-label="Photos">
+      <PhotoWall />
+    </section>
+  </main>
+
+  <Footer wide />
+</Base>
+
+<style>
+  /* One centred 1200px column for the note, contact and photo wall, so their edges line up. */
+  .about {
+    max-width: calc(1200px + 120px);
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  /* ---------- Intro ---------- */
+  .a-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    align-items: start;
+    padding: 200px 0 0;
+  }
+  .a-left { display: flex; flex-direction: column; }
+  .a-label, .a-details dt {
+    margin: 0;
+    font-weight: 400;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.5);
+  }
+  .a-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 560px;
+    margin-top: 16px;
+    font-size: 17px;
+    line-height: 25.5px;
+    letter-spacing: -0.34px;
+    color: rgba(50, 64, 79, 0.8);
+  }
+
+  /* ---------- Contact ---------- */
+  .a-contact { display: flex; flex-direction: column; align-items: flex-start; gap: 40px; }
+  .a-details { display: flex; flex-direction: column; gap: 28px; margin: 0; }
+  .a-details div { display: flex; flex-direction: column; gap: 8px; }
+  .a-details dd { margin: 0; font-size: 17px; line-height: 25.5px; letter-spacing: -0.34px; color: var(--ink); }
+  .email-row, .links-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .email-row { gap: 10px; }
+  .a-link {
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 1px) / 0 1px no-repeat;
+    transition: background-size 0.45s var(--ease-out);
+  }
+  .a-link:hover { background-size: 100% 1px; }
+  .ext { display: inline-block; color: var(--muted); transition: transform 0.45s var(--ease-out), color 0.3s ease; }
+  .a-link:hover .ext { transform: translate(2px, -2px); color: var(--ink); }
+
+  .copy {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .copy:hover { background: rgba(50, 64, 79, 0.06); color: var(--ink); }
+  .copy svg { grid-area: 1 / 1; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: opacity 0.2s ease, transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .copy .i-done { opacity: 0; transform: scale(0.4) rotate(-20deg); stroke-width: 1.8; }
+  .copy.is-copied { color: var(--ink); }
+  .copy.is-copied .i-copy { opacity: 0; transform: scale(0.6); }
+  .copy.is-copied .i-done { opacity: 1; transform: none; }
+  .copy:active svg { transform: scale(0.85); }
+  .copy-tip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 14px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    translate: -50% 4px;
+    pointer-events: none;
+    transition: opacity 0.2s ease, translate 0.3s var(--ease-out);
+  }
+  .copy-tip:not(:empty) { opacity: 1; translate: -50% 0; }
+
+  .resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 20px 0 24px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 22.5px;
+    text-transform: uppercase;
+    transition: background 0.3s ease, transform 0.45s var(--ease-out);
+  }
+  .resume svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.45s var(--ease-out); }
+  .resume:hover { background: #1e2b3a; transform: translateY(-2px); }
+  /* A soft band of light sweeps across on hover. */
+  .resume { position: relative; overflow: hidden; isolation: isolate; }
+  .resume::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.16) 50%, transparent 70%);
+    transform: translateX(-110%);
+    transition: transform 0.9s var(--ease-out);
+  }
+  .resume:hover::after { transform: translateX(110%); }
+  .resume:hover svg { transform: translate(2px, -2px); }
+
+  /* ---------- Photos ---------- */
+  .a-photos { padding: 160px 0 120px; }
+
+  @media (max-width: 1199px) {
+    .a-intro { grid-template-columns: 1fr; row-gap: 56px; padding-top: 120px; }
+    .a-contact { padding-top: 0; }
+  }
+  @media (max-width: 959px) {
+    .about { padding: 0 24px; }
+    .a-photos { padding: 96px 0 96px; }
+  }
+  @media (max-width: 600px) {
+    .about { padding: 0 16px; }
+    .a-intro { padding-top: 56px; row-gap: 40px; }
+    .a-photos { padding: 72px 0 72px; }
+  }
+</style>
+
+<script>
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    const tip = btn.querySelector<HTMLElement>('.copy-tip')!;
+    let t = 0;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy!);
+        tip.textContent = 'Copied';
+        btn.classList.add('is-copied');
+      } catch {
+        tip.textContent = 'Copy failed';
+      }
+      window.clearTimeout(t);
+      t = window.setTimeout(() => { tip.textContent = ''; btn.classList.remove('is-copied'); }, 1600);
+    });
+  }
+</script>

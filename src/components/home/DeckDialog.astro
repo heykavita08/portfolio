@@ -1,12 +1,12 @@
 ---
-// Opens a Figma deck in an on-page dialog (Figma annotation: "do not make them leave the site").
-// Any link with data-deck opens it; without JS the link still opens the deck in a new tab.
+// Opens external work (a Figma deck, a Behance project) in an on-page dialog, so visitors never leave
+// the site (Figma annotation). Any link with data-embed opens it; without JS the link opens in a new tab.
 ---
 <dialog class="deck" aria-label="Presentation">
   <button class="deck-close" type="button" aria-label="Close">
     <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
   </button>
-  <div class="deck-frame"><iframe title="Presentation" allowfullscreen loading="lazy"></iframe></div>
+  <div class="deck-frame"><iframe title="Presentation" allowfullscreen></iframe></div>
 </dialog>
 
 <style>
@@ -39,7 +39,6 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.14);
     color: #fff;
-    cursor: pointer;
     backdrop-filter: blur(8px);
     transition: background 0.2s ease, transform 0.3s var(--ease-out, ease);
   }
@@ -57,11 +56,14 @@
   dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
   dialog.addEventListener('close', () => { frame.src = 'about:blank'; });
 
-  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-deck]')) {
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-embed]')) {
     link.addEventListener('click', (e) => {
       if (typeof dialog.showModal !== 'function') return; // old browsers: follow the link
       e.preventDefault();
-      frame.src = `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(link.dataset.deck!)}`;
+      const title = link.dataset.embedTitle || 'Project';
+      dialog.setAttribute('aria-label', title);
+      frame.title = title;
+      frame.src = link.dataset.embed!;
       dialog.showModal();
     });
   }

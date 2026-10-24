@@ -1,0 +1,72 @@
+---
+// VEYRA: the project is ongoing, so its card opens a short holding page that points to the JB Air
+// case study instead. Same nav as home, the case studies' 704px reading column.
+import Base from '../../layouts/Base.astro';
+import HomeNav from '../../components/home/HomeNav.astro';
+import WorkCard from '../../components/home/WorkCard.astro';
+import { caseCards } from '../../data/case-cards';
+
+const { slug, logo, ...jb } = caseCards.find((c) => c.slug === 'jb-air')!;
+---
+<Base title="VEYRA — Kavita Tewari" description="VEYRA, a pet tracker app and wearable: an ongoing project. The case study is coming soon.">
+  <HomeNav href="/#work" label="Work" />
+
+  <main class="soon">
+    <section class="soon-note" aria-labelledby="soon-title">
+      <p class="soon-label" data-reveal>VEYRA • Ongoing 2026</p>
+      <h1 class="soon-title" id="soon-title" data-split>Pet tracker app + wearable</h1>
+      <p class="soon-body" data-reveal>An ongoing project. The case study is coming soon.</p>
+    </section>
+
+    <section class="soon-next" aria-labelledby="soon-next-label">
+      <p class="soon-label" id="soon-next-label" data-reveal>Meanwhile, read <span class="arrow" aria-hidden="true">→</span></p>
+      <div data-reveal>
+        <WorkCard {...jb} href={`/work/${slug}`} />
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .soon {
+    max-width: calc(704px + 120px);
+    margin: 0 auto;
+    padding: 200px 60px 160px;
+  }
+  .soon-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: rgba(50, 64, 79, 0.5);
+  }
+  .soon-title {
+    margin-top: 16px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 44px;
+    letter-spacing: -1.6px;
+    color: #1e2b3a;
+  }
+  .soon-body {
+    margin-top: 16px;
+    font-size: 17px;
+    line-height: 25.5px;
+    letter-spacing: -0.34px;
+    color: rgba(50, 64, 79, 0.8);
+  }
+  .soon-next { margin-top: 120px; }
+  .soon-next .soon-label { margin-bottom: 16px; }
+  .arrow { display: inline-block; margin-left: 4px; transition: transform 0.45s var(--ease-out); }
+  .soon-next:hover .arrow { transform: translateX(4px); }
+
+  @media (max-width: 959px) {
+    .soon { padding: 120px 24px 120px; }
+  }
+  @media (max-width: 600px) {
+    .soon { padding: 72px 16px 96px; }
+    .soon-title { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
+    .soon-next { margin-top: 80px; }
+  }
+</style>

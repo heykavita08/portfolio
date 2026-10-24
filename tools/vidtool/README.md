@@ -19,6 +19,7 @@ Settings used for PeakPause:
 - Launch film: `840 1500 audio` (never dissolve a produced edit)
 
 - Recording of a playing video with freezes / uneven capture (Yucatan card): `1600 2600 even=24`, no `cut` (fast motion isn't a cut)
+- Ambient background that must loop without a jump (prosthetic hand card): `650 1000 loop=1.5 lum`. `loop=<sec>` dissolves the last <sec> into the first; `lum` bakes Figma's Luminosity blend (greyscale, 0.3/0.59/0.11) so the video matches the poster.
 
 Gotchas:
 - macOS recording filenames contain a narrow no-break space before AM/PM, so match files with `grep -F "at 4.24.47"`, not the full name.

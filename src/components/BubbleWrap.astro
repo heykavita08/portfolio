@@ -1,0 +1,337 @@
+---
+// A strip of bubble wrap for the footer: press a bubble to pop it (drag with a mouse to pop a row),
+// with a synthesized pop sound and a light haptic tap on phones. The popped count is kept across
+// visits (localStorage). Reset re-inflates the sheet, and a fully popped sheet refills on its own.
+// Arrow keys move between bubbles, Enter/Space pops. Sound can be muted; the choice is remembered.
+const ROWS = 3;
+const MAX_COLS = 48; // enough for the widest footer; JS hides what doesn't fit in ROWS rows
+---
+<section class="bw" aria-label="Bubble wrap" data-rows={ROWS}>
+  <div class="bw-sheet" role="group" aria-label="Bubbles">
+    {Array.from({ length: ROWS * MAX_COLS }, (_, i) => (
+      <button class="bw-b" type="button" tabindex={i === 0 ? 0 : -1} aria-label="Bubble" aria-pressed="false" style={`--r:${(i * 137) % 360}deg`}></button>
+    ))}
+  </div>
+
+  <div class="bw-bar">
+    <p class="bw-count"><span class="bw-n" aria-live="polite">0</span> <span class="bw-label">Bubbles popped</span></p>
+    <div class="bw-actions">
+      <button class="bw-sound" type="button" aria-label="Sound" aria-pressed="true" data-tip="Sound on">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+          <path class="on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+          <path class="off" d="M16 9.5l5 5M21 9.5l-5 5" />
+        </svg>
+      </button>
+      <button class="bw-reset" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4.5H9" /></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  .bw { --s: 52px; --gap: 8px; margin-bottom: 72px; }
+
+  .bw-sheet {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--s));
+    grid-auto-rows: var(--s);
+    justify-content: space-between;
+    gap: var(--gap);
+    height: calc(var(--s) * 3 + var(--gap) * 2);
+    overflow: hidden;
+    padding: 14px;
+    box-sizing: content-box;
+    border-radius: 20px;
+    background:
+      linear-gradient(115deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.45) 70%, rgba(255, 255, 255, 0)),
+      #eceff2;
+    box-shadow: inset 0 1px 2px rgba(50, 64, 79, 0.06);
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .bw-b[hidden] { display: none; }
+
+  /* A full bubble: a clear dome catching light top-left. */
+  .bw-b {
+    position: relative;
+    width: var(--s);
+    height: var(--s);
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 1) 0 7%, rgba(255, 255, 255, 0) 20%),
+      radial-gradient(circle at 66% 74%, rgba(255, 255, 255, 0.7) 0 6%, rgba(255, 255, 255, 0) 16%),
+      radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.55), rgba(226, 231, 236, 0.75) 62%, rgba(196, 204, 212, 0.8) 100%);
+    box-shadow:
+      inset 0 -5px 9px rgba(255, 255, 255, 0.85),
+      inset 0 5px 10px rgba(110, 122, 135, 0.16),
+      0 2px 5px rgba(50, 64, 79, 0.1),
+      0 1px 1px rgba(50, 64, 79, 0.06);
+    transition: transform 0.25s var(--ease-out, ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bw-b:hover:not(.popped) { transform: scale(1.04); }
+  .bw-b:active:not(.popped) { transform: scale(0.9); transition-duration: 0.06s; }
+  .bw-b:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* Popped: the dome collapses into crumpled film. */
+  .bw-b::after {
+    content: '';
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    /* Crumpled-plastic texture, rasterised once by the browser and shared by every bubble. */
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='7'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='2.2'%3E%3CfeDistantLight azimuth='235' elevation='48'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23c)'/%3E%3C/svg%3E") center / cover;
+    rotate: var(--r);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .bw-b.popped {
+    transform: scale(0.94);
+    background: radial-gradient(circle at 50% 50%, rgba(236, 239, 242, 0.6), rgba(214, 220, 226, 0.7));
+    box-shadow: inset 0 1px 3px rgba(50, 64, 79, 0.14), 0 0 0 1px rgba(50, 64, 79, 0.04);
+    border-color: rgba(255, 255, 255, 0.6);
+    animation: bw-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .bw-b.popped::after { opacity: 0.75; }
+  @keyframes bw-pop { from { transform: scale(0.8); } }
+
+  /* Refill: bubbles puff back up in a wave. */
+  .bw-b.inflating { animation: bw-inflate 0.5s var(--ease-out, ease) var(--d, 0ms) both; }
+  @keyframes bw-inflate { from { transform: scale(0.9); opacity: 0.5; } }
+
+  .bw-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .bw-count { display: flex; align-items: baseline; gap: 10px; }
+  .bw-n {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 32px;
+    letter-spacing: -0.8px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .bw-n.bump { animation: bw-bump 0.3s var(--ease-out, ease); }
+  @keyframes bw-bump { 40% { transform: translateY(-3px); } }
+  .bw-n { display: inline-block; }
+  .bw-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bw-actions { display: flex; align-items: center; gap: 8px; }
+  .bw-sound, .bw-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    transition: background 0.25s ease, transform 0.45s var(--ease-out, ease);
+  }
+  .bw-sound { width: 40px; padding: 0; }
+  .bw-reset { padding: 0 16px 0 12px; font-family: var(--font-inter); font-size: 15px; }
+  .bw-sound:hover, .bw-reset:hover { background: rgba(50, 64, 79, 0.04); transform: translateY(-1px); }
+  .bw-sound svg, .bw-reset svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .bw-reset:active svg { rotate: -180deg; transition: rotate 0.4s var(--ease-out, ease); }
+  .bw-sound .off, .bw-sound[aria-pressed='false'] .on { display: none; }
+  .bw-sound[aria-pressed='false'] .off { display: inline; }
+
+  @media (max-width: 600px) {
+    .bw { --s: 46px; --gap: 6px; margin-bottom: 48px; }
+    .bw-sheet { padding: 10px; border-radius: 16px; }
+    .bw-n { font-size: 24px; line-height: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bw-b, .bw-b.popped, .bw-b.inflating, .bw-n.bump { animation: none; transition: none; }
+  }
+</style>
+
+<script>
+  const COUNT_KEY = 'bubbles-popped';
+  const SOUND_KEY = 'bubbles-sound';
+  const store = {
+    get(k: string) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+  };
+
+  // ---- Sound: a short filtered noise snap plus a small falling thump, varied per pop. ----
+  let ctx: AudioContext | null = null;
+  let noise: AudioBuffer | null = null;
+  let soundOn = store.get(SOUND_KEY) !== 'off';
+
+  function audio() {
+    if (!ctx) {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.12), ctx.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+
+  function popSound() {
+    if (!soundOn) return;
+    const ac = audio();
+    if (!ac || !noise) return;
+    const t = ac.currentTime + 0.001;
+    const out = ac.createGain();
+    out.gain.value = 0.55;
+    out.connect(ac.destination);
+
+    const snap = ac.createBufferSource();
+    snap.buffer = noise;
+    snap.playbackRate.value = 0.85 + Math.random() * 0.4;
+    const band = ac.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = 1300 + Math.random() * 1400;
+    band.Q.value = 1.1;
+    const sg = ac.createGain();
+    sg.gain.setValueAtTime(0.0001, t);
+    sg.gain.exponentialRampToValueAtTime(1, t + 0.002);
+    sg.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
+    snap.connect(band).connect(sg).connect(out);
+    snap.start(t);
+    snap.stop(t + 0.12);
+
+    const body = ac.createOscillator();
+    body.type = 'sine';
+    body.frequency.setValueAtTime(230 + Math.random() * 90, t);
+    body.frequency.exponentialRampToValueAtTime(70, t + 0.06);
+    const bg = ac.createGain();
+    bg.gain.setValueAtTime(0.0001, t);
+    bg.gain.exponentialRampToValueAtTime(0.45, t + 0.003);
+    bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+    body.connect(bg).connect(out);
+    body.start(t);
+    body.stop(t + 0.1);
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('.bw')) {
+    const rows = Number(root.dataset.rows) || 3;
+    const sheet = root.querySelector<HTMLElement>('.bw-sheet')!;
+    const all = [...sheet.querySelectorAll<HTMLButtonElement>('.bw-b')];
+    const nEl = root.querySelector<HTMLElement>('.bw-n')!;
+    const soundBtn = root.querySelector<HTMLButtonElement>('.bw-sound')!;
+    const resetBtn = root.querySelector<HTMLButtonElement>('.bw-reset')!;
+    let cols = 1;
+    let live: HTMLButtonElement[] = [];
+    let count = Number(store.get(COUNT_KEY)) || 0;
+    let refillTimer = 0;
+
+    const showCount = () => { nEl.textContent = count.toLocaleString(); };
+    showCount();
+
+    // Only as many bubbles as fit in `rows` rows are live; the rest are hidden.
+    const layout = () => {
+      const c = getComputedStyle(sheet).gridTemplateColumns.split(' ').length;
+      if (c === cols && live.length) return;
+      cols = c;
+      live = all.slice(0, cols * rows);
+      all.forEach((b, i) => { b.hidden = i >= live.length; });
+      if (!live.some((b) => b.tabIndex === 0)) live[0].tabIndex = 0;
+    };
+    layout();
+    new ResizeObserver(layout).observe(sheet);
+
+    const setSound = (on: boolean) => {
+      soundOn = on;
+      soundBtn.setAttribute('aria-pressed', String(on));
+      soundBtn.dataset.tip = on ? 'Sound on' : 'Sound off';
+      store.set(SOUND_KEY, on ? 'on' : 'off');
+    };
+    setSound(soundOn);
+    soundBtn.addEventListener('click', () => { setSound(!soundOn); if (soundOn) popSound(); });
+
+    const refill = () => {
+      window.clearTimeout(refillTimer);
+      live.forEach((b, i) => {
+        if (!b.classList.contains('popped')) return;
+        b.classList.remove('popped');
+        b.setAttribute('aria-pressed', 'false');
+        b.style.setProperty('--d', `${(i % cols) * 18 + Math.floor(i / cols) * 40}ms`);
+        b.classList.add('inflating');
+        b.addEventListener('animationend', () => b.classList.remove('inflating'), { once: true });
+      });
+    };
+    resetBtn.addEventListener('click', refill);
+
+    const pop = (b: HTMLButtonElement) => {
+      if (b.classList.contains('popped') || b.hidden) return;
+      b.classList.remove('inflating');
+      b.classList.add('popped');
+      b.setAttribute('aria-pressed', 'true');
+      popSound();
+      if ('vibrate' in navigator) navigator.vibrate?.(8);
+      count += 1;
+      store.set(COUNT_KEY, String(count));
+      showCount();
+      nEl.classList.remove('bump');
+      void nEl.offsetWidth;
+      nEl.classList.add('bump');
+      if (live.every((x) => x.classList.contains('popped'))) refillTimer = window.setTimeout(refill, 1200);
+    };
+
+    // Press to pop; with a mouse, keep the button down and sweep to pop a row.
+    let sweeping = false;
+    sheet.addEventListener('pointerdown', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bw-b');
+      if (!b) return;
+      if (e.pointerType === 'mouse') { sweeping = true; e.preventDefault(); }
+      pop(b);
+    });
+    sheet.addEventListener('pointerover', (e) => {
+      if (!sweeping) return;
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bw-b');
+      if (b) pop(b);
+    });
+    window.addEventListener('pointerup', () => { sweeping = false; });
+
+    // Keyboard: Enter/Space pops (button click), arrows move a roving focus.
+    sheet.addEventListener('click', (e) => {
+      if ((e as PointerEvent).detail !== 0) return; // pointer clicks already popped on pointerdown
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bw-b');
+      if (b) pop(b);
+    });
+    sheet.addEventListener('keydown', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bw-b');
+      if (!b) return;
+      const i = live.indexOf(b);
+      const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols }[e.key];
+      if (step === undefined || i < 0) return;
+      const next = live[i + step];
+      if (!next) return;
+      e.preventDefault();
+      b.tabIndex = -1;
+      next.tabIndex = 0;
+      next.focus();
+    });
+  }
+</script>

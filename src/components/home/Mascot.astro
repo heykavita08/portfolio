@@ -1,0 +1,134 @@
+---
+// The arsenal mascot, which takes turns with the tools Kavita works with (Figma 742:24308). One at a
+// time, each slides into the mascot's 176px spot, as an auto carousel that loops back to the mascot.
+// The dotted A is white with a difference blend in Figma; dotted-a.png bakes that result against --bg.
+// The window is wider than the slot (EDGE on each side) and fades out there, so slides glide in and
+// out softly without the mascot itself ever being masked at rest.
+import { Image } from 'astro:assets';
+import mascot from '../../assets/home/mascot.png';
+import figma from '../../assets/home/tools/figma.png';
+import dottedA from '../../assets/home/tools/dotted-a.png';
+import codex from '../../assets/home/tools/codex.png';
+import shopify from '../../assets/home/tools/shopify.png';
+import gsc from '../../assets/home/tools/gsc.png';
+import framer from '../../assets/home/tools/framer.png';
+import redV from '../../assets/home/tools/red-v.png';
+
+// Trimmed to their visible edges and sized to sit smaller than the mascot: marks ~48px tall,
+// app tiles 56px, the Search Console wordmark 100px wide.
+const logos = [
+  { src: figma, w: 32, h: 48 },
+  { src: dottedA, w: 52, h: 51 },
+  { src: codex, w: 56, h: 56 },
+  { src: shopify, w: 44, h: 50 },
+  { src: gsc, w: 100, h: 42 },
+  { src: framer, w: 33, h: 49 },
+  { src: redV, w: 56, h: 57 },
+];
+// mascot, the logos, then the mascot again so the loop can snap back invisibly.
+const slides = logos.length + 2;
+---
+<div class="mascot-wrap">
+  <div class="window">
+    <div class="track" style={`--n:${slides}`}>
+      <span class="slide"><Image class="mascot" src={mascot} alt="" width={176} height={176} densities={[1, 2]} format="webp" quality={90} loading="lazy" /></span>
+      {logos.map(({ src, w, h }) => (
+        <span class="slide" aria-hidden="true">
+          <Image class="logo" src={src} alt="" width={w} height={h} densities={[1, 2]} format="webp" quality={90} loading="lazy" style={`width:${w}px;height:${h}px`} />
+        </span>
+      ))}
+      <span class="slide" aria-hidden="true"><Image class="mascot" src={mascot} alt="" width={176} height={176} densities={[1, 2]} format="webp" quality={90} loading="lazy" /></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .mascot-wrap {
+    --edge: 64px;
+    position: relative;
+    width: 176px;
+    height: 176px;
+  }
+  .window {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--edge) * -1);
+    right: calc(var(--edge) * -1);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--edge), #000 calc(100% - var(--edge)), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 var(--edge), #000 calc(100% - var(--edge)), transparent);
+  }
+  .track {
+    --i: 0;
+    display: flex;
+    width: calc(var(--n) * 100%);
+    height: 100%;
+    transform: translate3d(calc(var(--i) * -100% / var(--n)), 0, 0);
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .track.snap { transition: none; }
+  .slide {
+    flex: 0 0 calc(100% / var(--n));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  .slide :global(.mascot) { display: block; width: 176px; height: 176px; }
+  .slide :global(.logo) { display: block; flex: none; }
+</style>
+
+<script>
+  const HOLD_MASCOT = 3200; // ms on the mascot, including the slide
+  const HOLD = 2200; // ms per logo, including the slide
+  const FIRST = 1200; // ms after the mascot comes into view
+
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    for (const wrap of document.querySelectorAll<HTMLElement>('.mascot-wrap')) {
+      const track = wrap.querySelector<HTMLElement>('.track')!;
+      const last = track.children.length - 1;
+      let i = 0;
+      let timer = 0;
+      let inView = false;
+
+      const go = (n: number) => { i = n; track.style.setProperty('--i', String(n)); };
+      const snapHome = () => {
+        track.classList.add('snap');
+        go(0);
+        void track.offsetWidth;
+        track.classList.remove('snap');
+      };
+      track.addEventListener('transitionend', () => { if (i >= last) snapHome(); });
+
+      const next = () => {
+        if (i >= last) snapHome(); // in case transitionend never fired (tab hidden mid-slide)
+        go(i + 1);
+      };
+      const holdFor = () => (i === 0 || i === last ? HOLD_MASCOT : HOLD);
+      const stop = () => window.clearTimeout(timer);
+      const start = (delay: number) => {
+        stop();
+        timer = window.setTimeout(function loop() { next(); timer = window.setTimeout(loop, holdFor()); }, delay);
+      };
+
+      new IntersectionObserver(([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView && !document.hidden) start(i === 0 ? FIRST : HOLD);
+        else stop();
+      }, { threshold: 0.4 }).observe(wrap);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else if (inView) start(HOLD);
+      });
+
+      // Hovering skips ahead to the next slide.
+      wrap.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse' || !inView) return;
+        next();
+        start(holdFor());
+      });
+    }
+  }
+</script>

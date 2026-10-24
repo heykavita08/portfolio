@@ -1,0 +1,44 @@
+---
+// End of a case study: the next one, shown as its home-page card (same poster, video and caption),
+// in the home page's order (Cooktop → PeakPause → JB Air → back to Cooktop).
+import { Image } from 'astro:assets';
+import WorkCard from '../home/WorkCard.astro';
+import whirlpoolLogo from '../../assets/home/cards/whirlpool-logo.png';
+import { caseCards as cases, type CaseSlug } from '../../data/case-cards';
+
+interface Props { current: CaseSlug }
+const { current } = Astro.props;
+
+const i = cases.findIndex((c) => c.slug === current);
+const { slug, logo, ...next } = cases[(i + 1) % cases.length];
+---
+<section class="next" aria-labelledby="next-label">
+  <p class="next-label" id="next-label">Next case study <span class="arrow" aria-hidden="true">→</span></p>
+  <WorkCard {...next} href={`/work/${slug}`}>
+    {logo && (
+      <span slot="overlay" class="ov ov-logo" style="--x:208;--y:193;--w:472.843;--h:161.762">
+        <Image src={whirlpoolLogo} alt="" width={473} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+      </span>
+    )}
+  </WorkCard>
+</section>
+
+<style>
+  .next { margin-top: 120px; }
+  .next-label {
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .arrow { display: inline-block; margin-left: 4px; transition: transform 0.45s var(--ease-out); }
+  .next:hover .arrow { transform: translateX(4px); }
+  .ov-logo { overflow: hidden; }
+  .ov-logo :global(img) { position: absolute; left: 0; top: -98.37%; width: 100%; height: 292.31%; max-width: none; }
+
+  @media (max-width: 600px) {
+    .next { margin-top: 80px; }
+  }
+</style>

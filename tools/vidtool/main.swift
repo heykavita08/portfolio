@@ -59,11 +59,17 @@ Task {
       let out = URL(fileURLWithPath: args[3])
       let targetW = Int(args[4])!
       let kbps = Int(args[5])!
-      // Extra options: audio | cut=<mad> | fade=<frames> | end=<seconds> | even=<fps>
+      // Extra options: audio | cut=<mad> | fade=<frames> | end=<seconds> | even=<fps> | loop=<seconds> | lum
       //   even=<fps>: ignore the source timestamps and show every captured frame for exactly one tick at
       //   <fps>. For screen recordings of playing video with uneven capture (freezes, dropped ticks).
+      //   loop=<seconds>: seamless loop. Output starts <seconds> in, and the last <seconds> dissolve into
+      //   the opening <seconds>, so the final frame flows straight into the first. For ambient backgrounds.
+      //   lum: greyscale with Figma's luminosity weights (0.3/0.59/0.11), i.e. a layer set to the
+      //   Luminosity blend mode over white, baked in so the video matches the Figma poster.
       var keepAudio = false, cutThreshold = 0.0, fadeFrames = 9, endAt = Double.infinity
       var evenFps: Double? = nil
+      var loopSec = 0.0
+      var lum = false
       for opt in args.dropFirst(6) {
         let kv = opt.split(separator: "=", maxSplits: 1).map(String.init)
         switch kv[0] {
@@ -72,6 +78,8 @@ Task {
         case "fade": fadeFrames = Int(kv[1])!
         case "end": endAt = Double(kv[1])!
         case "even": evenFps = Double(kv[1])!
+        case "loop": loopSec = Double(kv[1])!
+        case "lum": lum = true
         default: fail("unknown option \(opt)")
         }
       }
@@ -113,6 +121,19 @@ Task {
       // No colour management: blended frames must match untouched frames bit for bit.
       let ci = CIContext(options: [.workingColorSpace: NSNull(), .outputColorSpace: NSNull(), .cacheIntermediates: false])
       writer.add(vIn)
+      let lumRow = CIVector(x: 0.3, y: 0.59, z: 0.11, w: 0)
+      func shade(_ img: CIImage) -> CIImage {
+        guard lum else { return img }
+        return img.applyingFilter("CIColorMatrix", parameters: ["inputRVector": lumRow, "inputGVector": lumRow, "inputBVector": lumRow])
+      }
+      // Appends a frame, routing it through the luminosity matrix when `lum` is on.
+      func put(_ px: CVPixelBuffer, _ time: CMTime) {
+        guard lum else { adaptor.append(px, withPresentationTime: time); return }
+        var outPx: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &outPx)
+        ci.render(shade(CIImage(cvPixelBuffer: px)), to: outPx!)
+        adaptor.append(outPx!, withPresentationTime: time)
+      }
 
       var aOut: AVAssetReaderTrackOutput?
       var aIn: AVAssetWriterInput?
@@ -151,6 +172,16 @@ Task {
       var blendFrom: CIImage? = nil
       var blendLeft = 0
       var cuts = 0
+      // loop=: the opening ticks are held back (copied, since reader buffers are recycled) and later
+      // blended under the tail. totalTicks stops a little before the source ends so the tail is complete.
+      var loopTicks = 0, totalTicks = Int.max
+      var loopBuf: [CIImage] = []
+      if loopSec > 0 {
+        let d = endAt.isFinite ? endAt : try await asset.load(.duration).seconds
+        totalTicks = Int((d - 0.1) * fps)
+        loopTicks = Int(loopSec * fps)
+        if loopTicks * 2 >= totalTicks { fail("loop longer than half the clip") }
+      }
 
       let group = DispatchGroup()
       group.enter()
@@ -181,6 +212,34 @@ Task {
             }
           }
           let px = CMSampleBufferGetImageBuffer(current)!
+          if loopTicks > 0 {
+            if k >= totalTicks { vIn.markAsFinished(); group.leave(); return }
+            let target = shade(CIImage(cvPixelBuffer: px))
+            if k < loopTicks {
+              var copy: CVPixelBuffer?
+              CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &copy)
+              ci.render(target, to: copy!)
+              loopBuf.append(CIImage(cvPixelBuffer: copy!))
+              k += 1
+              continue
+            }
+            let time = CMTime(value: CMTimeValue(outFrames), timescale: CMTimeScale(fps))
+            let tailStart = totalTicks - loopTicks
+            if k >= tailStart {
+              let j = k - tailStart
+              let p = Double(j + 1) / Double(loopTicks + 1)
+              let eased = p * p * (3 - 2 * p)
+              let img = target.applyingFilter("CIDissolveTransition", parameters: ["inputTargetImage": loopBuf[j], "inputTime": eased]).cropped(to: target.extent)
+              var outPx: CVPixelBuffer?
+              CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &outPx)
+              ci.render(img, to: outPx!)
+              adaptor.append(outPx!, withPresentationTime: time)
+            } else {
+              put(px, time)
+            }
+            k += 1; outFrames += 1
+            continue
+          }
           // Hard cut? Dissolve from what was last shown into the new frame.
           if changed && cutThreshold > 0 {
             let g = lumaGrid(px)
@@ -188,7 +247,7 @@ Task {
             prevGrid = g
           }
           let time = CMTime(value: CMTimeValue(k), timescale: CMTimeScale(fps))
-          let target = CIImage(cvPixelBuffer: px)
+          let target = shade(CIImage(cvPixelBuffer: px))
           if blendLeft > 0, let from = blendFrom {
             let p = 1 - Double(blendLeft) / Double(fadeFrames + 1)
             let eased = p * p * (3 - 2 * p)
@@ -200,7 +259,7 @@ Task {
             lastOut = img // keep the expression, not the pooled buffer (it gets recycled)
             blendLeft -= 1
           } else {
-            adaptor.append(px, withPresentationTime: time)
+            put(px, time)
             lastOut = target
           }
           k += 1; outFrames += 1
@@ -224,7 +283,7 @@ Task {
       }
 
       group.wait()
-      writer.endSession(atSourceTime: CMTime(value: CMTimeValue(k), timescale: CMTimeScale(fps)))
+      writer.endSession(atSourceTime: CMTime(value: CMTimeValue(loopTicks > 0 ? outFrames : k), timescale: CMTimeScale(fps)))
       await writer.finishWriting()
       if writer.status != .completed { fail("write failed: \(String(describing: writer.error))") }
       let bytes = (try FileManager.default.attributesOfItem(atPath: out.path)[.size] as? Int) ?? 0
