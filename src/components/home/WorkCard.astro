@@ -76,6 +76,25 @@ const hasOverlay = Astro.slots.has('overlay');
     container: card / inline-size;
   }
   .card :global(.card-media) { width: min(var(--mw), 100%); }
+
+  /* Soft rounded media with a faint hairline drawn on top, so posters with a baked-in Figma border
+     don't show clipped corners. */
+  .card { --radius: 16px; }
+  .card :global(.card-media),
+  .card :global(.vmedia),
+  .cbox { border-radius: var(--radius); }
+  .card :global(.vmedia) { isolation: isolate; }
+  .card :global(.vmedia)::after,
+  .cbox::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(50, 64, 79, 0.08);
+    pointer-events: none;
+  }
+  @media (max-width: 759px) { .card { --radius: 12px; } }
   .cbox {
     position: relative;
     aspect-ratio: var(--mratio);

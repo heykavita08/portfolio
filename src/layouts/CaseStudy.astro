@@ -23,7 +23,7 @@ const { title, description, sections } = Astro.props;
 const current = Astro.url.pathname.split('/').filter(Boolean)[1] as CaseSlug;
 ---
 <Base title={title} description={description}>
-  <HomeNav href="/about" label="About & contact" />
+  <HomeNav href="/about" label="Let’s talk" />
   <div class="body">
     <aside class="sidebar">
       <a class="back" href="/#work"><span class="arrow" aria-hidden="true">←</span> Back</a>

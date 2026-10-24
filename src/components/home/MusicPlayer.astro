@@ -1,0 +1,169 @@
+---
+// A small music pill for the nav: an iridescent disc that spins while playing, notes that bob, and
+// a thin progress line. Click to play or pause (the volume fades in and out). The track keeps
+// going across pages: its time and state are saved on leave and picked up on the next page.
+// Track: "Washed Up" by HoliznaCC0, CC0 1.0 (public domain), from Free Music Archive:
+// https://freemusicarchive.org/music/holiznacc0/ocean-memory-lo-fi-chill/washed-up/
+const TRACK = { src: '/audio/washed-up.m4a', title: 'Washed Up', artist: 'HoliznaCC0' };
+---
+<div class="player" data-tip={`${TRACK.title} · ${TRACK.artist}`}>
+  <button class="pl-btn" type="button" aria-pressed="false" aria-label={`Play music: ${TRACK.title} by ${TRACK.artist}`}>
+    <span class="disc" aria-hidden="true"><span class="disc-hub"></span></span>
+    <span class="pl-right" aria-hidden="true">
+      <svg class="notes" viewBox="0 0 30 16">
+        <path class="n n1" d="M7 2.5v8.4a2.4 2.4 0 1 1-1.5-2.2V1.8l5.2-1.3v1.7z" />
+        <path class="n n2" d="M18 3v7.7a2.2 2.2 0 1 1-1.4-2V4.2l6.2-1.6v7.1a2.2 2.2 0 1 1-1.4-2V4.4z" />
+      </svg>
+      <span class="bar"><span class="bar-fill"></span></span>
+    </span>
+  </button>
+  <audio src={TRACK.src} preload="none" loop></audio>
+</div>
+
+<style>
+  .player { position: relative; }
+  .pl-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 3px 12px 3px 3px;
+    border: 0;
+    border-radius: 999px;
+    background: #ecedf1;
+    transition: background 0.3s ease, transform 0.45s var(--ease-out);
+  }
+  .pl-btn:hover { background: #e6e7ec; transform: translateY(-1px); }
+  .pl-btn:active { transform: scale(0.97); }
+
+  /* The disc: cool blue iridescent rings, a soft hub and a tiny hole. */
+  .disc {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, transparent 0 13%, rgba(255, 255, 255, 0.55) 14% 15%, transparent 16% 34%, rgba(255, 255, 255, 0.35) 35% 36%, transparent 37%),
+      conic-gradient(from 210deg, #cfe0fb, #8fb6f2, #eef5ff, #b7d0f7, #6f9fe8, #d6e6fc, #f4f8ff, #cfe0fb);
+    box-shadow: 0 2px 6px rgba(30, 43, 58, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    animation: disc-spin 3.2s linear infinite;
+    animation-play-state: paused;
+  }
+  .disc-hub {
+    position: absolute;
+    inset: 36%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ecedf1 0 30%, #93aed6 32% 40%, #d5e2f5 42%);
+    box-shadow: inset 0 0 0 1px rgba(30, 43, 58, 0.08);
+  }
+  @keyframes disc-spin { to { transform: rotate(360deg); } }
+
+  .pl-right { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 32px; }
+  .notes { display: block; width: 26px; height: 14px; overflow: visible; fill: #8a9099; }
+  .n { transform-box: fill-box; transform-origin: center; }
+  .bar { width: 100%; }
+  .bar { position: relative; height: 2px; border-radius: 2px; background: rgba(50, 64, 79, 0.12); overflow: hidden; }
+  .bar-fill { position: absolute; inset: 0; background: rgba(50, 64, 79, 0.45); transform-origin: left; transform: scaleX(var(--p, 0)); }
+
+  /* Playing */
+  .player.is-playing .disc { animation-play-state: running; }
+  .player.is-playing .n { animation: note-bob 1.6s ease-in-out infinite; }
+  .player.is-playing .n2 { animation-delay: -0.8s; }
+  @keyframes note-bob { 50% { transform: translateY(-2px) rotate(-8deg); } }
+
+  /* Track name on hover, like the footer icons. */
+  .player::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 14px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.3s var(--ease-out);
+  }
+  .player:hover::after, .player:has(.pl-btn:focus-visible)::after { opacity: 1; transform: none; }
+
+  @media (max-width: 600px) {
+    .pl-btn { height: 36px; padding: 3px; }
+    .disc { width: 30px; height: 30px; }
+    .pl-right { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .player.is-playing .n { animation: none; }
+    .player.is-playing .disc { animation-duration: 12s; }
+  }
+</style>
+
+<script>
+  const KEY = 'nav-music';
+  const VOL = 0.45;
+  for (const root of document.querySelectorAll<HTMLElement>('.player')) {
+    const btn = root.querySelector<HTMLButtonElement>('.pl-btn')!;
+    const audio = root.querySelector('audio')!;
+    let fade = 0;
+
+    const setUi = (playing: boolean) => {
+      root.classList.toggle('is-playing', playing);
+      btn.setAttribute('aria-pressed', String(playing));
+      btn.setAttribute('aria-label', btn.getAttribute('aria-label')!.replace(/^(Play|Pause) music/, playing ? 'Pause music' : 'Play music'));
+    };
+    let settle = 0;
+    const ramp = (to: number, ms: number) => {
+      cancelAnimationFrame(fade);
+      window.clearTimeout(settle);
+      const from = audio.volume, t0 = performance.now();
+      const step = (t: number) => {
+        const k = Math.min(1, (t - t0) / ms);
+        audio.volume = from + (to - from) * k;
+        if (k < 1) fade = requestAnimationFrame(step);
+      };
+      fade = requestAnimationFrame(step);
+      // Land on the target even if animation frames are paused (background tab).
+      settle = window.setTimeout(() => { cancelAnimationFrame(fade); audio.volume = to; }, ms + 50);
+    };
+    const play = async () => {
+      audio.volume = 0;
+      try {
+        await audio.play();
+        setUi(true);
+        ramp(VOL, 600);
+      } catch {
+        setUi(false); // autoplay blocked: wait for a click
+      }
+    };
+    const pause = () => {
+      setUi(false);
+      ramp(0, 350);
+      // Stop for certain even if animation frames are paused (background tab).
+      window.setTimeout(() => { if (!root.classList.contains('is-playing')) audio.pause(); }, 380);
+    };
+
+    btn.addEventListener('click', () => (root.classList.contains('is-playing') ? pause() : play()));
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) root.style.setProperty('--p', String(audio.currentTime / audio.duration));
+    });
+
+    // Carry on across pages.
+    let saved: { t: number; playing: boolean } | null = null;
+    try { saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch { /* storage off */ }
+    if (saved) {
+      audio.preload = 'auto';
+      audio.addEventListener('loadedmetadata', () => { audio.currentTime = saved!.t || 0; }, { once: true });
+      if (saved.playing) play();
+    }
+    window.addEventListener('pagehide', () => {
+      try { sessionStorage.setItem(KEY, JSON.stringify({ t: audio.currentTime, playing: root.classList.contains('is-playing') })); } catch { /* storage off */ }
+    });
+  }
+</script>

@@ -1,10 +1,11 @@
 ---
 // Figma "Card / Front" (687:18631 / 633:9216): the embossed "Kavita" wordmark as an interactive card.
-// At rest it is exactly the Figma frame.
-//   Desktop: the card tilts and drifts toward the cursor, and a chrome version of the name shows
-//            through a soft spotlight that follows the cursor and fades slowly behind it.
-//   Phones:  the card follows the phone's tilt (iPhone asks once, on the first tap) and the chrome
-//            spotlight moves with it; dragging a finger paints the chrome too.
+// The name reads in chrome silver; the Figma white emboss sits on top and shows only through a soft
+// spotlight, so the letters turn white where you hover.
+//   Desktop: the card tilts and drifts toward the cursor, and the white shows through a spotlight
+//            that follows the cursor and fades slowly behind it.
+//   Phones:  the card follows the phone's tilt (iPhone asks once, on the first tap) and the
+//            spotlight moves with it; dragging a finger paints white too.
 // The emboss shadows shift with the tilt so the light feels fixed while the card moves.
 //
 // Chrome layer: Kavita's chrome lettering (kavita-chrome.webp, 2000×679, transparent). Fitted onto the
@@ -18,10 +19,10 @@ const { class: className } = Astro.props;
 ---
 <h1 class:list={['mark', className]} aria-label="Kavita">
   <span class="mark-tilt" aria-hidden="true">
-    <span class="mark-in"><span class="mk mark-ka">Ka</span><span class="mk mark-vita">vita</span></span>
     <span class="mark-chrome">
       <Image class="mark-chrome-img" src={chrome} alt="" width={678} densities={[1, 2]} format="webp" quality={92} loading="eager" />
     </span>
+    <span class="mark-in"><span class="mk mark-ka">Ka</span><span class="mk mark-vita">vita</span></span>
   </span>
 </h1>
 
@@ -49,7 +50,7 @@ const { class: className } = Astro.props;
     inset: 0;
     background: var(--bg);
     transform: translate3d(var(--tx), var(--ty), 0) rotateX(var(--rx)) rotateY(var(--ry));
-    transform-style: preserve-3d;
+    /* Flat inside: the layers keep normal stacking (white over chrome) while the card tilts. */
     will-change: transform;
   }
   /* Type is sized in units of the 764px card. font-size resolves cqw from the parent's container,
@@ -78,13 +79,15 @@ const { class: className } = Astro.props;
   .mark-ka { left: calc(72.0471 * var(--k)); }
   .mark-vita { left: calc(296.8813 * var(--k)); }
 
-  /* Chrome layer, shown through a mask. By default (no JS / reduced motion) a soft glint rests on
-     "Ka" so people can tell there's chrome underneath; the script replaces this with the drifting glint
-     and the cursor spotlight. */
+  /* Chrome is the base layer. The white emboss above it is shown through a mask: by default (no JS /
+     reduced motion) a soft glint rests on "Ka" so people can tell it reacts; the script replaces this
+     with the drifting glint and the cursor spotlight. */
   .mark-chrome {
     position: absolute;
     inset: 0;
     pointer-events: none;
+  }
+  .mark-in {
     --glint: radial-gradient(circle 19cqw at 22% 66%, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0) 100%);
     -webkit-mask-image: var(--glint);
     mask-image: var(--glint);
@@ -99,7 +102,8 @@ const { class: className } = Astro.props;
     max-width: none;
   }
 
-  :global(.motion) .mark-in .mk { animation: mark-in 1.6s var(--ease-out) both; }
+  :global(.motion) .mark-in .mk,
+  :global(.motion) .mark-chrome :global(.mark-chrome-img) { animation: mark-in 1.6s var(--ease-out) both; }
   :global(.motion) .mark-in .mark-vita { animation-delay: 0.12s; }
   @keyframes mark-in {
     from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
@@ -113,10 +117,10 @@ const { class: className } = Astro.props;
 <script>
   const mark = document.querySelector<HTMLElement>('.mark');
   const card = mark?.querySelector<HTMLElement>('.mark-tilt');
-  const chromeLayer = mark?.querySelector<HTMLElement>('.mark-chrome');
+  const whiteLayer = mark?.querySelector<HTMLElement>('.mark-in'); // shown through the spotlight
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (mark && card && chromeLayer && !reduced) {
+  if (mark && card && whiteLayer && !reduced) {
     // ---------- Tilt ----------
     const MAX_TILT = 9; // degrees
     const MAX_SHIFT = 14; // px
@@ -135,9 +139,9 @@ const { class: className } = Astro.props;
       card.style.setProperty('--dy', `${(-y * MAX_SHADOW).toFixed(3)}`);
     };
 
-    // ---------- Chrome spotlight trail ----------
+    // ---------- Spotlight trail ----------
     // A handful of soft spots: each new pointer position adds one at full strength, and every spot
-    // fades over ~1.4s, so the chrome lingers behind the cursor like the reference.
+    // fades over ~1.4s, so the white lingers behind the cursor.
     type Spot = { x: number; y: number; a: number };
     let spots: Spot[] = [];
     const FADE_MS = 1400;
@@ -156,7 +160,7 @@ const { class: className } = Astro.props;
       kick();
     };
     // ---------- Resting glint ----------
-    // So the chrome is never fully hidden: a soft spot drifts slowly back and forth across the name.
+    // A hint that the name reacts: a soft white spot drifts slowly back and forth across the silver.
     // It fades out while someone is hovering or touching (the cursor spotlight takes over) and fades
     // back in once their trail has gone.
     const IDLE_A = 0.72; // strength of the resting glint
@@ -183,7 +187,7 @@ const { class: className } = Astro.props;
         layers.push(spotLayer(w * u, h * v, idleA, r));
       }
       const mask = layers.length ? layers.join(',') : 'linear-gradient(transparent, transparent)';
-      chromeLayer.style.webkitMaskImage = chromeLayer.style.maskImage = mask;
+      whiteLayer.style.webkitMaskImage = whiteLayer.style.maskImage = mask;
     };
 
     // ---------- One loop for both ----------
@@ -225,11 +229,11 @@ const { class: className } = Astro.props;
       addSpot(lx, ly);
     };
 
-    // Mouse / pen: follow the pointer over the card, settle back when it leaves (the chrome fades out).
+    // Mouse / pen: follow the pointer over the card, settle back when it leaves (the white fades out).
     mark.addEventListener('pointermove', (e) => { if (e.pointerType !== 'touch') { engaged = true; fromPoint(e.clientX, e.clientY); } });
     mark.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') { engaged = false; aim(0, 0); } });
 
-    // Finger: drag across the card to tilt it and paint the chrome.
+    // Finger: drag across the card to tilt it and paint white.
     mark.addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) fromPoint(t.clientX, t.clientY); }, { passive: true });
     mark.addEventListener('touchmove', (e) => { const t = e.touches[0]; if (t) fromPoint(t.clientX, t.clientY); }, { passive: true });
     mark.addEventListener('touchend', () => { if (!sensing) aim(0, 0); }, { passive: true });
@@ -237,7 +241,7 @@ const { class: className } = Astro.props;
     window.addEventListener('touchend', () => { engaged = false; }, { passive: true });
 
     // ---------- Phone motion ----------
-    // Tilt relative to how the phone was held when sensing started; the chrome spotlight sits where
+    // Tilt relative to how the phone was held when sensing started; the spotlight sits where
     // the phone is "pointing" on the card.
     let sensing = false;
     let base: { b: number; g: number } | null = null;

@@ -67,18 +67,18 @@ a { color: inherit; text-decoration: none; }
 
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
 
-/* Pixel hand cursor (drawn to match the mascot) everywhere on the page; the finger dips while
-   pressed. Clickable elements are listed too because browsers give them their own cursor.
-   The plain url() line is the fallback where image-set() isn't supported for cursors. */
-:is(html, a[href], button, [role='button'], summary, label, select, input, textarea) {
-  cursor: url('/cursors/hand.png') 9 1, pointer;
-  cursor: -webkit-image-set(url('/cursors/hand.png') 1x, url('/cursors/hand@2x.png') 2x) 9 1, pointer;
-  cursor: image-set(url('/cursors/hand.png') 1x, url('/cursors/hand@2x.png') 2x) 9 1, pointer;
+/* Custom cursors: a soft, curvy white arrow everywhere and a classic white pointing hand over
+   anything clickable, both outlined in black. The plain url() line is the fallback where
+   image-set() isn't supported for cursors. */
+html {
+  cursor: url('/cursors/arrow.png') 3 3, auto;
+  cursor: -webkit-image-set(url('/cursors/arrow.png') 1x, url('/cursors/arrow@2x.png') 2x) 3 3, auto;
+  cursor: image-set(url('/cursors/arrow.png') 1x, url('/cursors/arrow@2x.png') 2x) 3 3, auto;
 }
-:is(html, a[href], button, [role='button'], summary, label, select, input, textarea):active {
-  cursor: url('/cursors/hand-press.png') 9 1, pointer;
-  cursor: -webkit-image-set(url('/cursors/hand-press.png') 1x, url('/cursors/hand-press@2x.png') 2x) 9 1, pointer;
-  cursor: image-set(url('/cursors/hand-press.png') 1x, url('/cursors/hand-press@2x.png') 2x) 9 1, pointer;
+:is(a[href], button:not(:disabled), [role='button'], summary, label[for], select) {
+  cursor: url('/cursors/hand.png') 12 4, pointer;
+  cursor: -webkit-image-set(url('/cursors/hand.png') 1x, url('/cursors/hand@2x.png') 2x) 12 4, pointer;
+  cursor: image-set(url('/cursors/hand.png') 1x, url('/cursors/hand@2x.png') 2x) 12 4, pointer;
 }
 
 .visually-hidden {

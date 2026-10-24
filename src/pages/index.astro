@@ -81,7 +81,7 @@ const skills = [
 ---
 <Base title="Kavita Tewari — Product Designer" description="Kavita Tewari, product designer: apps, websites, tablets and appliance screens.">
   <!-- Background+HorizontalBorder (633:9202) -->
-  <HomeNav href="/about" label="About & contact" />
+  <HomeNav href="/about" label="Let’s talk" />
 
   <main class="home" id="top">
     <!-- Card / Front (633:9216): embossed wordmark -->
@@ -301,16 +301,16 @@ const skills = [
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 24px;
     align-items: start;
-    min-height: 982.795px;
-    padding-top: 310.795px;
+    /* Tighter than the Figma frame (310px of air) so the intro starts in the first screen. */
+    padding: 64px 0 120px;
   }
   .intro-left { display: flex; flex-direction: column; gap: 24px; }
   .intro-lede {
     max-width: 559px;
     font-family: var(--font-display);
-    font-size: 40px;
-    line-height: 44px;
-    letter-spacing: -1.6px;
+    font-size: 36px;
+    line-height: 40px;
+    letter-spacing: -1.4px;
     color: #1e2b3a;
   }
   .intro-details { display: flex; flex-direction: column; gap: 28px; margin: 0; padding-top: 20px; }
@@ -464,7 +464,7 @@ const skills = [
 
   /* ---------- Smaller screens ---------- */
   @media (max-width: 1199px) {
-    .intro { grid-template-columns: 1fr; min-height: 0; padding: 120px 0 96px; row-gap: 56px; }
+    .intro { grid-template-columns: 1fr; padding: 88px 0 96px; row-gap: 56px; }
   }
   @media (max-width: 959px) {
     .home { padding: 16px 24px 0; }
@@ -484,7 +484,7 @@ const skills = [
     .skill-tag { display: none; }
   }
   @media (max-width: 600px) {
-    .intro-lede { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
+    .intro-lede { font-size: 28px; line-height: 32px; letter-spacing: -1px; }
     .home { padding: 8px 16px 0; }
     .row { grid-template-columns: 70px 1fr; row-gap: 0; padding-bottom: 6px; }
     .row-year { white-space: nowrap; }

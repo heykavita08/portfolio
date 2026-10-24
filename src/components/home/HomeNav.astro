@@ -1,13 +1,18 @@
 ---
-// The home page's top bar (Figma 633:9202): name on the left, one ✦ link on the right.
-// Shared with the About page, where the link points back to the work.
+// The top bar on every page (from the home Figma, 633:9202): name on the left; the music pill and
+// one ✦ link on the right (Let’s talk, or Work on the About and VEYRA pages).
+import MusicPlayer from './MusicPlayer.astro';
+
 interface Props { href: string; label: string }
 const { href, label } = Astro.props;
 ---
 <header class="nav">
   <div class="nav-in">
     <a class="brand" href="/">kavita tewari</a>
-    <nav aria-label="Primary"><a class="nav-link" href={href}><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.2 16.8 11.1 24 12C16.8 12.9 12.9 16.8 12 24C11.1 16.8 7.2 12.9 0 12C7.2 11.1 11.1 7.2 12 0Z" fill="currentColor"/></svg><span class="nav-text">{label}</span></a></nav>
+    <div class="nav-r">
+      <MusicPlayer />
+      <nav aria-label="Primary"><a class="nav-link" href={href}><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.2 16.8 11.1 24 12C16.8 12.9 12.9 16.8 12 24C11.1 16.8 7.2 12.9 0 12C7.2 11.1 11.1 7.2 12 0Z" fill="currentColor"/></svg><span class="nav-text">{label}</span></a></nav>
+    </div>
   </div>
 </header>
 
@@ -28,6 +33,7 @@ const { href, label } = Astro.props;
     height: 100%;
     margin: 0 auto;
   }
+  .nav-r { display: flex; align-items: center; gap: 16px; }
   .brand {
     font-family: var(--font-mono);
     font-weight: 500;
@@ -43,15 +49,16 @@ const { href, label } = Astro.props;
     line-height: 22.5px;
     text-transform: uppercase;
     color: #1e2b3a;
+    letter-spacing: -0.04em;
     white-space: pre;
   }
   /* ✦ drawn as a vector: Geist Mono has no star glyph, so the font fallback rendered it small.
-     Sized to the caps (10.9px), centred on them, one mono letter-space (9px) before the text. */
+     Sized to the caps (10.9px), centred on them, 6px before the text. */
   .spark {
     display: inline-block;
     width: 11.6px;
     height: 11.6px;
-    margin-right: 9px;
+    margin-right: 6px;
     vertical-align: -0.8px;
     color: #000;
     transition: transform 0.6s var(--ease-out);
@@ -80,5 +87,6 @@ const { href, label } = Astro.props;
   }
   @media (max-width: 600px) {
     .nav { padding: 0 16px; }
+    .nav-r { gap: 12px; }
   }
 </style>
