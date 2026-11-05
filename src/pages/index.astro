@@ -9,7 +9,8 @@ import WorkCard from '../components/home/WorkCard.astro';
 import DeckDialog from '../components/home/DeckDialog.astro';
 import TiltMark from '../components/home/TiltMark.astro';
 import HomeNav from '../components/home/HomeNav.astro';
-import Mascot from '../components/home/Mascot.astro';
+import { arsenal } from '../data/arsenal';
+import { GOOGLE_MAPS_TOOLS, IDENTITY_LABS_TOOLS, JB_AIR_TOOLS, PORTFOLIO_TOOLS, PROSTHETIC_HAND_TOOLS, REBORN_GOODS_TOOLS, VEYRA_TOOLS } from '../data/ai-tools';
 import Footer from '../components/Footer.astro';
 import { Image } from 'astro:assets';
 
@@ -26,6 +27,7 @@ import l4 from '../assets/home/cards/more-l4.png';
 import l5 from '../assets/home/cards/more-l5.png';
 import l6 from '../assets/home/cards/more-l6.png';
 import l7 from '../assets/home/cards/more-l7.png';
+import l8 from '../assets/home/cards/more-l8.png';
 import r2 from '../assets/home/cards/more-r2.png';
 import r3 from '../assets/home/cards/more-r3.png';
 import r4 from '../assets/home/cards/more-r4.png';
@@ -33,6 +35,9 @@ import r6 from '../assets/home/cards/more-r6.png';
 import r7 from '../assets/home/cards/more-r7.png';
 import r7Phone from '../assets/home/cards/more-r7-phone.png';
 import r7Grips from '../assets/home/cards/more-r7-grips.png';
+import r8 from '../assets/home/cards/more-r8.png';
+import r9 from '../assets/home/cards/more-r9.png';
+import r9Clock from '../assets/home/cards/more-r9-clock.png';
 
 const DECK_URL = 'https://www.figma.com/deck/mRsFPUIQRjeqk4KO44klcB';
 const MAPS_POPUP = { href: DECK_URL, embed: `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(DECK_URL)}` };
@@ -66,16 +71,6 @@ const timeline = [
   ['2022', 'Big 6 Prototypes', 'Ovens, all brands · Prototyping'],
   ['2022', 'Flush / QC+ Phase 1', 'Microwave + oven · Spec definition'],
   ['2022', 'Scribble T', 'Website · POD'],
-];
-
-const skills = [
-  ['UI/UX Design', 'Craft'],
-  ['AI fluency and workflow automation', 'Process'],
-  ['Functional prototyping', 'Craft'],
-  ['Strategic problem framing and business thinking', 'Strategy'],
-  ['Systems thinking', 'Strategy'],
-  ['No-code development', 'Craft'],
-  ['Human Machine Interface Design', 'Craft'],
 ];
 
 ---
@@ -133,7 +128,7 @@ const skills = [
             </span>
           </WorkCard>
           <WorkCard
-            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026" href="/work/veyra"
+            title="Pet tracker app + wearable" meta="VEYRA • Ongoing 2026" href="/work/veyra" ai tools={VEYRA_TOOLS}
             alt="VEYRA app home: Champa is home" poster={caseVeyra} w={886} h={497.5}
             video="/videos/home/veyra.mp4" rect={{ x: 337, y: 124.32, w: 211, h: 444, r: 41 }}
           />
@@ -145,7 +140,7 @@ const skills = [
             video="/videos/home/peakpause.mp4" rect={{ x: 350.66, y: 54.24, w: 186.682, h: 391.023, r: 35.318 }}
           />
           <WorkCard
-            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air"
+            title="One design language, screen to site" meta="JB Air • Shipped 2026" href="/work/jb-air" ai tools={JB_AIR_TOOLS}
             alt="The JB Air purifier in a living room" poster={caseJb} w={888} h={555}
             video="/videos/home/jb.mp4" rect={{ x: -8, y: -43.6, w: 904, h: 603 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
           />
@@ -159,32 +154,32 @@ const skills = [
       <div class="grid grid-more">
         <div class="col col-l" data-stagger>
           <WorkCard
-            title="Coffee machine spec management" meta="Keurig i200 • 2025"
+            title="Coffee machine spec management"
             alt="Keurig alta screen in an oval frame over clouds" poster={l1} w={886} h={497.5}
             video="/videos/home/l1.mp4" rect={{ x: 310, y: 26.005, w: 266, h: 444, r: 136 }}
           />
           <WorkCard
-            title="eVTOL dashboard, tablet system design" meta="ORION • 2024"
+            title="eVTOL dashboard, tablet system design"
             alt="ORION eVTOL management and details screens on two iPads" poster={l2} w={888} h={555}
           />
           <WorkCard
-            title="Yucatan web explorations" meta="Yucatan • Concept 2023"
+            title="Yucatan web explorations"
             alt="A 3D carousel of fashion editorial pages" poster={l3} w={886} h={497.5}
             video="/videos/home/l3.mp4" rect={{ x: -32, y: 21.73, w: 950.438, h: 453.909 }}
           />
           <WorkCard
-            title="eVTOL dashboard, desktop" meta="ORION • 2024"
+            title="eVTOL dashboard, desktop"
             alt="ORION desktop dashboard: Good morning, Jane" poster={l4} w={886} h={553}
             video="/videos/home/l4.mp4" rect={{ x: -110, y: -54, w: 1105, h: 621 }}
           />
           <WorkCard
-            title="Portfolio exploration" meta="Personal • Concept 2026"
+            title="Portfolio exploration" tools={PORTFOLIO_TOOLS}
             alt="Design Police Dept site with a red portrait" poster={l5} w={888} h={499.5}
             video="/videos/home/l5.mp4" rect={{ x: -13, y: -47, w: 914.59, h: 594 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
           <!-- Figma 755:24556 (931 x 1329), shown whole on its white ground in a 16:10 card. -->
           <WorkCard
-            title="Prosthetic Hand Research Project" meta="Non Zero • Medtech"
+            title="Prosthetic Hand Research Project" tools={PROSTHETIC_HAND_TOOLS}
             alt="A prosthetic arm with a slim smart band on the wrist showing 55% charged" w={888} h={555} bg="#fffffd" border
           >
             <span slot="overlay" class="ov arm" style="--x:250.3;--y:1;--w:387.4;--h:553">
@@ -192,39 +187,55 @@ const skills = [
             </span>
           </WorkCard>
           <WorkCard
-            title="Platform design and UX" meta="Reborn Goods • 2026"
+            title="Platform design and UX" ai tools={REBORN_GOODS_TOOLS}
             alt="We find the right people to build your brand: a platform home page" poster={l6} w={888} h={555}
             video="/videos/home/l6.mp4" rect={{ x: 0, y: -0.27, w: 896, h: 563 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
           />
+          <!-- Figma 783:10416: an ambient recording behind the display. -->
+          <WorkCard
+            title="JennAir Oven"
+            alt="A double oven clock display: 12:40 over smoke, with upper and lower oven buttons" poster={r9} w={888} h={621.59}
+            video="/videos/home/r9.mp4" rect={{ x: 124, y: -206.27, w: 640, h: 1034 }} rotate={90} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
+          >
+            <span slot="overlay" class="ov oven-clock" style="--x:36;--y:182.99;--w:815;--h:255.45">
+              <Image src={r9Clock} alt="" width={815} densities={[1, 2]} format="webp" quality={90} loading="lazy" />
+            </span>
+          </WorkCard>
+          <!-- Figma 787:10504 -->
+          <WorkCard
+            title="Identity Labs" ai tools={IDENTITY_LABS_TOOLS}
+            alt="Identity Labs: a post breakdown over a row of postage stamps" poster={l8} w={888} h={555}
+            video="/videos/home/l8.mp4" rect={{ x: 0, y: -0.77, w: 896, h: 557 }} clip={{ x: 1, y: 1, w: 886, h: 553 }}
+          />
         </div>
         <div class="col col-r" data-stagger>
-          <WorkCard title="Google Maps study" meta="Personal • Study 2026" popup={MAPS_POPUP} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
+          <WorkCard title="Google Maps study" tools={GOOGLE_MAPS_TOOLS} popup={MAPS_POPUP} alt="A map-pin logo filled with a flowing rainbow gradient" w={886} h={553} bg="#fafcfd">
             <span slot="overlay" class="ov pin-bg" style="--x:-8.86;--y:-5.53;--w:903.72;--h:564.06"></span>
             <span slot="overlay" class="ov pin" style={`--x:324;--y:157;--w:239;--h:239;--mask:url(${pinMask.src})`}>
               <span class="pin-flow"></span>
             </span>
           </WorkCard>
           <WorkCard
-            title="Yucatan UI/UX & CGI website" meta="Non Zero • 2023" popup={YUCATAN_POPUP}
+            title="Yucatan UI/UX & CGI website" popup={YUCATAN_POPUP}
             alt="The Yucatan website on a laptop: a shirt and trousers to configure" poster={r2} w={888} h={621.59}
             video="/videos/home/r2.mp4" rect={{ x: -59, y: 39.23, w: 1007, h: 544 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
           />
           <WorkCard
-            title="Titan 4 microwave oven, with the China team" meta="Whirlpool • 2023"
+            title="Titan 4 microwave oven, with the China team"
             alt="A microwave control panel: Enter cup, 00:02" poster={r3} w={888} h={621.59}
             video="/videos/home/r3.mp4" rect={{ x: 221, y: 59, w: 445, h: 641, r: 48 }} clip={{ x: 1, y: 1, w: 886, h: 619.59 }}
           />
           <WorkCard
-            title="Identity Labs" meta="Agency website • 2026"
+            title="Identity Labs" ai tools={IDENTITY_LABS_TOOLS}
             alt="A hero over soft clouds: world's first content science lab" poster={r4} w={888} h={499.5}
             video="/videos/home/r4.mp4" rect={{ x: -20.64, y: -66.95, w: 913.286, h: 634 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
           />
-          <WorkCard title="Vetted badge" meta="Reborn Goods • 2026" alt="A bronze Reborn Goods Vetted coin turning" w={888} h={555} bg="#958073" border>
+          <WorkCard title="Vetted badge" ai tools={REBORN_GOODS_TOOLS} alt="A bronze Reborn Goods Vetted coin turning" w={888} h={555} bg="#958073" border>
             <img slot="overlay" class="ov ring" style="--x:251;--y:85.22;--w:385;--h:385" src="/videos/home/r5-ring.webp" alt="" loading="lazy" decoding="async" />
           </WorkCard>
           <!-- Figma 755:24578: an ambient recording (Luminosity blend, baked into hand.mp4) behind two phones. -->
           <WorkCard
-            title="Prosthetic Hand Research Project" meta="Non Zero • Medtech"
+            title="Prosthetic Hand Research Project" tools={PROSTHETIC_HAND_TOOLS}
             alt="Bio Arm Pro app: the grip gallery and the arm's home screen on two phones" poster={r7} w={903.72} h={631.99}
             video="/videos/home/hand.mp4" rect={{ x: 97, y: -222, w: 649, h: 1077 }} rotate={90}
           >
@@ -236,9 +247,15 @@ const skills = [
             </span>
           </WorkCard>
           <WorkCard
-            title="Identity Labs" meta="Agency website • 2026"
+            title="Identity Labs" ai tools={IDENTITY_LABS_TOOLS}
             alt="Identity Labs: the science of viral posts" poster={r6} w={888} h={499.5}
             video="/videos/home/r6.mp4" rect={{ x: -24, y: -27, w: 936, h: 597 }} clip={{ x: 1, y: 1, w: 886, h: 497.5 }}
+          />
+          <!-- Figma 789:10642 -->
+          <WorkCard
+            title="Whirlpool G45 Project"
+            alt="An appliance display showing 4:20 and a photo of cupcakes" poster={r8} w={888} h={555}
+            video="/videos/home/r8.mp4" rect={{ x: 69.5, y: 130.71, w: 748, h: 294 }}
           />
         </div>
       </div>
@@ -262,21 +279,23 @@ const skills = [
     <section class="block" aria-labelledby="h-arsenal">
       <h2 class="h-sec h-more" id="h-arsenal" data-split>In the arsenal...</h2>
       <div class="arsenal">
-        <div class="ars-intro" data-reveal>
-          <Mascot />
-          <p class="ars-text">The tools, habits and instincts I bring to every team, from first framing to shipped screen.</p>
-        </div>
-        <ol class="skills" data-stagger>
-          {skills.map(([name, tag], i) => (
-            <li class="skill">
-              <span class="skill-label">
-                <span class="skill-n">{String(i + 1).padStart(2, '0')}</span>
-                <span class="skill-name">{name}</span>
-              </span>
-              <span class="skill-tag">{tag}</span>
-            </li>
+        <div class="ars-grid" data-stagger>
+          {arsenal.map(({ title, tools }) => (
+            <div class="ars-card">
+              <h3 class="ars-title">{title}</h3>
+              <ul class="ars-tools">
+                {tools.map(({ name, logo }) => (
+                  <li class="ars-tool">
+                    <span class="ars-logo">
+                      {logo ? <img src={logo.src} alt="" width="28" height="28" loading="lazy" decoding="async" /> : name[0]}
+                    </span>
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ol>
+        </div>
       </div>
     </section>
   </main>
@@ -409,60 +428,60 @@ const skills = [
   @keyframes pin-turn { to { transform: rotate(1turn); } }
   .ring { object-fit: contain; }
   .arm :global(img) { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .oven-clock :global(img) { display: block; width: 100%; height: 100%; }
   .hand-phone :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: calc(50.355 * 100cqw / var(--W)); }
   .hand-grips { overflow: hidden; border-radius: calc(62.853 * 100cqw / var(--W)); }
   .hand-grips :global(img) { position: absolute; left: -2.62%; top: 0; width: 105.51%; height: 100.88%; max-width: none; }
 
   /* ---------- Arsenal ---------- */
-  .arsenal {
+  .arsenal { padding: 40px 0 160px; }
+  .ars-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 24px;
-    align-items: start;
-    padding: 40px 0 160px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
-  .ars-intro { display: flex; flex-direction: column; gap: 20px; }
-  .ars-text {
-    max-width: 420px;
-    font-size: 17px;
-    line-height: 25.5px;
-    letter-spacing: -0.34px;
-    color: rgba(50, 64, 79, 0.8);
+  .ars-card {
+    padding: 20px 24px 24px;
+    border-radius: 2px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(50, 64, 79, 0.1);
   }
-  .skill {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 13px 0;
-  }
-  .skill-label { display: flex; align-items: baseline; min-width: 0; }
-  .skill-n {
-    flex: 0 0 48px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 20px;
-    color: rgba(50, 64, 79, 0.45);
-  }
-  .skill-name {
+  .ars-title {
     font-family: var(--font-display);
-    font-size: 20px;
-    line-height: 22px;
-    letter-spacing: -0.8px;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 28px;
+    letter-spacing: -0.44px;
     color: var(--ink);
-    white-space: nowrap;
-    transition: transform 0.45s var(--ease-out);
   }
-  .skill:hover .skill-name { transform: translateX(6px); }
-  .skill-tag {
+  .ars-tools { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .ars-tool {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-inter);
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: -0.2px;
+    color: rgba(50, 64, 79, 0.9);
+  }
+  .ars-logo {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    overflow: hidden;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(50, 64, 79, 0.1);
     font-family: var(--font-mono);
     font-size: 13px;
-    line-height: 20px;
-    text-transform: uppercase;
-    color: rgba(50, 64, 79, 0.5);
-    white-space: nowrap;
+    color: var(--ink);
+    transition: transform 0.25s var(--ease-out, ease);
   }
-
+  .ars-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .ars-tool:hover .ars-logo { transform: translateY(-2px); }
 
   /* ---------- Smaller screens ---------- */
   @media (max-width: 1199px) {
@@ -472,18 +491,18 @@ const skills = [
     .home { padding: 16px 24px 0; }
     .h-case { padding: 16px 0 32px; }
     .h-more { padding: 72px 0 24px; }
-    .arsenal { grid-template-columns: 1fr; row-gap: 40px; padding-bottom: 120px; }
+    .arsenal { padding-bottom: 120px; }
+    .ars-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 759px) {
     .tl-desk { display: none; }
     .tl-mobile { display: block; padding-top: 96px; }
     .grid { grid-template-columns: 1fr; }
+    .ars-grid { grid-template-columns: 1fr; gap: 16px; }
     .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
     .grid .col + .col { margin-top: 40px; }
     .intro { padding: 56px 0 64px; row-gap: 40px; }
     .intro-details dd { font-size: 16px; line-height: 24px; }
-    .skill-name { white-space: normal; font-size: 19px; line-height: 23px; letter-spacing: -0.7px; }
-    .skill-tag { display: none; }
   }
   @media (max-width: 600px) {
     .intro-lede { font-size: 28px; line-height: 32px; letter-spacing: -1px; }
@@ -491,6 +510,5 @@ const skills = [
     .row { grid-template-columns: 72px 1fr; row-gap: 0; padding-bottom: 6px; }
     .row-year { white-space: nowrap; }
     .row-desc { grid-column: 2; font-size: 14px; line-height: 20px; }
-    .skill-n { flex-basis: 40px; }
   }
 </style>

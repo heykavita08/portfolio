@@ -1,0 +1,588 @@
+---
+// Chess for the footer: you play White against a bot (bot.ts, in a worker so the page stays smooth).
+// Full rules live in engine.ts. Click or tap a piece and then a square, or drag with a mouse; arrow
+// keys and Enter work too. The game is saved in the browser, so it survives moving between pages.
+const squares = Array.from({ length: 64 }, (_, sq) => ({ sq, r: sq >> 3, c: sq & 7 }));
+---
+<section class="chess" aria-label="Chess">
+  <div class="ch-board" role="group" aria-label="Chess board">
+    {squares.map(({ sq, r, c }) => (
+      <button class:list={['ch-sq', { dark: (r + c) % 2 === 1 }]} type="button" data-sq={sq} tabindex={sq === 52 ? 0 : -1}>
+        {c === 0 && <span class="ch-coord rank" aria-hidden="true">{8 - r}</span>}
+        {r === 7 && <span class="ch-coord file" aria-hidden="true">{'abcdefgh'[c]}</span>}
+      </button>
+    ))}
+    <div class="ch-pieces" aria-hidden="true"></div>
+    <div class="ch-promo" role="group" aria-label="Choose a piece" hidden></div>
+  </div>
+
+  <div class="ch-side">
+    <p class="ch-status" aria-live="polite"><span class="ch-turn" aria-hidden="true"></span><span class="ch-status-text">White to move</span></p>
+    <div class="ch-taken" aria-hidden="true">
+      <div class="ch-taken-row" data-side="w"></div>
+      <div class="ch-taken-row" data-side="b"></div>
+    </div>
+    <ol class="ch-moves" aria-label="Moves"></ol>
+    <div class="ch-actions">
+      <button class="ch-btn ch-sound" type="button" aria-label="Move sounds" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+          <path class="on" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+          <path class="off" d="M16 9.5l5 5M21 9.5l-5 5" />
+        </svg>
+      </button>
+      <button class="ch-btn ch-undo" type="button" disabled>Undo</button>
+      <button class="ch-btn ch-new" type="button">New game</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chess {
+    display: grid;
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    gap: 48px;
+    margin-bottom: 72px;
+  }
+
+  /* ---------- Board ---------- */
+  .ch-board {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    aspect-ratio: 1;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(50, 64, 79, 0.1);
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .ch-sq {
+    --sq: #f1f3f5;
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--sq);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ch-sq.dark { --sq: #c3ccd6; }
+  .ch-sq.is-last { background: color-mix(in srgb, var(--sq), #fc825b 28%); }
+  .ch-sq.is-selected { background: color-mix(in srgb, var(--sq), #fc825b 58%); }
+  .ch-sq.is-check { background: radial-gradient(circle, #e5484d 0 30%, color-mix(in srgb, var(--sq), #e5484d 45%) 72%); }
+  .ch-sq:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 0; z-index: 3; }
+  /* Where the selected piece can go: a dot on empty squares, a ring around captures. */
+  .ch-sq.is-target::after {
+    content: '';
+    position: absolute;
+    inset: 36%;
+    z-index: 2;
+    border-radius: 50%;
+    background: rgba(30, 43, 58, 0.28);
+    pointer-events: none;
+  }
+  .ch-sq.is-capture::after {
+    inset: 5%;
+    background: none;
+    box-shadow: inset 0 0 0 4px rgba(30, 43, 58, 0.28);
+  }
+  .ch-coord {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    color: #7c8894;
+    pointer-events: none;
+  }
+  .ch-sq.dark .ch-coord { color: #f1f3f5; }
+  .ch-coord.rank { top: 4px; left: 4px; }
+  .ch-coord.file { right: 4px; bottom: 4px; }
+
+  .ch-pieces { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .ch-pieces :global(.ch-piece) {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    left: calc(var(--c) * 12.5%);
+    top: calc(var(--r) * 12.5%);
+    will-change: transform;
+  }
+  .ch-pieces :global(.ch-piece.is-sliding) { transition: transform 0.2s var(--ease-out, ease); }
+  .ch-pieces :global(.ch-piece.is-drag) { z-index: 4; transform-origin: center; }
+  .chess :global(.ch-glyph) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .chess :global(.ch-glyph.w) { fill: #fff; stroke: #1e2b3a; filter: drop-shadow(0 1px 1px rgba(30, 43, 58, 0.25)); }
+  .chess :global(.ch-glyph.b) { fill: #1e2b3a; stroke: #1e2b3a; }
+  .chess :global(.ch-glyph .eye) { stroke: none; }
+  .chess :global(.ch-glyph.w .eye) { fill: #1e2b3a; }
+  .chess :global(.ch-glyph.b .eye) { fill: #fff; }
+
+  /* Promotion choice, over the file the pawn reached. */
+  .ch-promo {
+    position: absolute;
+    z-index: 5;
+    left: calc(var(--c, 0) * 12.5%);
+    width: 12.5%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 8px 24px rgba(30, 43, 58, 0.3);
+  }
+  .ch-promo[hidden] { display: none; }
+  .ch-promo :global(button) { aspect-ratio: 1; padding: 0; border: 0; background: none; }
+  .ch-promo :global(button:hover) { background: #fdeee8; }
+
+  /* ---------- Side panel ---------- */
+  .ch-side { display: flex; flex-direction: column; min-width: 0; }
+  .ch-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: -0.8px;
+    color: var(--ink);
+  }
+  .ch-turn {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1.5px #1e2b3a;
+    transition: background 0.25s ease;
+  }
+  .ch-turn.black { background: #1e2b3a; }
+  .ch-turn.over { background: #fc825b; box-shadow: none; }
+
+  .ch-taken { display: flex; flex-direction: column; gap: 2px; margin-top: 16px; }
+  .ch-taken-row { display: flex; flex-wrap: wrap; min-height: 20px; }
+  .ch-taken-row :global(.ch-glyph) { width: 20px; height: 20px; margin-right: -5px; }
+
+  .ch-moves {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-top: 16px;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 22px;
+    color: rgba(50, 64, 79, 0.8);
+  }
+  .ch-moves :global(li) { display: grid; grid-template-columns: 36px 88px 88px; }
+  .ch-moves :global(.n) { color: var(--muted); }
+
+  .ch-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .ch-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    font-family: var(--font-inter);
+    font-size: 15px;
+    transition: background 0.25s ease, transform 0.45s var(--ease-out, ease), opacity 0.25s ease;
+  }
+  .ch-btn:hover:not(:disabled) { background: rgba(50, 64, 79, 0.04); transform: translateY(-1px); }
+  .ch-btn:disabled { opacity: 0.45; }
+  .ch-sound { width: 40px; padding: 0; }
+  .ch-sound svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .ch-sound .off, .ch-sound[aria-pressed='false'] .on { display: none; }
+  .ch-sound[aria-pressed='false'] .off { display: inline; }
+
+  @media (max-width: 759px) {
+    .chess { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-bottom: 48px; }
+    .ch-moves { flex: none; max-height: 132px; }
+    .ch-status { font-size: 24px; line-height: 30px; }
+    .ch-coord { font-size: 8px; }
+    .ch-coord.rank { top: 2px; left: 2px; }
+    .ch-coord.file { right: 2px; bottom: 2px; }
+    .ch-sq.is-capture::after { box-shadow: inset 0 0 0 3px rgba(30, 43, 58, 0.28); }
+  }
+</style>
+
+<script>
+  import { apply, inCheck, initial, legalMoves, outcome, positionKey, san, squareName, type Move, type Piece, type Promo, type State } from './engine';
+  import { chooseMove } from './bot';
+
+  const SAVE_KEY = 'chess-game';
+  const LEVEL = 'medium'; // the bot's strength: 'easy', 'medium' or 'hard'
+  const SOUND_KEY = 'chess-sound';
+  const store = {
+    get(k: string) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+  };
+  const NAMES: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+
+  // Piece drawings on a 40 × 40 grid, sharing one base.
+  const BASE = '<path d="M10 31.5h20a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5H10A1.5 1.5 0 0 1 8.5 35v-2a1.5 1.5 0 0 1 1.5-1.5Z"/>';
+  const ART: Record<string, string> = {
+    p: '<path d="M20 7a5.5 5.5 0 0 1 3.4 9.8H25v2.4h-2.6c.2 4.4 2.2 7.6 3.8 12.3H13.8c1.6-4.7 3.6-7.9 3.8-12.3H15v-2.4h1.6A5.5 5.5 0 0 1 20 7Z"/>',
+    r: '<path d="M11.5 6h4.2v3.5h2.2V6h4.2v3.5h2.2V6h4.2v8l-3 2.5 1.5 15H13l1.5-15-3-2.5Z"/>',
+    b: '<path d="M20 4a2.2 2.2 0 0 1 1.3 4c3.6 2.6 6.2 6 6.2 9.5 0 2.3-1.2 4-3.2 5h1V25h-2c.2 2.6 1.6 4.4 3 6.5H13.7c1.4-2.1 2.8-3.9 3-6.5h-2v-2.5h1c-2-1-3.2-2.7-3.2-5 0-3.5 2.6-6.9 6.2-9.5A2.2 2.2 0 0 1 20 4Z"/>',
+    n: '<path d="M12 31.5c0-6 5.5-8.5 7-13-2.5 1.6-5.2 2.6-7.2 2-1.9-.6-2.6-2.4-1.6-4 2-3 3.6-6 6.8-8l1.2-4 2.8 3c6.6 1.4 9.8 8 9.8 15.5v8.5Z"/><circle class="eye" cx="17.5" cy="11.5" r="1.3"/>',
+    q: '<path d="M8.5 13 13 23l1-13.5L18 22l2-14.5L22 22l4-12.5L27 23l4.5-10-3 18.5h-17Z"/><circle cx="8.5" cy="12" r="2"/><circle cx="14" cy="8.5" r="2"/><circle cx="20" cy="6.5" r="2"/><circle cx="26" cy="8.5" r="2"/><circle cx="31.5" cy="12" r="2"/>',
+    k: '<path d="M18.8 3h2.4v3h3v2.4h-3v4h-2.4v-4h-3V6h3Z"/><path d="M20 14.5c2-3 9.5-3.5 10.5 1.5.8 4-3 7.5-3.5 15.5H13c-.5-8-4.3-11.5-3.5-15.5 1-5 8.5-4.5 10.5-1.5Z"/>',
+  };
+  const glyph = (p: Piece) => `<svg class="ch-glyph ${p === p.toUpperCase() ? 'w' : 'b'}" viewBox="0 0 40 40" aria-hidden="true">${ART[p.toLowerCase()]}${BASE}</svg>`;
+
+  // ---------- Sound: a short wooden knock, heavier on captures ----------
+  let ctx: AudioContext | null = null;
+  let soundOn = store.get(SOUND_KEY) !== 'off';
+  function knock(capture: boolean) {
+    if (!soundOn) return;
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    ctx ??= new AC();
+    if (ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime + 0.001;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(capture ? 300 : 460, t);
+    osc.frequency.exponentialRampToValueAtTime(capture ? 110 : 190, t + 0.07);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(capture ? 0.5 : 0.3, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.12);
+  }
+
+  const root = document.querySelector<HTMLElement>('.chess');
+  if (root) {
+    const boardEl = root.querySelector<HTMLElement>('.ch-board')!;
+    const piecesEl = root.querySelector<HTMLElement>('.ch-pieces')!;
+    const promoEl = root.querySelector<HTMLElement>('.ch-promo')!;
+    const squares = [...root.querySelectorAll<HTMLButtonElement>('.ch-sq')];
+    const statusEl = root.querySelector<HTMLElement>('.ch-status-text')!;
+    const turnEl = root.querySelector<HTMLElement>('.ch-turn')!;
+    const movesEl = root.querySelector<HTMLElement>('.ch-moves')!;
+    const undoBtn = root.querySelector<HTMLButtonElement>('.ch-undo')!;
+    const newBtn = root.querySelector<HTMLButtonElement>('.ch-new')!;
+    const soundBtn = root.querySelector<HTMLButtonElement>('.ch-sound')!;
+    const takenW = root.querySelector<HTMLElement>('[data-side="w"]')!;
+    const takenB = root.querySelector<HTMLElement>('[data-side="b"]')!;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---------- Game state: the move list is the source of truth ----------
+    let played: Move[] = [];
+    let state: State = initial();
+    let keys: string[] = [positionKey(state)];
+    let notation: string[] = [];
+    let taken: Piece[] = [];
+    let gameOver = false;
+    let selected: number | null = null;
+    let targets: Move[] = [];
+    /** The bot always plays Black. */
+    const botTurn = () => !state.white && !gameOver;
+
+    const capturedBy = (s: State, m: Move): Piece | null => (m.ep ? (s.white ? 'p' : 'P') : s.board[m.to]);
+
+    function rebuild(moves: Move[]) {
+      state = initial();
+      keys = [positionKey(state)];
+      notation = [];
+      taken = [];
+      played = [];
+      for (const m of moves) {
+        const legal = legalMoves(state, m.from).find((x) => x.to === m.to && x.promo === m.promo);
+        if (!legal) break; // a corrupted save: keep what's valid
+        step(legal);
+      }
+    }
+    function step(m: Move) {
+      notation.push(san(state, m));
+      const hit = capturedBy(state, m);
+      if (hit) taken.push(hit);
+      state = apply(state, m);
+      keys.push(positionKey(state));
+      played.push(m);
+    }
+    const save = () => store.set(SAVE_KEY, JSON.stringify(played.map(({ from, to, promo }) => ({ from, to, promo }))));
+
+    // ---------- The bot ----------
+    let worker: Worker | null = null;
+    try {
+      worker = new Worker(new URL('./bot-worker.ts', import.meta.url), { type: 'module' });
+    } catch { /* no workers: think on the main thread */ }
+    let botRequest = 0; // bumping this abandons any answer still on its way
+    const cancelBot = () => { botRequest++; };
+
+    function requestBot() {
+      if (!botTurn()) return;
+      const id = ++botRequest;
+      const asked = performance.now();
+      const answer = (move: Move | null) => {
+        // Never reply instantly: a short pause reads as a move being considered.
+        const wait = Math.max(0, 450 - (performance.now() - asked));
+        window.setTimeout(() => {
+          if (id === botRequest && move && botTurn()) play(move);
+        }, wait);
+      };
+      const history = keys.slice();
+      const onMain = () => window.setTimeout(() => answer(chooseMove(state, history, LEVEL)), 30);
+      if (!worker) return onMain();
+      worker.onmessage = (e) => { if (e.data.id === id) answer(e.data.move); };
+      worker.onerror = () => { worker = null; if (id === botRequest) onMain(); };
+      worker.postMessage({ id, state, history, level: LEVEL });
+    }
+
+    // ---------- Drawing ----------
+    function statusText() {
+      const o = outcome(state, keys);
+      gameOver = o.over;
+      if (o.over) {
+        if (o.reason === 'checkmate') return o.winner === 'white' ? 'Checkmate. You win' : 'Checkmate. The bot wins';
+        if (o.reason === 'stalemate') return 'Stalemate. It’s a draw';
+        if (o.reason === 'repetition') return 'Draw by repetition';
+        if (o.reason === 'fifty') return 'Draw by the 50-move rule';
+        return 'Draw. Not enough pieces';
+      }
+      if (!state.white) return 'The bot is thinking';
+      return o.check ? 'Your move, you’re in check' : 'Your move';
+    }
+
+    function render(slides: [number, number][] = []) {
+      statusEl.textContent = statusText();
+      turnEl.classList.toggle('black', !state.white);
+      turnEl.classList.toggle('over', gameOver);
+
+      piecesEl.textContent = '';
+      state.board.forEach((p, sq) => {
+        const label = squareName(sq);
+        squares[sq].setAttribute('aria-label', p ? `${label}, ${p === p.toUpperCase() ? 'white' : 'black'} ${NAMES[p.toLowerCase()]}` : label);
+        if (!p) return;
+        const el = document.createElement('div');
+        el.className = 'ch-piece';
+        el.dataset.sq = String(sq);
+        el.style.setProperty('--r', String(sq >> 3));
+        el.style.setProperty('--c', String(sq & 7));
+        el.innerHTML = glyph(p);
+        piecesEl.append(el);
+      });
+
+      const last = played[played.length - 1];
+      const king = state.board.indexOf(state.white ? 'K' : 'k');
+      const checked = inCheck(state);
+      squares.forEach((b, sq) => {
+        const target = targets.find((m) => m.to === sq);
+        b.classList.toggle('is-last', !!last && (sq === last.from || sq === last.to));
+        b.classList.toggle('is-selected', sq === selected);
+        b.classList.toggle('is-target', !!target);
+        b.classList.toggle('is-capture', !!target && (!!state.board[sq] || !!target.ep));
+        b.classList.toggle('is-check', checked && sq === king);
+      });
+
+      movesEl.textContent = '';
+      for (let i = 0; i < notation.length; i += 2) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="n">${i / 2 + 1}.</span><span>${notation[i]}</span><span>${notation[i + 1] ?? ''}</span>`;
+        movesEl.append(li);
+      }
+      movesEl.scrollTop = movesEl.scrollHeight;
+
+      // Pieces each player has taken: white's captures are the black pieces.
+      takenW.innerHTML = taken.filter((p) => p !== p.toUpperCase()).map(glyph).join('');
+      takenB.innerHTML = taken.filter((p) => p === p.toUpperCase()).map(glyph).join('');
+      undoBtn.disabled = played.length === 0;
+
+      if (!reduced) {
+        for (const [from, to] of slides) {
+          const el = piecesEl.querySelector<HTMLElement>(`[data-sq="${to}"]`);
+          if (!el) continue;
+          const dx = ((from & 7) - (to & 7)) * 100;
+          const dy = ((from >> 3) - (to >> 3)) * 100;
+          el.style.transform = `translate(${dx}%, ${dy}%)`;
+          void el.offsetWidth;
+          el.classList.add('is-sliding');
+          el.style.transform = '';
+        }
+      }
+    }
+
+    const clearSelection = () => { selected = null; targets = []; };
+
+    function play(m: Move, slide = true) {
+      const capture = !!capturedBy(state, m);
+      step(m);
+      clearSelection();
+      save();
+      const slides: [number, number][] = slide ? [[m.from, m.to]] : [];
+      if (m.castle) slides.push(m.castle === 'K' ? [m.to + 1, m.to - 1] : [m.to - 2, m.to + 1]);
+      render(slides);
+      knock(capture);
+      requestBot();
+    }
+
+    // ---------- Input ----------
+    const ownPiece = (sq: number) => {
+      const p = state.board[sq];
+      return !!p && (p === p.toUpperCase()) === state.white;
+    };
+    function select(sq: number) {
+      selected = sq;
+      targets = legalMoves(state, sq);
+      render();
+    }
+    function hidePromo() {
+      promoEl.hidden = true;
+      promoEl.textContent = '';
+    }
+    function showPromo(to: number, options: Move[], slide: boolean) {
+      promoEl.textContent = '';
+      promoEl.style.setProperty('--c', String(to & 7));
+      promoEl.style.top = state.white ? '0' : '';
+      promoEl.style.bottom = state.white ? '' : '0';
+      for (const kind of ['q', 'r', 'b', 'n'] as Promo[]) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', `Promote to ${NAMES[kind]}`);
+        b.innerHTML = glyph((state.white ? kind.toUpperCase() : kind) as Piece);
+        b.addEventListener('click', () => {
+          hidePromo();
+          play(options.find((m) => m.promo === kind)!, slide);
+        });
+        promoEl.append(b);
+      }
+      promoEl.hidden = false;
+      promoEl.querySelector('button')?.focus();
+    }
+    /** Move the selected piece to `to` if that's legal; returns whether it was a legal target. */
+    function tryMove(to: number, slide = true) {
+      const options = targets.filter((m) => m.to === to);
+      if (!options.length) return false;
+      if (options[0].promo) showPromo(to, options, slide);
+      else play(options[0], slide);
+      return true;
+    }
+    function tap(sq: number) {
+      if (!promoEl.hidden) { hidePromo(); return; }
+      if (gameOver || botTurn()) return;
+      if (selected !== null && tryMove(sq)) return;
+      if (sq !== selected && ownPiece(sq)) select(sq);
+      else { clearSelection(); render(); }
+    }
+
+    // Mouse: press to select, drag to move. Touch and keyboard come through click, so a finger
+    // scrolling past the board never picks up a piece.
+    const squareAt = (x: number, y: number) => {
+      const r = boardEl.getBoundingClientRect();
+      const c = Math.floor(((x - r.left) / r.width) * 8);
+      const row = Math.floor(((y - r.top) / r.height) * 8);
+      return c >= 0 && c < 8 && row >= 0 && row < 8 ? row * 8 + c : null;
+    };
+    let lastPointer = '';
+    let drag: { from: number; el: HTMLElement; x: number; y: number; moved: boolean } | null = null;
+
+    boardEl.addEventListener('pointerdown', (e) => {
+      lastPointer = e.pointerType;
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      if (promoEl.contains(e.target as Node)) return;
+      const sq = squareAt(e.clientX, e.clientY);
+      if (sq === null) return;
+      if (!promoEl.hidden) { hidePromo(); return; }
+      if (gameOver || botTurn()) return;
+      if (selected !== null && targets.some((m) => m.to === sq)) { tryMove(sq); return; }
+      if (!ownPiece(sq)) { clearSelection(); render(); return; }
+      if (sq !== selected) select(sq);
+      const el = piecesEl.querySelector<HTMLElement>(`[data-sq="${sq}"]`);
+      if (el) {
+        drag = { from: sq, el, x: e.clientX, y: e.clientY, moved: false };
+        el.classList.add('is-drag');
+      }
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+      drag.moved = true;
+      drag.el.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`;
+    });
+    window.addEventListener('pointerup', (e) => {
+      if (!drag) return;
+      const { from, el, moved } = drag;
+      drag = null;
+      el.classList.remove('is-drag');
+      el.style.transform = '';
+      if (!moved) return;
+      const to = squareAt(e.clientX, e.clientY);
+      if (to !== null && to !== from) tryMove(to, false);
+    });
+
+    squares.forEach((b, sq) => {
+      b.addEventListener('click', (e) => {
+        // Mouse presses were handled on pointerdown; detail 0 is the keyboard.
+        if (e.detail !== 0 && lastPointer === 'mouse') return;
+        tap(sq);
+      });
+    });
+
+    // Arrow keys move a single tab stop around the board.
+    boardEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { hidePromo(); clearSelection(); render(); return; }
+      const sq = squares.indexOf(e.target as HTMLButtonElement);
+      const delta = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 8, ArrowUp: -8 }[e.key];
+      if (sq < 0 || delta === undefined) return;
+      const next = squares[sq + delta];
+      if (!next || (Math.abs(delta) === 1 && (sq + delta) >> 3 !== sq >> 3)) return;
+      e.preventDefault();
+      squares[sq].tabIndex = -1;
+      next.tabIndex = 0;
+      next.focus();
+    });
+
+    undoBtn.addEventListener('click', () => {
+      cancelBot();
+      hidePromo();
+      clearSelection();
+      // Take back the bot's reply too, or just your move if it hasn't answered yet.
+      rebuild(played.slice(0, state.white ? -2 : -1));
+      save();
+      render();
+    });
+    newBtn.addEventListener('click', () => {
+      cancelBot();
+      hidePromo();
+      clearSelection();
+      rebuild([]);
+      save();
+      render();
+    });
+
+    const setSound = (on: boolean) => {
+      soundOn = on;
+      soundBtn.setAttribute('aria-pressed', String(on));
+      store.set(SOUND_KEY, on ? 'on' : 'off');
+    };
+    setSound(soundOn);
+    soundBtn.addEventListener('click', () => {
+      setSound(!soundOn);
+      knock(false);
+    });
+
+    // Pick up a game in progress.
+    try {
+      const saved = JSON.parse(store.get(SAVE_KEY) || '[]');
+      if (Array.isArray(saved)) rebuild(saved);
+    } catch { /* a bad save just means a new game */ }
+    render();
+    requestBot(); // in case the page was left while the bot was thinking
+  }
+</script>

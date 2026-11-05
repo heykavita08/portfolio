@@ -1,9 +1,9 @@
 ---
-// Site footer: a strip of bubble wrap to pop, then name + year on the left, LinkedIn / Instagram /
+// Site footer: a chess game against a bot, then name + year on the left, LinkedIn / Instagram /
 // email on the right.
 // `wide` lines it up with the home and About column (1200px, 60px gutters); otherwise it matches the
 // case-study nav (32px gutters).
-import BubbleWrap from './BubbleWrap.astro';
+import ChessGame from './chess/ChessGame.astro';
 
 interface Props { wide?: boolean }
 const { wide = false } = Astro.props;
@@ -15,7 +15,7 @@ const INSTAGRAM_URL = 'https://www.instagram.com/rizzemble.life/';
 const year = new Date().getFullYear();
 ---
 <footer class:list={['footer', { wide }]}>
-  <div class="foot-in foot-game"><BubbleWrap /></div>
+  <div class="foot-in foot-game"><ChessGame /></div>
   <div class="foot-in">
     <p class="foot-name">© {year} Kavita Tewari</p>
     <ul class="socials" aria-label="Find me elsewhere">

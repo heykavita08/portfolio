@@ -1,6 +1,6 @@
 ---
-// VEYRA: the project is ongoing, so its card opens a short holding page that points to the JB Air
-// case study instead. Same nav as home, the case studies' 704px reading column.
+// VEYRA: the project is ongoing, so its card opens a short holding page that says so plainly, then
+// offers the JB Air case study as a separate project. Same nav as home, the case studies' 704px reading column.
 import Base from '../../layouts/Base.astro';
 import HomeNav from '../../components/home/HomeNav.astro';
 import WorkCard from '../../components/home/WorkCard.astro';
@@ -8,18 +8,18 @@ import { caseCards } from '../../data/case-cards';
 
 const { slug, logo, ...jb } = caseCards.find((c) => c.slug === 'jb-air')!;
 ---
-<Base title="VEYRA — Kavita Tewari" description="VEYRA, a pet tracker app and wearable: an ongoing project. The case study is coming soon.">
+<Base title="VEYRA — Case study in progress" description="VEYRA, a pet tracker app and wearable, is still being designed. The case study is in progress.">
   <HomeNav href="/#work" label="Work" />
 
   <main class="soon">
     <section class="soon-note" aria-labelledby="soon-title">
-      <p class="soon-label" data-reveal>VEYRA • Ongoing 2026</p>
-      <h1 class="soon-title" id="soon-title" data-split>Pet tracker app + wearable</h1>
-      <p class="soon-body" data-reveal>An ongoing project. The case study is coming soon.</p>
+      <p class="soon-status" data-reveal><span class="soon-dot" aria-hidden="true"></span>VEYRA • Ongoing</p>
+      <h1 class="soon-title" id="soon-title" data-split>Case study in progress</h1>
+      <p class="soon-body" data-reveal>VEYRA is a pet tracker app and wearable, still being designed. I’ll share the full story here once it’s ready.</p>
     </section>
 
-    <section class="soon-next" aria-labelledby="soon-next-label">
-      <p class="soon-label" id="soon-next-label" data-reveal>Meanwhile, read <span class="arrow" aria-hidden="true">→</span></p>
+    <section class="soon-next" aria-labelledby="soon-next-title">
+      <h2 class="soon-next-title" id="soon-next-title" data-reveal>In the meantime, here’s a different project</h2>
       <div data-reveal>
         <WorkCard {...jb} href={`/work/${slug}`} />
       </div>
@@ -33,15 +33,29 @@ const { slug, logo, ...jb } = caseCards.find((c) => c.slug === 'jb-air')!;
     margin: 0 auto;
     padding: 200px 60px 160px;
   }
-  .soon-label {
+  .soon-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 10px;
+    border-radius: 999px;
+    background: #fdeee8;
+    color: #a8431f;
     font-family: var(--font-mono);
     font-size: 13px;
     line-height: 20px;
     text-transform: uppercase;
-    color: rgba(50, 64, 79, 0.5);
   }
+  .soon-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fc825b;
+    animation: soon-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes soon-pulse { 50% { opacity: 0.35; transform: scale(0.8); } }
   .soon-title {
-    margin-top: 16px;
+    margin-top: 20px;
     font-family: var(--font-display);
     font-weight: 400;
     font-size: 40px;
@@ -50,23 +64,34 @@ const { slug, logo, ...jb } = caseCards.find((c) => c.slug === 'jb-air')!;
     color: #1e2b3a;
   }
   .soon-body {
+    max-width: 560px;
     margin-top: 16px;
     font-size: 17px;
     line-height: 25.5px;
     letter-spacing: -0.34px;
-    color: rgba(50, 64, 79, 0.8);
+    color: var(--ink);
   }
-  .soon-next { margin-top: 120px; }
-  .soon-next .soon-label { margin-bottom: 16px; }
-  .arrow { display: inline-block; margin-left: 4px; transition: transform 0.45s var(--ease-out); }
-  .soon-next:hover .arrow { transform: translateX(4px); }
+  /* A clear break: JB Air is a separate project, not part of VEYRA. */
+  .soon-next { margin-top: 96px; padding-top: 56px; border-top: 1px solid var(--line); }
+  .soon-next-title {
+    margin-bottom: 24px;
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 25.5px;
+    letter-spacing: -0.34px;
+    color: rgba(50, 64, 79, 0.7);
+  }
 
+  @media (prefers-reduced-motion: reduce) {
+    .soon-dot { animation: none; }
+  }
   @media (max-width: 959px) {
     .soon { padding: 120px 24px 120px; }
   }
   @media (max-width: 600px) {
     .soon { padding: 72px 16px 96px; }
     .soon-title { font-size: 32px; line-height: 36px; letter-spacing: -1.2px; }
-    .soon-next { margin-top: 80px; }
+    .soon-next { margin-top: 64px; padding-top: 40px; }
   }
 </style>

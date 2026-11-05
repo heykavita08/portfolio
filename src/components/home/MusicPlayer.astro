@@ -126,7 +126,8 @@ const TRACK = { src: '/audio/washed-up.m4a', title: 'Washed Up', artist: 'Holizn
       window.clearTimeout(settle);
       const from = audio.volume, t0 = performance.now();
       const step = (t: number) => {
-        const k = Math.min(1, (t - t0) / ms);
+        // A frame's timestamp can be slightly before t0, which would make the volume negative and throw.
+        const k = Math.max(0, Math.min(1, (t - t0) / ms));
         audio.volume = from + (to - from) * k;
         if (k < 1) fade = requestAnimationFrame(step);
       };

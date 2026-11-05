@@ -4,6 +4,7 @@
 import caseCooktop from '../assets/home/cards/case-cooktop.png';
 import casePeakpause from '../assets/home/cards/case-peakpause.png';
 import caseJb from '../assets/home/cards/case-jb.png';
+import { JB_AIR_TOOLS } from './ai-tools';
 
 export type CaseSlug = 'cooktop' | 'peakpause' | 'jb-air';
 
@@ -20,7 +21,7 @@ export const caseCards = [
     video: '/videos/home/peakpause.mp4', rect: { x: 350.66, y: 54.24, w: 186.682, h: 391.023, r: 35.318 },
   },
   {
-    slug: 'jb-air' as CaseSlug, title: 'One design language, screen to site', meta: 'JB Air • Shipped 2026',
+    slug: 'jb-air' as CaseSlug, title: 'One design language, screen to site', meta: 'JB Air • Shipped 2026', ai: true, tools: JB_AIR_TOOLS,
     alt: 'The JB Air purifier in a living room', poster: caseJb, w: 888, h: 555,
     video: '/videos/home/jb.mp4', rect: { x: -8, y: -43.6, w: 904, h: 603 }, clip: { x: 1, y: 1, w: 886, h: 553 },
   },
