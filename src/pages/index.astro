@@ -261,20 +261,6 @@ const timeline = [
       </div>
     </section>
 
-    <!-- Phones only: the project timeline moves below the work so the case studies come first. -->
-    <section class="block tl-mobile" aria-labelledby="h-projects">
-      <h2 class="tl-label" id="h-projects">Projects</h2>
-      <ol class="timeline" data-stagger>
-        {timeline.map(([year, name, desc]) => (
-          <li class="row">
-            <span class="row-year">{year}</span>
-            <span class="row-name">{name}</span>
-            <span class="row-desc">{desc}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
-
     <!-- In the arsenal (633:9193 + 674:18567) -->
     <section class="block" aria-labelledby="h-arsenal">
       <h2 class="h-sec h-more" id="h-arsenal" data-split>In the arsenal...</h2>
@@ -297,6 +283,20 @@ const timeline = [
           ))}
         </div>
       </div>
+    </section>
+
+    <!-- Phones only: the project timeline moves below the work and the arsenal. -->
+    <section class="block tl-mobile" aria-labelledby="h-projects">
+      <h2 class="tl-label" id="h-projects">Projects</h2>
+      <ol class="timeline" data-stagger>
+        {timeline.map(([year, name, desc]) => (
+          <li class="row">
+            <span class="row-year">{year}</span>
+            <span class="row-name">{name}</span>
+            <span class="row-desc">{desc}</span>
+          </li>
+        ))}
+      </ol>
     </section>
   </main>
 
@@ -496,9 +496,15 @@ const timeline = [
   }
   @media (max-width: 759px) {
     .tl-desk { display: none; }
-    .tl-mobile { display: block; padding-top: 96px; }
+    .tl-mobile { display: block; padding: 96px 0 120px; }
     .grid { grid-template-columns: 1fr; }
-    .ars-grid { grid-template-columns: 1fr; gap: 16px; }
+    .arsenal { padding-bottom: 0; }
+    .ars-grid { gap: 12px; }
+    .ars-card { min-width: 0; padding: 14px 12px 16px; }
+    .ars-title { font-size: 20px; line-height: 26px; }
+    .ars-tools { gap: 10px; margin-top: 12px; }
+    .ars-tool { gap: 8px; font-size: 14px; line-height: 18px; letter-spacing: -0.2px; }
+    .ars-logo { width: 24px; height: 24px; border-radius: 6px; }
     .grid .col { gap: 40px !important; padding-bottom: 0 !important; }
     .grid .col + .col { margin-top: 40px; }
     .intro { padding: 56px 0 64px; row-gap: 40px; }
